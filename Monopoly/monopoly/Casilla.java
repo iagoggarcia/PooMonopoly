@@ -1,4 +1,4 @@
-package monopoly;
+package monopoly; //iago la tiene pequeña
 
 import partida.*;
 import java.util.ArrayList;
