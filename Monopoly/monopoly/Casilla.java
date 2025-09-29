@@ -43,7 +43,7 @@ public class Casilla {
         this.nombre = nombre;
         this.tipo = "Impuesto";
         this.posicion = posicion;
-        this.valor = valor;
+        this.valor = 0;
         this.duenho = duenho;
         this.impuesto = 2000000;
         this.hipoteca = 0;
@@ -58,7 +58,7 @@ public class Casilla {
         this.nombre = nombre;
         this.tipo = tipo;
         this.posicion = posicion;
-        this.valor = valor;
+        this.valor = 0;
         this.duenho = duenho;
         this.impuesto = 0;
         this.hipoteca = 0;

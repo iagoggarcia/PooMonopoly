@@ -12,5 +12,5 @@ public class Dado {
         this.valor = ThreadLocalRandom.current().nextInt(1,7);
         return this.valor;
     }
-
+    
 }
