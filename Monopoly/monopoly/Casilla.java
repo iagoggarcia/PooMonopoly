@@ -32,7 +32,7 @@ public class Casilla {
      */
     public Casilla(String nombre, int posicion, float impuesto, Jugador duenho) {
     }
-
+    
     /*Constructor utilizado para crear las otras casillas (Suerte, Caja de comunidad y Especiales):
     * Parámetros: nombre, tipo de la casilla (será uno de los que queda), posición en el tablero y dueño.
      */
