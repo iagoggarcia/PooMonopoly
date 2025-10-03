@@ -22,6 +22,9 @@ public class Avatar {
     * avatares creados (usado para crear un ID distinto del de los demás avatares).
      */
     public Avatar(String tipo, Jugador jugador, Casilla lugar, ArrayList<Avatar> avCreados) {
+        this.tipo = tipo;
+        this.jugador = jugador;
+        this.lugar = lugar;
     }
 
     //A continuación, tenemos otros métodos útiles para el desarrollo del juego.

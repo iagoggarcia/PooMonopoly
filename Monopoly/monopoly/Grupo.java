@@ -37,7 +37,7 @@ class Grupo {
     * Parámetro: jugador que se quiere evaluar.
     * Valor devuelto: true si es dueño de todas las casillas del grupo, false en otro caso.
      */
-    public boolean esDuenhoGrupo(Jugador jugador) {
-    }
+    /*public boolean esDuenhoGrupo(Jugador jugador) {
+    }*/
 
 }

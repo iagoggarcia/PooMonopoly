@@ -27,6 +27,14 @@ public class Jugador {
     * que dos avatares tengan mismo ID). Desde este constructor también se crea el avatar.
      */
     public Jugador(String nombre, String tipoAvatar, Casilla inicio, ArrayList<Avatar> avCreados) {
+        this.nombre = nombre;
+        this.avatar = new Avatar(tipoAvatar, this, inicio, avCreados); // para el avatar hay que crearlo y por defecto le puse que lo cree en la casilla inicial
+        this.fortuna = 15000000; // puse la fortuna inicial
+        this.gastos = gastos;
+        this.enCarcel = enCarcel;
+        this.tiradasCarcel = tiradasCarcel;
+        this.propiedades = new ArrayList<>();
+        this.propiedades = propiedades;
     }
 
     //Otros métodos:
