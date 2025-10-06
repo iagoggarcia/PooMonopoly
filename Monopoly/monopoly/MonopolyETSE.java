@@ -17,9 +17,12 @@ public class MonopolyETSE {
         * hago get(0).get(0) porque como "posiciones" es un array de arrays, accedo al lado sur con el primer get(0) y a la casilla 0,
         * la salida, con el segundo get(0). Es como si estuviera haciendo posiciones[0][0] y eso corresponde a la casilla de salida.
         *
-        * */
+        *
         Casilla salida = tablero.getPosiciones().get(0).get(0);
         System.out.println(salida.getNombre()); // debería imprimirse el nombre de la salida
         System.out.println(salida.getTipo()); // y el tipo de casilla que le puse en Tablero.java
+        */
+
+        System.out.println(tablero);
     }
 }
