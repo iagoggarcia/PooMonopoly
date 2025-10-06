@@ -3,6 +3,8 @@ package monopoly;
 import java.util.ArrayList;
 import partida.*;
 
+import static monopoly.Valor.FORTUNA_BANCA;
+
 public class Menu {
 
     //Atributos
@@ -20,8 +22,35 @@ public class Menu {
 
     // Método para inciar una partida: crea los jugadores y avatares.
     private void iniciarPartida() {
+        this.avatares  = new ArrayList<>();
+        this.jugadores = new ArrayList<>();
+        this.dado1 = new Dado();
+        this.dado2 = new Dado();
+
+        //Banca y tablero (guarda en atributos del menú)
+        this.banca   = new Jugador(FORTUNA_BANCA);          // constructor para la banca
+        this.tablero = new Tablero(this.banca); // el tablero genera todas las casillas
+        Casilla salida = tablero.getPosiciones().getFirst().getFirst(); // "Salida" (pos 0)
+
+        //Jugadores (cada Jugador crea su Avatar internamente)
+        Jugador j1 = new Jugador("Jugador 1", "Sombrero", salida, avatares);
+        Jugador j2 = new Jugador("Jugador 2", "Esfinge",  salida, avatares);
+        Jugador j3 = new Jugador("Jugador 3", "Pelota",   salida, avatares);
+        Jugador j4 = new Jugador("Jugador 4", "Coche",    salida, avatares);
+
+        this.jugadores.add(j1);
+        this.jugadores.add(j2);
+        this.jugadores.add(j3);
+        this.jugadores.add(j4);
+
+        //en avatar ya asignamos a una lista los avatares y ya se le asigna el tipo, jugador... desde el constructor de jugador
+
+        this.turno = 0;
+        this.tirado = false;
+        this.solvente = true;
     }
-    
+
+
     /*Método que interpreta el comando introducido y toma la accion correspondiente.
     * Parámetro: cadena de caracteres (el comando).
     */
