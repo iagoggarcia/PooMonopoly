@@ -62,7 +62,11 @@ public class Avatar {
                     break;
                 }
             }
-            if (libre)
+            if (libre) {
+                this.id = String.valueOf(c);
+                return;
+            }
         }
+        throw new IllegalStateException("No quedan IDs libres estre A y Z para avatares");
     }
 }
