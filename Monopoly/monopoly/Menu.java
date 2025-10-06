@@ -19,6 +19,9 @@ public class Menu {
     private boolean tirado; //Booleano para comprobar si el jugador que tiene el turno ha tirado o no.
     private boolean solvente; //Booleano para comprobar si el jugador que tiene el turno es solvente, es decir, si ha pagado sus deudas.
 
+   /* public Menu(){
+        iniciarPartida();
+    }*/
 
     // Método para inciar una partida: crea los jugadores y avatares.
     private void iniciarPartida() {
@@ -31,6 +34,8 @@ public class Menu {
         this.banca   = new Jugador(FORTUNA_BANCA);          // constructor para la banca
         this.tablero = new Tablero(this.banca); // el tablero genera todas las casillas
         Casilla salida = tablero.getPosiciones().getFirst().getFirst(); // "Salida" (pos 0)
+
+        //IMPORTANTE, HACER BUCLE FOR DESPUES DE PEDIR POR LINEA DE COMANDOS EL NUMERO DE JUGADORES QUE VAN A JUGAR
 
         //Jugadores (cada Jugador crea su Avatar internamente)
         Jugador j1 = new Jugador("Jugador 1", "Sombrero", salida, avatares);
