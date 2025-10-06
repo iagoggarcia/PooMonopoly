@@ -22,9 +22,22 @@ public class Avatar {
     * avatares creados (usado para crear un ID distinto del de los demás avatares).
      */
     public Avatar(String tipo, Jugador jugador, Casilla lugar, ArrayList<Avatar> avCreados) {
-        this.tipo = tipo;
-        this.jugador = jugador;
-        this.lugar = lugar;
+        this.tipo = tipo; // cadena con el tipo de avatar
+        this.jugador = jugador; // el dueño del avatar (quien lo va a mover)
+        this.lugar = lugar; // la casilla  inicial donde aparecerá el avatar (salida normalmente)
+        
+        generarId(avCreados); // pone el this.id, no añadeel avatar a avCreados, solo genera el id
+
+        // colocamos el avatar en la casilla que se pasa como argumento
+        if (this.lugar != null) {
+            try { this.lugar.anhadirAvatar(this); } // coloca el avatar en la lista de avatares de la casilla, da error porque aun no esta hecho anhadirAvatar
+            catch (UnsupportedOperationException e) { } // esto es para que como aun no esta todo en casilla no de error
+            catch (RuntimeException e) { throw  e;} // esto es para que si da error por otra cosa verlo
+        }
+
+        if (!avCreados.contains(this)) { // registramos el avatar en la lista de avatares
+            avCreados.add(this);
+        }
     }
 
     //A continuación, tenemos otros métodos útiles para el desarrollo del juego.
@@ -41,5 +54,15 @@ public class Avatar {
     * - Un arraylist de los avatares ya creados, con el objetivo de evitar que se generen dos ID iguales.
      */
     private void generarId(ArrayList<Avatar> avCreados) {
+        for (char c = 'A'; c <= 'Z'; c++0) {
+            boolean libre = true;
+            for (Avatar a : avCreados) {
+                if (a != null && a.id != null && a.id.equals(String.valueOf(c))) {
+                    libre = false;
+                    break;
+                }
+            }
+            if (libre)
+        }
     }
 }
