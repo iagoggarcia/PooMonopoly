@@ -1,8 +1,8 @@
 package monopoly;
 
-import partida.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import partida.*;
 
 
 public class Tablero {
@@ -168,4 +168,5 @@ public class Tablero {
     //Método usado para buscar la casilla con el nombre pasado como argumento:
     //public Casilla encontrar_casilla(String nombre){
     //}
+
 }
