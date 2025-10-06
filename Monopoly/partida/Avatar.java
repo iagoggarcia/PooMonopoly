@@ -26,7 +26,7 @@ public class Avatar {
         this.jugador = jugador; // el dueño del avatar (quien lo va a mover)
         this.lugar = lugar; // la casilla  inicial donde aparecerá el avatar (salida normalmente)
         
-        generarId(avCreados); // pone el this.id, no añadeel avatar a avCreados, solo genera el id
+        generarId(avCreados); // pone el this.id, no añade el avatar a avCreados, solo genera el id
 
         // colocamos el avatar en la casilla que se pasa como argumento
         if (this.lugar != null) {
@@ -46,7 +46,49 @@ public class Avatar {
     * - Un entero que indica el numero de casillas a moverse (será el valor sacado en la tirada de los dados).
     * EN ESTA VERSIÓN SUPONEMOS QUE valorTirada siemrpe es positivo.
      */
+    // sin reglas por ahora, solo para poder mover el avatar
     public void moverAvatar(ArrayList<ArrayList<Casilla>> casillas, int valorTirada) {
+        // comprobaciones básicas d si está vacío las hago después
+
+        // convertimos la lista de listas en una lista lineal de casillas
+        ArrayList<Casilla> recorrido = new ArrayList<>();
+        for (ArrayList<Casilla> lado : casillas) {
+            if (lado == null) continue;
+            for (Casilla c : lado){
+                if (c != null) recorrido.add(c);
+            }
+        }
+
+        // econtramos la posición actual del avatar dentro de ese recorrido
+        int indiceActual = recorrido.indexOf(this.lugar);
+        if (indiceActual == -1) {
+            for (int i = 0; i < recorrido.size(); i++){
+                Casilla c = recorrido.get(i);
+                try {
+                    if (c != null && c.getNombre().equals(this.lugar.getNombre())) {
+                        indiceActual = i;
+                        break;
+                    }
+                } catch (Exception ignored) {}
+            }
+            if (indiceActual == -1) {
+                throw new IllegalStateException("No se encuentra la casilla actual en el tablero");
+            }
+        }
+        
+        // calculamos el nuevo índice (módulo número total de casillas)
+        int totalCasillas = recorrido.size();      // normalmente 40
+        int indiceNuevo = (indiceActual + valorTirada) % totalCasillas;
+
+        // quitamos el avatar de la casilla actual y lo añadimos en la nueva
+        Casilla origen  = recorrido.get(indiceActual);
+        Casilla destino = recorrido.get(indiceNuevo);
+        try { if (origen  != null) origen.eliminarAvatar(this); } catch (UnsupportedOperationException e) { }
+        try { if (destino != null) destino.anhadirAvatar(this); } catch (UnsupportedOperationException e) { } // no esta hecho 
+
+        // actualizamos su posición interna
+        this.lugar = destino;
+
     }
 
     /*Método que permite generar un ID para un avatar. Sólo lo usamos en esta clase (por ello es privado).
@@ -54,16 +96,16 @@ public class Avatar {
     * - Un arraylist de los avatares ya creados, con el objetivo de evitar que se generen dos ID iguales.
      */
     private void generarId(ArrayList<Avatar> avCreados) {
-        for (char c = 'A'; c <= 'Z'; c++0) {
-            boolean libre = true;
-            for (Avatar a : avCreados) {
-                if (a != null && a.id != null && a.id.equals(String.valueOf(c))) {
-                    libre = false;
+        for (char c = 'A'; c <= 'Z'; c++) { // recorre todas las letras para buscar una letra libre
+            boolean libre = true; // asumimos que la letra si esta libre
+            for (Avatar a : avCreados) { // comprobamos que el avatar a y su id no son nulos
+                if (a != null && a.id != null && a.id.equals(String.valueOf(c))) { // convierte char c a string y comprueba si esta libre o no
+                    libre = false; // si no lo esta libre es false
                     break;
                 }
             }
-            if (libre) {
-                this.id = String.valueOf(c);
+            if (libre) { // si despues de revisar toda la lista libre es true, nadie esta usando esa letra
+                this.id = String.valueOf(c); // asignamos esa letra como id del avatar
                 return;
             }
         }
