@@ -86,10 +86,48 @@ public class Jugador {
 
     /*Método para establecer al jugador en la cárcel. 
     * Se requiere disponer de las casillas del tablero para ello (por eso se pasan como parámetro).*/
+    
+    private static final int NUM_CASILLAS = 40;
+    private static final int IDX_CARCEL   = 10; // posición fija de "Cárcel"
+
+
+    // ddevuelve  la casilla con indice lineal en el orden el que fue construido
+    private Casilla casillaPorIndice(ArrayList<ArrayList<Casilla>> pos, int indice) {
+        if (pos == null || indice < 0 || indice >= NUM_CASILLAS) return null;
+
+        int k = 0; // k ira contando para cada casilla visitada
+        for (ArrayList<Casilla> lado : pos) {
+            for (Casilla c : lado) {
+                if (k == indice) return c; // encontramos la casilla en la posicion buscada
+                k++; // avanzamosa a la siguiente
+            }
+        }
+        return null; 
+    }
+    
     // por ahora solo mueve fisicamente el avatar a la carcel y marca el estado en enCarcel y modifica tiradasCarcel
     // las otras "reglas" (cobrar o pagar dinero, comprobar si se puede salir, etc) se gestionan desde otro sitio, por ejemplo el menu
     public void encarcelar(ArrayList<ArrayList<Casilla>> pos) {
-        
+        if (pos == null || pos.isEmpty()) {
+            throw new IllegalArgumentException("El tablero (pos) no puede ser nulo ni vacío");
+        }
+        if (this.avatar == null) {
+            throw new IllegalStateException("El jugador no tiene avatar asociado");
+        }
+
+        // localizamos la casilla cárcel por índice fijo
+        Casilla carcel = casillaPorIndice(pos, IDX_CARCEL);
+        if (carcel == null) {
+            throw new IllegalStateException("No se encontró la casilla de Cárcel (índice 10)");
+        }
+        // quitamos al avatar de su casilla actual y lo colocamos en carcel
+        Casilla actual = this.avatar.getLugar();
+        if (actual != null) actual.eliminarAvatar(this.avatar);  // cuando esté implementado en casilla
+        carcel.anhadirAvatar(this.avatar);                       
+        this.avatar.setLugar(carcel);                            // actualiza el puntero del avatar
+
+        this.enCarcel = true;
+        this.tiradasCarcel = 0;
     }
 
 }
