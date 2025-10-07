@@ -1,7 +1,10 @@
 package monopoly;
 
 import java.util.ArrayList;
+import java.util.Scanner;
+
 import partida.*;
+
 
 import static monopoly.Valor.FORTUNA_BANCA;
 
@@ -19,47 +22,82 @@ public class Menu {
     private boolean tirado; //Booleano para comprobar si el jugador que tiene el turno ha tirado o no.
     private boolean solvente; //Booleano para comprobar si el jugador que tiene el turno es solvente, es decir, si ha pagado sus deudas.
 
-   /* public Menu(){
+    public Menu(){ //constructor publico para iniciar partida
         iniciarPartida();
-    }*/
+    }
 
     // Método para inciar una partida: crea los jugadores y avatares.
-    private void iniciarPartida() {
-        this.avatares  = new ArrayList<>();
-        this.jugadores = new ArrayList<>();
-        this.dado1 = new Dado();
-        this.dado2 = new Dado();
+    public void iniciarPartida() {
+        Scanner sc = new Scanner(System.in);
 
-        //Banca y tablero (guarda en atributos del menú)
-        this.banca   = new Jugador(FORTUNA_BANCA);          // constructor para la banca
-        this.tablero = new Tablero(this.banca); // el tablero genera todas las casillas
-        Casilla salida = tablero.getPosiciones().getFirst().getFirst(); // "Salida" (pos 0)
+        // 1. Crear banca y tablero
+        Jugador banca = new Jugador(Valor.FORTUNA_BANCA);
+        Tablero tablero = new Tablero(banca);
 
-        //IMPORTANTE, HACER BUCLE FOR DESPUES DE PEDIR POR LINEA DE COMANDOS EL NUMERO DE JUGADORES QUE VAN A JUGAR
+        // 2. Obtener la casilla "Salida" donde se colocan los avatares
+        Casilla salida = tablero.getPosiciones().get(0).get(0);
 
-        //Jugadores (cada Jugador crea su Avatar internamente)
-        Jugador j1 = new Jugador("Jugador 1", "Sombrero", salida, avatares);
-        Jugador j2 = new Jugador("Jugador 2", "Esfinge",  salida, avatares);
-        Jugador j3 = new Jugador("Jugador 3", "Pelota",   salida, avatares);
-        Jugador j4 = new Jugador("Jugador 4", "Coche",    salida, avatares);
+        // 3. Preguntar número de jugadores
+        int numJugadores = 0;
+        while (true) {
+            System.out.print("¿Cuántos jugadores van a jugar? (2-4): ");
+            try {
+                numJugadores = Integer.parseInt(sc.nextLine().trim());
+                if (numJugadores >= 2 && numJugadores <= 4) break;
+            } catch (NumberFormatException e) { }
+            System.out.println("Número no válido, introduce 2, 3 o 4.");
+        }
 
-        this.jugadores.add(j1);
-        this.jugadores.add(j2);
-        this.jugadores.add(j3);
-        this.jugadores.add(j4);
+        // 4. Crear los jugadores
+        ArrayList<Jugador> jugadores = new ArrayList<>();
+        ArrayList<Avatar> avatares = new ArrayList<>();
 
-        //en avatar ya asignamos a una lista los avatares y ya se le asigna el tipo, jugador... desde el constructor de jugador
+        for (int i = 1; i <= numJugadores; i++) {
+            System.out.print("Introduce el nombre del jugador " + i + ": ");
+            String nombre = sc.nextLine().trim();
+
+            String tipoAvatar;
+            while (true) {
+                System.out.print("Tipo de avatar (coche | esfinge | sombrero | pelota): ");
+                tipoAvatar = sc.nextLine().trim().toLowerCase();
+                if (tipoAvatar.equals("coche") || tipoAvatar.equals("esfinge")
+                        || tipoAvatar.equals("sombrero") || tipoAvatar.equals("pelota")) break;
+                System.out.println("Tipo no válido. Intenta de nuevo.");
+            }
+
+            // 5. Crear el jugador y añadirlo a la lista
+            Jugador jugador = new Jugador(nombre, tipoAvatar, salida, avatares);
+            jugadores.add(jugador);
+
+            // Mostrar confirmación como en el ejemplo del enunciado
+            System.out.println("{");
+            System.out.println("  nombre: " + nombre + ",");
+            System.out.println("  avatar: " + jugador.getAvatar().getId());
+            System.out.println("}");
+        }
+
+        // 6. Guardar la información en los atributos de Menu (si los tienes)
+        this.tablero = tablero;
+        this.banca = banca;
+        this.jugadores = jugadores;
+        this.avatares = avatares;
 
         this.turno = 0;
-        this.tirado = false;
         this.solvente = true;
+        this.enCurso = true;
+
+
+        System.out.println("\nPartida inicializada correctamente con " + numJugadores + " jugadores.\n");
+
     }
+
 
 
     /*Método que interpreta el comando introducido y toma la accion correspondiente.
     * Parámetro: cadena de caracteres (el comando).
     */
     private void analizarComando(String comando) {
+
     }
 
     /*Método que realiza las acciones asociadas al comando 'describir jugador'.

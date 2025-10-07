@@ -7,7 +7,7 @@ import partida.Avatar; // también faltaba y por eso daba error al crear un avat
 import monopoly.Menu;
 public class MonopolyETSE {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         Menu menu = new Menu();
     }
 }
