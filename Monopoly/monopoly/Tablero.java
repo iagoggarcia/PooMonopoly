@@ -1,8 +1,8 @@
 package monopoly;
 
-import partida.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import partida.*;
 
 
 public class Tablero {
@@ -22,9 +22,9 @@ public class Tablero {
     
     //Método para crear todas las casillas del tablero. Formado a su vez por cuatro métodos (1/lado).
     private void generarCasillas() {
+        this.insertarLadoNorte();
         this.insertarLadoSur();
         this.insertarLadoOeste();
-        this.insertarLadoNorte();
         this.insertarLadoEste();
     }
     
@@ -41,13 +41,13 @@ public class Tablero {
         ladoNorte.add(new Casilla("Solar16", "solar", 27, 2600000, banca));
         ladoNorte.add(new Casilla("Serv2", "servicios", 28, 500000, banca));
         ladoNorte.add(new Casilla("Solar17", "solar", 29, 2800000,banca));
-
+        ladoNorte.add(new Casilla("IrCarcel", "especial", 30, banca));
         posiciones.add(ladoNorte); // meto el array "norte" (que a su vez es otro array con las casillas) en posiciones
     }
 
     //Método para insertar las casillas del lado sur.
     private void insertarLadoSur() {
-        ArrayList<Casilla> ladoSur = new ArrayList<>(); // lo mismo para el lado sur, y también meto la casilla de inicio (salida)
+        ArrayList<Casilla> ladoSur = new ArrayList<>(); // lo mismo para el lado sur
         ladoSur.add(new Casilla("Salida", "especial", 0, banca));
         ladoSur.add(new Casilla("Solar1", "solar", 1, 600000,banca));
         ladoSur.add(new Casilla("Caja", "caja de comunidad", 2, banca));
@@ -58,14 +58,14 @@ public class Tablero {
         ladoSur.add(new Casilla("Suerte", "suerte", 7, banca));
         ladoSur.add(new Casilla("Solar4", "solar", 8, 1000000, banca));
         ladoSur.add(new Casilla("Solar5", "solar", 9, 1200000, banca));
+        ladoSur.add(new Casilla("Cárcel", "especial", 10, banca));
 
         posiciones.add(ladoSur); // meto el array "sur" (que a su vez es otro array con las casillas) en posiciones
     }
 
     //Método que inserta casillas del lado oeste.
     private void insertarLadoOeste() {
-        ArrayList<Casilla> ladoOeste = new ArrayList<>(); // lo mismo para el lado oeste, y también meto la cárcel
-        ladoOeste.add(new Casilla("Cárcel", "especial", 10, banca));
+        ArrayList<Casilla> ladoOeste = new ArrayList<>(); // lo mismo para el lado oeste
         ladoOeste.add(new Casilla("Solar6", "solar", 11, 1400000, banca));
         ladoOeste.add(new Casilla("Serv1", "servicios", 12, 500000, banca));
         ladoOeste.add(new Casilla("Solar7", "solar", 13, 1400000, banca));
@@ -81,8 +81,7 @@ public class Tablero {
 
     //Método que inserta las casillas del lado este.
     private void insertarLadoEste() {
-        ArrayList<Casilla> ladoEste = new ArrayList<>(); // lo mismo para el lado este, y también meto "Ir a la cárcel"
-        ladoEste.add(new Casilla("IrCarcel", "especial", 30, banca));
+        ArrayList<Casilla> ladoEste = new ArrayList<>(); // lo mismo para el lado este
         ladoEste.add(new Casilla("Solar18", "solar", 31, 3000000, banca));
         ladoEste.add(new Casilla("Solar19", "solar", 32, 3000000, banca));
         ladoEste.add(new Casilla("Caja", "caja de comunidad", 33, banca));
@@ -126,10 +125,48 @@ public class Tablero {
 
     //Para imprimir el tablero, modificamos el método toString().
     //@Override
-    //public String toString() {
-    //}
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("====TABLERO MONOPOLY====\n");
+
+        ArrayList<Casilla> ladoNorte = posiciones.get(0);
+        ArrayList<Casilla> ladoSur = posiciones.get(1);
+        ArrayList<Casilla> ladoOeste = posiciones.get(2);
+        ArrayList<Casilla> ladoEste = posiciones.get(3);
+
+        // Definir el ancho fijo para cada casilla
+        final int ANCHO_CASILLA = 8;
+
+
+        for (Casilla c : ladoNorte) {
+            String nombreFormateado = String.format("|%-" + ANCHO_CASILLA + "s", c.getNombre());
+            sb.append(nombreFormateado);
+        }
+
+        sb.append("\n");
+
+        for (int i = ladoOeste.size() - 1; i >= 0; i--) {
+            // Usar variables para hacer el código más claro
+            Casilla casillaOeste = ladoOeste.get(i);
+            Casilla casillaEste = ladoEste.get(ladoEste.size() - 1 - i);
+            int espaciosCentro = ANCHO_CASILLA * (ladoNorte.size() - 2) + (ladoNorte.size() - 2);
+
+            sb.append(String.format("|%-" + ANCHO_CASILLA + "s", casillaOeste.getNombre()))
+                    .append(" ".repeat(espaciosCentro))
+                    .append(String.format("|%-" + ANCHO_CASILLA + "s", casillaEste.getNombre()))
+                    .append("|\n");
+        }
+
+        for (Casilla c : ladoSur) {
+            String nombreFormateado = String.format("|%-" + ANCHO_CASILLA + "s", c.getNombre());
+            sb.append(nombreFormateado);
+        }
+
+        return sb.toString();
+    }
     
     //Método usado para buscar la casilla con el nombre pasado como argumento:
     //public Casilla encontrar_casilla(String nombre){
     //}
+
 }
