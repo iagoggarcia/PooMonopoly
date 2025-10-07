@@ -39,6 +39,31 @@ public class Jugador {
         this.propiedades = new ArrayList<>(); // solo hay que inicializar propiedades como  una lista vaćía
     }
 
+    public Jugador(float valor){
+        this.fortuna = valor;
+    }
+
+    // ----- Getters mínimos que necesita el menú ----- //los añado porque me hacen falta en menu
+    public String getNombre() {
+        return nombre;
+    }
+
+    public Avatar getAvatar() {
+        return avatar;
+    }
+
+    public float getFortuna() {
+        return fortuna;
+    }
+
+    public boolean isEnCarcel() {
+        return enCarcel;
+    }
+
+    public ArrayList<Casilla> getPropiedades() {
+        return propiedades;
+    }
+
     //Otros métodos:
     //Método para añadir una propiedad al jugador (cuando la compra). Como parámetro, la casilla a añadir.
     public void anhadirPropiedad(Casilla casilla) {

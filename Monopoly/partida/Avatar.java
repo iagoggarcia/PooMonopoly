@@ -17,6 +17,28 @@ public class Avatar {
     public Avatar() {
     }
 
+    // ----- Getters / setters mínimos ----- //los añado porque hacen falta para menu
+    public String getId() {
+        return id;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public Casilla getLugar() {
+        return lugar;
+    }
+
+    public Jugador getJugador() {
+        return jugador;
+    }
+
+    public void setLugar(Casilla lugar) {
+        this.lugar = lugar;
+    }
+
+
     /*Constructor principal. Requiere éstos parámetros:
     * Tipo del avatar, jugador al que pertenece, lugar en el que estará ubicado, y un arraylist con los
     * avatares creados (usado para crear un ID distinto del de los demás avatares).
