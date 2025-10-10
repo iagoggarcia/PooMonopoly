@@ -36,8 +36,8 @@ public class Menu {
         Jugador banca = new Jugador(Valor.FORTUNA_BANCA);
         Tablero tablero = new Tablero(banca);
 
-        // 2. Obtener la casilla "Salida" donde se colocan los avatares
-        Casilla salida = tablero.getPosiciones().get(0).get(0);
+        // 2. Obtener la casilla "Salida" donde se colocan los avatares //iago lo tiene en sur, que es get(1) y despues dentro de sur, get(0)
+        Casilla salida = tablero.getPosiciones().get(1).get(0);
 
         // 3. Preguntar número de jugadores
         int numJugadores = 0;
@@ -98,15 +98,76 @@ public class Menu {
     * Parámetro: cadena de caracteres (el comando).
     */
     private void analizarComando(String comando) {
-        if(comando.equals("describir jugador")){
+        if(comando.equals("Describir jugador")){
             String partes[] = comando.split(" ");
             descJugador(partes);
         }
-        else if(comando.equals("crear jugador")){
-            String partes[] = comando.split(" ");
+        else if(comando.startsWith("Describir avatar")){
+            String Idavatar = comando.substring("Describir avatar ".length()).trim();
+            descAvatar(Idavatar);
+        }
+        else if(comando.startsWith("Describir casilla")){
+            String nombreCasilla = comando.substring("describir casilla".length()).trim();
+            descCasilla(nombreCasilla);
+        }
+        else if(comando.startsWith("Lanzar dados")){
+            String cadenaComprobar = comando.substring("lanzar dados".length()).trim();
+            if(cadenaComprobar.isEmpty()){
+                lanzarDados();
+            }
+            else{
+                String[] valores = cadenaComprobar.split("\\+"); //separo la cadena en 2 usando el + como caracter separador
+                lanzarDadosValor(valores); //le paso la cadena como un array y luego accedo a cada posicion a mi gusto
+            }
+        }
+        else if(comando.startsWith("Comprar una propiedad")){
+            String nombrePropiedad = comando.substring("comprar".length()).trim();
+            comprar(nombrePropiedad);
+        }
+        else if(comando.equals("Salir de la cárcel")){
+            salirCarcel();
+        }
+        else if(comando.equals("Listar propiedades en venta")){
+            listarVenta();
+        }
+        else if(comando.equals("Listar jugadores")){
+            listarJugadores();
+        }
+        else if(comando.equals("Listar avatares")){
+            listarAvatares();
+        }
+        else if(comando.equals("Acabar turno")){
+            acabarTurno();
+        }
 
+        //funciones que no hay pero hacen falta
+        else if(comando.equals("Crear jugador")){
+            String datosJugador = comando.substring("Crear jugador".length()).trim();
+            String[] partes = datosJugador.split(" ");
+            crearJugadorArchivo(partes);
         }
     }
+
+    //función para crear jugador desde archivo
+    private void crearJugadorArchivo(String[] partes){
+        if(this.banca == null){
+            this.banca = new Jugador(Valor.FORTUNA_BANCA);
+        }
+        if(this.tablero == null){
+            this.tablero = new Tablero(banca);
+        }
+        if(this.jugadores == null){
+            this.jugadores = new ArrayList<>();
+        }
+        if(this.avatares == null){
+            this.avatares = new ArrayList<>();
+        }
+        Casilla salida = tablero.getPosiciones().get(1).get(0);
+        Jugador jugador = new Jugador(partes[0], partes[1], salida, avatares);
+        this.jugadores.add(jugador);
+    }
+
+    //EN LAS FUNCIONES DE DESCRIBIR Y LISTAR SOLAMENTE HAY QUE HACER PRINTS, LAS HAGO DE ÚLTIMO
 
     /*Método que realiza las acciones asociadas al comando 'describir jugador'.
     * Parámetro: comando introducido
@@ -128,6 +189,30 @@ public class Menu {
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'lanzar dados'.
     private void lanzarDados() {
+        if(this.enCurso == false){
+            iniciarPartida();
+        }
+        if(this.dado1 == null){
+            this.dado1 = new Dado();
+        }
+        if(this.dado2 == null){
+            this.dado2 = new Dado();
+        }
+        this.dado1.hacerTirada();
+        this.dado2.hacerTirada();
+
+
+        //continuar con todas las comprobaciones que hay que hacer al caer en nueva casilla
+        //actualizar casilla
+        //comprobar número de lanzamientos, caso del doble 6 y el castigo
+        //comprobar si cae en casilla especial
+        //comprobar si cae en casilla que ya es de alguien y si tiene que pagar, bancarrota...
+    }
+
+    private void lanzarDadosValor(String[] valores) {
+        //va a ser un copia y pega de lo de arriba, asi que mejor hago una sola función en la que le paso igualmente la cadena y dentro
+        //compruebo si está vacía para decidir si hago hacerTirada o asignar un valor forzado
+        //lo hago cuando acabe la anterior
     }
 
     /*Método que ejecuta todas las acciones realizadas con el comando 'comprar nombre_casilla'.
