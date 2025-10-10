@@ -98,7 +98,14 @@ public class Menu {
     * Parámetro: cadena de caracteres (el comando).
     */
     private void analizarComando(String comando) {
+        if(comando.equals("describir jugador")){
+            String partes[] = comando.split(" ");
+            descJugador(partes);
+        }
+        else if(comando.equals("crear jugador")){
+            String partes[] = comando.split(" ");
 
+        }
     }
 
     /*Método que realiza las acciones asociadas al comando 'describir jugador'.

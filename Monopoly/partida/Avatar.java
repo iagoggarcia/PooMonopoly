@@ -17,27 +17,6 @@ public class Avatar {
     public Avatar() {
     }
 
-    // ----- Getters / setters mínimos ----- //los añado porque hacen falta para menu
-    public String getId() {
-        return id;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public Casilla getLugar() {
-        return lugar;
-    }
-
-    public Jugador getJugador() {
-        return jugador;
-    }
-
-    public void setLugar(Casilla lugar) {
-        this.lugar = lugar;
-    }
-
 
     /*Constructor principal. Requiere éstos parámetros:
     * Tipo del avatar, jugador al que pertenece, lugar en el que estará ubicado, y un arraylist con los
@@ -60,6 +39,27 @@ public class Avatar {
         if (!avCreados.contains(this)) { // registramos el avatar en la lista de avatares
             avCreados.add(this);
         }
+    }
+
+    // ----- Getters / setters mínimos ----- //los añado porque hacen falta para menu
+    public String getId() {
+        return id;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public Casilla getLugar() {
+        return lugar;
+    }
+
+    public Jugador getJugador() {
+        return jugador;
+    }
+
+    public void setLugar(Casilla lugar) {
+        this.lugar = lugar;
     }
 
     //A continuación, tenemos otros métodos útiles para el desarrollo del juego.
