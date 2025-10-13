@@ -31,9 +31,7 @@ public class Avatar {
 
         // colocamos el avatar en la casilla que se pasa como argumento
         if (this.lugar != null) {
-            try { this.lugar.anhadirAvatar(this); } // coloca el avatar en la lista de avatares de la casilla, da error porque aun no esta hecho anhadirAvatar
-            catch (UnsupportedOperationException e) { } // esto es para que como aun no esta todo en casilla no de error
-            catch (RuntimeException e) { throw  e;} // esto es para que si da error por otra cosa verlo
+            try { this.lugar.anhadirAvatar(this); } // coloca el avatar en la lista de avatares de la casilla
         }
 
         if (!avCreados.contains(this)) { // registramos el avatar en la lista de avatares
@@ -68,49 +66,76 @@ public class Avatar {
     * - Un entero que indica el numero de casillas a moverse (será el valor sacado en la tirada de los dados).
     * EN ESTA VERSIÓN SUPONEMOS QUE valorTirada siemrpe es positivo.
      */
-    // sin reglas por ahora, solo para poder mover el avatar
-    public void moverAvatar(ArrayList<ArrayList<Casilla>> casillas, int valorTirada) {
-        // comprobaciones básicas d si está vacío las hago después
+    private static final int NUM_CASILLAS = 40;
 
-        // convertimos la lista de listas en una lista lineal de casillas
-        ArrayList<Casilla> recorrido = new ArrayList<>();
-        for (ArrayList<Casilla> lado : casillas) {
+    // devuelve casilla por indice lineal
+    private Casilla casillaPorIndice(ArrayList<ArrayList<Casilla>> pos, int indice) {
+        if (pos == null || indice < 0 || indice >= NUM_CASILLAS) return null;
+        int k = 0;
+        for (ArrayList<Casilla> lado : pos) {
             if (lado == null) continue;
-            for (Casilla c : lado){
-                if (c != null) recorrido.add(c);
+            for (Casilla c : lado) {
+                if (c == null) continue;
+                if (k == indice) return c;
+                k++;
             }
         }
+        return null; // con tablero fijo bien formado, no deberíamos llegar aquí
+    }
 
-        // econtramos la posición actual del avatar dentro de ese recorrido
-        int indiceActual = recorrido.indexOf(this.lugar);
-        if (indiceActual == -1) {
-            for (int i = 0; i < recorrido.size(); i++){
-                Casilla c = recorrido.get(i);
+    // indice lineal de una casilla concreta
+    private int indiceDeCasilla(ArrayList<ArrayList<Casilla>> pos, Casilla objetivo) {
+        if (pos == null || objetivo == null) return -1;
+        int k = 0;
+        for (ArrayList<Casilla> lado : pos) {
+            if (lado == null) continue;
+            for (Casilla c : lado) {
+                if (c == objetivo) return k; // comparación por identidad (misma instancia)
+                // si no la encuentra por identidad, la busca por nombre
                 try {
-                    if (c != null && c.getNombre().equals(this.lugar.getNombre())) {
-                        indiceActual = i;
-                        break;
+                    if (c != null && c.getNombre() != null && c.getNombre().equals(objetivo.getNombre())) {
+                        return k;
                     }
                 } catch (Exception ignored) {}
-            }
-            if (indiceActual == -1) {
-                throw new IllegalStateException("No se encuentra la casilla actual en el tablero");
+                k++;
             }
         }
-        
-        // calculamos el nuevo índice (módulo número total de casillas)
-        int totalCasillas = recorrido.size();      // normalmente 40
-        int indiceNuevo = (indiceActual + valorTirada) % totalCasillas;
+        return -1;
+    }
 
-        // quitamos el avatar de la casilla actual y lo añadimos en la nueva
-        Casilla origen  = recorrido.get(indiceActual);
-        Casilla destino = recorrido.get(indiceNuevo);
-        try { if (origen  != null) origen.eliminarAvatar(this); } catch (UnsupportedOperationException e) { }
-        try { if (destino != null) destino.anhadirAvatar(this); } catch (UnsupportedOperationException e) { } // no esta hecho 
+    // mover avatar SIN REGLAS
+    public void moverAvatar(ArrayList<ArrayList<Casilla>> casillas, int valorTirada) {
 
-        // actualizamos su posición interna
+        if (casillas == null || casillas.isEmpty())
+            throw new IllegalArgumentException("El tablero no puede ser nulo ni vacío");
+        if (this.lugar == null)
+            throw new IllegalStateException("El avatar no tiene casilla actual (lugar == null)");
+        if (valorTirada < 0)
+            throw new IllegalArgumentException("valorTirada debe ser >= 0");
+
+        // indice actual del avatar
+        int indiceActual = indiceDeCasilla(casillas, this.lugar);
+        if (indiceActual == -1)
+            throw new IllegalStateException("No se encuentra la casilla actual del avatar en el tablero");
+
+        // indice destino (modulo fijo es el num de casillas = 40)
+        int indiceNuevo = (indiceActual + valorTirada) % NUM_CASILLAS;
+
+        // obtener casilla destino
+        Casilla destino = casillaPorIndice(casillas, indiceNuevo);
+        if (destino == null)
+            throw new IllegalStateException("No se pudo localizar la casilla destino (índice " + indiceNuevo + ")");
+
+        // quitar de origen y poner en destino (solo movimiento físico)
+        try {
+            if (this.lugar != null) this.lugar.eliminarAvatar(this);
+        } catch (UnsupportedOperationException ignored) {} // por si aún es stub
+        try {
+            destino.anhadirAvatar(this);
+        } catch (UnsupportedOperationException ignored) {}
+
+        // actualizar referencia interna
         this.lugar = destino;
-
     }
 
     /*Método que permite generar un ID para un avatar. Sólo lo usamos en esta clase (por ello es privado).
@@ -131,6 +156,6 @@ public class Avatar {
                 return;
             }
         }
-        throw new IllegalStateException("No quedan IDs libres estre A y Z para avatares");
+        throw new IllegalStateException("No quedan IDs libres entre A y Z para avatares");
     }
 }

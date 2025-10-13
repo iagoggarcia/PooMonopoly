@@ -8,5 +8,9 @@ import monopoly.Menu;
 public class MonopolyETSE {
     public static void main(String[] args) {
         Menu menu = new Menu();
+        Jugador banca = new Jugador();
+        Tablero tablero = new Tablero(banca);
+
+        System.out.println(tablero);
     }
 }

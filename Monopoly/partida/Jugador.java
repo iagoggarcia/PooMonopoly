@@ -3,6 +3,8 @@ package partida;
 import java.util.ArrayList;
 import monopoly.*;
 
+import static monopoly.Valor.FORTUNA_INICIAL;
+
 
 public class Jugador {
 
@@ -27,18 +29,18 @@ public class Jugador {
     * avatares creados (usado para dos propósitos: evitar que dos jugadores tengan el mismo nombre y
     * que dos avatares tengan mismo ID). Desde este constructor también se crea el avatar.
      */
-
+/*
     public Jugador(String nombre, String tipoAvatar, Casilla inicio, ArrayList<Avatar> avCreados) {
         this.nombre = nombre;
         this.avatar = new Avatar(tipoAvatar, this, inicio, avCreados); // para el avatar hay que crearlo y por defecto le puse que lo cree en la casilla inicial
-        this.fortuna = 15000000; // puse la fortuna inicial
+        this.fortuna = Valor.FORTUNA_INICIAL; // puse la fortuna inicial
         this.gastos = 0; // antes = gastos, incorrecto porque está sin inicializar, no se pasa como parámetro, daría error
         this.enCarcel = false; // antes = enCarcel, lo mismo que arriba
         this.tiradasCarcel = 0; // antes = tiradasCarcel
         this.vueltas = 0; 
         this.propiedades = new ArrayList<>(); // solo hay que inicializar propiedades como  una lista vaćía
     }
-
+*/
     public Jugador(float valor){
         this.fortuna = valor;
     }
@@ -115,7 +117,6 @@ public class Jugador {
     private static final int NUM_CASILLAS = 40;
     private static final int IDX_CARCEL   = 10; // posición fija de "Cárcel"
 
-
     // ddevuelve  la casilla con indice lineal en el orden el que fue construido
     private Casilla casillaPorIndice(ArrayList<ArrayList<Casilla>> pos, int indice) {
         if (pos == null || indice < 0 || indice >= NUM_CASILLAS) return null;
@@ -154,5 +155,4 @@ public class Jugador {
         this.enCarcel = true;
         this.tiradasCarcel = 0;
     }
-
 }

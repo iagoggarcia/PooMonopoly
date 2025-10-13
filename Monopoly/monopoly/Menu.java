@@ -8,6 +8,7 @@ import partida.*;
 
 import static monopoly.Valor.FORTUNA_BANCA;
 
+
 public class Menu {
 
     //Atributos
@@ -33,11 +34,13 @@ public class Menu {
         Scanner sc = new Scanner(System.in);
 
         // 1. Crear banca y tablero
-        Jugador banca = new Jugador(Valor.FORTUNA_BANCA);
+        // Jugador banca = new Jugador(Valor.FORTUNA_BANCA);
+        Jugador banca = new Jugador();
+        banca.sumarFortuna(Valor.FORTUNA_BANCA); 
         Tablero tablero = new Tablero(banca);
 
         // 2. Obtener la casilla "Salida" donde se colocan los avatares //iago lo tiene en sur, que es get(1) y despues dentro de sur, get(0)
-        Casilla salida = tablero.getPosiciones().get(1).get(0);
+        Casilla salida = tablero.getPosiciones().get(1).get(1);
 
         // 3. Preguntar número de jugadores
         int numJugadores = 0;
@@ -188,18 +191,70 @@ public class Menu {
     }
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'lanzar dados'.
-    private void lanzarDados() {
-        if(this.enCurso == false){
-            iniciarPartida();
+private int dobles=0;
+
+private void lanzarDados() {
+
+    if (!this.enCurso){
+        iniciarPartida();
+    }
+
+    if (this.dado1 == null){
+        this.dado1 = new Dado();
+    }
+    if (this.dado2 == null){
+        this.dado2 = new Dado();
+    }
+
+    int valor1 = this.dado1.hacerTirada();
+    int valor2 = this.dado2.hacerTirada();
+    int suma = valor1 + valor2;
+
+    Jugador actual = this.jugadores.get(this.turno);
+    Avatar av = actual.getAvatar();
+    Casilla origen = av.getLugar();
+
+    //movemos todas las posiciones sin comprobar antes
+    av.moverAvatar(this.tablero.getPosiciones(), suma);
+
+    // nueva casilla
+    Casilla destino = av.getLugar();
+
+    evaluarCasilla(destino);
+
+    //aqui si compruebo si pase por la salida y sumo la fortuna al jugador
+    /*if (origen != null && destino.getPosicion() < origen.getPosicion()) {
+        actual.sumarFortuna(Valor.SUMA_VUELTA);
+        // aquí podrías registrar la vuelta si llevas contador
+    }
+
+    System.out.println("Has caído en: " + destino.getNombre()+ " (pos " + destino.getPosicion() + ")");
+
+    Casilla parking = this.tablero.getPosiciones.get(0).get(21);
+    if(destino == parking){
+        this.jugador.sumarFortuna(parking.getValor());
         }
-        if(this.dado1 == null){
-            this.dado1 = new Dado();
+    }*/
+
+    //al final, despues de completar la funcion
+    if(suma == 12){
+
+        dobles++;
+        if(dobles<3){
+            lanzarDados();
         }
-        if(this.dado2 == null){
-            this.dado2 = new Dado();
+
+        else{
+            Casilla carcel = this.tablero.getPosiciones().get(1).get(11);
+            av.setLugar = carcel;
+            dobles = 0;
         }
-        this.dado1.hacerTirada();
-        this.dado2.hacerTirada();
+    }
+    else{
+        dobles = 0;
+    }
+}
+
 
 
         //continuar con todas las comprobaciones que hay que hacer al caer en nueva casilla
@@ -207,7 +262,6 @@ public class Menu {
         //comprobar número de lanzamientos, caso del doble 6 y el castigo
         //comprobar si cae en casilla especial
         //comprobar si cae en casilla que ya es de alguien y si tiene que pagar, bancarrota...
-    }
 
     private void lanzarDadosValor(String[] valores) {
         //va a ser un copia y pega de lo de arriba, asi que mejor hago una sola función en la que le paso igualmente la cadena y dentro

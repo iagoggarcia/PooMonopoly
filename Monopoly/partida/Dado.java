@@ -10,7 +10,7 @@ public class Dado {
     //Metodo para simular lanzamiento de un dado: devolverá un valor aleatorio entre 1 y 6.
     public int hacerTirada() {
         this.valor = ThreadLocalRandom.current().nextInt(1,7); // guardamos el resultado
-        // se pone de 1 a 7 porque el líkmite superior es exclusivo (el 7 no se cuenta)
+        // se pone de 1 a 7 porque el límite superior es exclusivo (el 7 no se cuenta)
         return this.valor;
     }
     
