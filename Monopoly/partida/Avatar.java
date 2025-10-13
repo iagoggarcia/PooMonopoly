@@ -1,8 +1,7 @@
 package partida;
 
-import monopoly.*;
-
 import java.util.ArrayList;
+import monopoly.*;
 
 
 public class Avatar {
@@ -31,7 +30,7 @@ public class Avatar {
 
         // colocamos el avatar en la casilla que se pasa como argumento
         if (this.lugar != null) {
-            try { this.lugar.anhadirAvatar(this); } // coloca el avatar en la lista de avatares de la casilla
+            this.lugar.anhadirAvatar(this); // coloca el avatar en la lista de avatares de la casilla
         }
 
         if (!avCreados.contains(this)) { // registramos el avatar en la lista de avatares
