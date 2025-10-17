@@ -190,8 +190,8 @@ public class Menu {
 
     private void analizarComando(String comando) {
         if (comando.startsWith("Describir jugador")) {
-            String partes[] = comando.split(" ");
-            descJugador(partes);
+            String nombreJugador = comando.substring("Describir jugador ".length()).trim();
+            descJugador(nombreJugador);
         }
         else if (comando.startsWith("Describir avatar")) {
             String Idavatar = comando.substring("Describir avatar ".length()).trim();
@@ -291,14 +291,126 @@ public class Menu {
 
     //EN LAS FUNCIONES DE DESCRIBIR Y LISTAR SOLAMENTE HAY QUE HACER PRINTS, LAS HAGO DE ÚLTIMO
 
-    private void descJugador(String[] partes) {
+    // --- helpers opcionales para no repetir búsquedas ---
+    private Jugador buscarJugadorPorNombre(String nombre) {
+        if (this.jugadores == null) return null;
+        for (Jugador j : this.jugadores) {
+            String n = j.getNombre();
+            if (n != null && n.equalsIgnoreCase(nombre)) return j;
+        }
+        return null;
     }
 
-    private void descAvatar(String ID) {
+    private Avatar buscarAvatarPorId(String id) {
+        if (this.avatares == null) return null;
+        for (Avatar a : this.avatares) {
+            if (a != null && a.getId() != null && a.getId().equalsIgnoreCase(id)) return a;
+        }
+        return null;
     }
 
-    private void descCasilla(String nombre) {
+    // --- Describir jugador: delega en avatar y casilla ---
+    private void descJugador(String nombreJugador) {
+        if (nombreJugador == null || nombreJugador.isBlank()) {
+            System.err.println("Uso correcto: Describir jugador <Nombre>");
+            return;
+        }
+        Jugador j = buscarJugadorPorNombre(nombreJugador.trim());
+        if (j == null) {
+            System.out.println("No existe un jugador con el nombre '" + nombreJugador + "'.");
+            return;
+        }
+
+        System.out.println("===== Información del jugador =====");
+        System.out.println("Nombre: " + j.getNombre());
+        System.out.println("Fortuna: " + j.getFortuna());
+        System.out.println("¿En cárcel?: " + (j.isEnCarcel() ? "Sí" : "No"));
+
+        // 1) Describir avatar del jugador
+        if (j.getAvatar() != null && j.getAvatar().getId() != null) {
+            descAvatar(j.getAvatar().getId());
+        } else {
+            System.out.println("(El jugador no tiene avatar asociado)");
+        }
+
+        // 2) Describir la casilla actual del jugador
+        if (j.getAvatar() != null && j.getAvatar().getLugar() != null) {
+            descCasilla(j.getAvatar().getLugar().getNombre());
+        }
+
+        // 3) Describir sus propiedades (reutilizando también descCasilla)
+        if (j.getPropiedades() == null || j.getPropiedades().isEmpty()) {
+            System.out.println("Propiedades: (ninguna)");
+        } else {
+            System.out.println("Propiedades:");
+            for (Casilla c : j.getPropiedades()) {
+                if (c != null && c.getNombre() != null) {
+                    descCasilla(c.getNombre());
+                }
+            }
+        }
+        System.out.println("===================================");
     }
+
+    // --- Describir avatar por ID ---
+    private void descAvatar(String id) {
+        if (id == null || id.isBlank()) {
+            System.err.println("Uso correcto: Describir avatar <ID>");
+            return;
+        }
+        Avatar a = buscarAvatarPorId(id.trim());
+        if (a == null) {
+            System.out.println("No existe un avatar con ID '" + id + "'.");
+            return;
+        }
+
+        System.out.println("---- Avatar ----");
+        System.out.println("ID: " + a.getId());
+        System.out.println("Tipo: " + a.getTipo());
+        System.out.println("Jugador: " + (a.getJugador() != null ? a.getJugador().getNombre() : "(ninguno)"));
+        if (a.getLugar() != null) {
+            System.out.println("Ubicación: " + a.getLugar().getNombre());
+        } else {
+            System.out.println("Ubicación: (desconocida)");
+        }
+    }
+
+    // --- Describir casilla por nombre (usa Tablero.encontrar_casilla) ---
+    private void descCasilla(String nombreCasilla) {
+        if (nombreCasilla == null || nombreCasilla.isBlank()) {
+            System.err.println("Uso correcto: Describir casilla <Nombre>");
+            return;
+        }
+        if (this.tablero == null) {
+            System.out.println("No hay tablero inicializado.");
+            return;
+        }
+
+        Casilla c = this.tablero.encontrar_casilla(nombreCasilla.trim());
+        if (c == null) {
+            System.out.println("No existe una casilla llamada '" + nombreCasilla + "'.");
+            return;
+        }
+
+        System.out.println("---- Casilla ----");
+        System.out.println("Nombre: " + c.getNombre());
+        System.out.println("Tipo: " + c.getTipo());
+        System.out.println("Posición: " + c.getPosicion());
+        System.out.println("Valor: " + c.getValor());
+        System.out.println("Dueño: " + (c.getDuenho() != null ? c.getDuenho().getNombre() : "(sin dueño)"));
+        // Si quieres, también: avatares presentes
+        if (c.getAvatares() != null && !c.getAvatares().isEmpty()) {
+            System.out.print("Avatares en la casilla: ");
+            boolean primero = true;
+            for (Avatar av : c.getAvatares()) {
+                if (!primero) System.out.print(", ");
+                System.out.print(av.getId());
+                primero = false;
+            }
+            System.out.println();
+        }
+    }
+
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'lanzar dados'.
     private int dobles=0;
