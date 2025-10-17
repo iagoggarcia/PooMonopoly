@@ -303,46 +303,58 @@ public class Menu {
     //Método que ejecuta todas las acciones relacionadas con el comando 'lanzar dados'.
     private int dobles=0;
 
-    private void lanzarDados() {
-
-        //mínimo 2 jugadores
+    private void lanzarDados() {//funcion para valores random de dados
         if (this.jugadores == null || this.jugadores.size() < 2) {
             System.err.println("Error: no hay suficientes jugadores (mínimo 2) para lanzar dados.");
             return;
         }
 
-        if (this.dado1 == null){
-            this.dado1 = new Dado();
-        }
-        if (this.dado2 == null){
-            this.dado2 = new Dado();
-        }
+        if (this.dado1 == null) this.dado1 = new Dado();
+        if (this.dado2 == null) this.dado2 = new Dado();
+
         this.enCurso = true;
 
         int valor1 = this.dado1.hacerTirada();
         int valor2 = this.dado2.hacerTirada();
-        int suma = valor1 + valor2;
 
+        realizarTirada(valor1, valor2);
+    }
+
+    private void lanzarDadosValor(String[] valores) { //funcion para forzar valor de dados
+        if (valores.length != 2) {
+            System.err.println("Error: formato inválido. Uso: 'Lanzar dados <dado1>+<dado2>'");
+            return;
+        }
+
+        try {
+            int valor1 = Integer.parseInt(valores[0].trim());
+            int valor2 = Integer.parseInt(valores[1].trim());
+            realizarTirada(valor1, valor2);
+        } catch (NumberFormatException e) {
+            System.err.println("Error: los valores de los dados deben ser números enteros.");
+        }
+    }
+
+    // 🔹 Método auxiliar con toda la lógica compartida
+    private void realizarTirada(int valor1, int valor2) {//hice el proceso de la tirada fuera para no tener que copiarlo en ambas funciones de lanzar
+        int suma = valor1 + valor2;
         Jugador actual = this.jugadores.get(this.turno);
         Avatar av = actual.getAvatar();
         Casilla origen = av.getLugar();
 
         av.moverAvatar(this.tablero.getPosiciones(), suma);
-
         Casilla destino = av.getLugar();
-
         evaluarCasilla(destino);
 
-        // Control de dobles / turno (cambios mínimos, inline)
-        if (suma == 12) { // tu criterio de "dobles"
+        // Control de dobles / turno
+        if (suma == 12) { // criterio de "dobles"
             dobles++;
             if (dobles < 3) {
-                lanzarDados(); // repite turno
+                lanzarDados(); // repite turno (solo usa aleatorio de nuevo)
             } else {
                 Casilla carcel = this.tablero.getPosiciones().get(1).get(11);
                 av.setLugar(carcel);
                 dobles = 0;
-                // pasa al siguiente jugador (ciclo 0..n-1)
                 this.turno = (this.turno + 1) % this.jugadores.size();
             }
         } else {
@@ -351,9 +363,6 @@ public class Menu {
         }
     }
 
-    private void lanzarDadosValor(String[] valores) {
-        // pendiente
-    }
 
     /*Método que ejecuta todas las acciones realizadas con el comando 'comprar nombre_casilla'.
     * Parámetro: cadena de caracteres con el nombre de la casilla.
@@ -390,12 +399,27 @@ public class Menu {
     }
 
     private void listarVenta() {
+        for(Casilla casilla : this.)
     }
 
     private void listarJugadores() {
+        for(Jugador jugador : this.jugadores){
+            System.out.println(jugador.getNombre());
+            System.out.println(jugador.getAvatar());
+            System.out.println(jugador.getFortuna());
+            System.out.println(jugador.getPropiedades());
+            //System.out.println(jugador.getHipotecas()); aun no hacemos esta parte del proyecto en la primera entrega
+            //System.out.println(jugador.getEdificios());
+        }
     }
 
     private void listarAvatares() {
+        for(Avatar avatar : this.avatares){
+            System.out.println(avatar.getJugador().getNombre());
+            System.out.println(avatar.getTipo());
+            System.out.println(avatar.getLugar());
+            System.out.println(avatar.getId());
+        }
     }
 
     private void acabarTurno() {
@@ -408,8 +432,6 @@ public class Menu {
     System.out.println("Le toca al jugador " + siguiente.getNombre() + ".");
 
     }
-
-
 }
 
 
