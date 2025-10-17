@@ -210,6 +210,7 @@ public class Casilla {
             System.out.println("La casilla es propiedad de otro jugador");
         }
         else{
+            //comprobar que no sea especial
             Casilla casilla = solicitante.getAvatar().getLugar();//casilla en la que cae el jugador (posicion del avatar)
             solicitante.anhadirPropiedad(casilla);
             casilla.setDuenho(solicitante);
@@ -227,16 +228,108 @@ public class Casilla {
 
     /*Método para mostrar información sobre una casilla.
      * Devuelve una cadena con información específica de cada tipo de casilla.*/
-    public String infoCasilla(String nombre) {
+    public String infoCasilla() {
 
-        
-        /*for (arrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
-            for (Casilla c : lado) {
-                String n = c.getNombre();
-                if (n != null && n.equals(nombre)) {
-                    System.out.println("Nombre: ");
-                }
-            }
+        StringBuilder informacion = new StringBuilder(); // aquí guardamos la info de la casilla
+
+        switch(tipo.toLowerCase()) {
+            case "solar":
+                informacion.append("\nTipo: ").append(tipo).append("\nGrupo: ").append(grupo).append("\nPropietario: ").append(duenho).append("\nValor: ").append(valor);
+                break;
+            case "impuesto":
+                informacion.append("\nTipo: ").append(tipo)
+                        .append("\nA pagar: ").append(impuesto);
+
+                if (avatares != null && !avatares.isEmpty()) {
+                        ArrayList<String> nombres = new ArrayList<>(); // creamos la lista donde guardaremos los jugadores que están en la casilla
+
+                        for (Avatar av : avatares) {
+                            if (av != null && av.getLugar() == this) { // comprobamos si la casilla en la que está el avatar coincide con la que describimos
+                                nombres.add(av.getJugador().getNombre());
+                            }
+                        }
+
+                        if (!nombres.isEmpty()) {
+                            informacion.append("\nJugadores: ").append(nombres);
+                        }
+                        else {
+                            informacion.append("\nNo hay avatares en esta casilla.");
+                        }
+                    }
+                    else {
+                        informacion.append("\nNo hay avatares en esta casilla.");
+                    }
+                break;
+            case "transporte":
+                informacion.append("\nValor: ").append(valor);
+                if (avatares != null && !avatares.isEmpty()) {
+                        ArrayList<String> nombres = new ArrayList<>(); // creamos la lista donde guardaremos los jugadores que están en la casilla
+
+                        for (Avatar av : avatares) {
+                            if (av != null && av.getLugar() == this) { // comprobamos si la casilla en la que está el avatar coincide con la que describimos
+                                nombres.add(av.getJugador().getNombre());
+                            }
+                        }
+
+                        if (!nombres.isEmpty()) {
+                            informacion.append("\nJugadores: ").append(nombres);
+                        }
+                        else {
+                            informacion.append("\nNo hay avatares en esta casilla.");
+                        }
+                    }
+                    else {
+                        informacion.append("\nNo hay avatares en esta casilla.");
+                    }
+                break;
+                case "servicios":
+                    informacion.append("\nValor: ").append(valor);
+                    if (avatares != null && !avatares.isEmpty()) {
+                        ArrayList<String> nombres = new ArrayList<>(); // creamos la lista donde guardaremos los jugadores que están en la casilla
+
+                        for (Avatar av : avatares) {
+                            if (av != null && av.getLugar() == this) { // comprobamos si la casilla en la que está el avatar coincide con la que describimos
+                                nombres.add(av.getJugador().getNombre());
+                            }
+                        }
+
+                        if (!nombres.isEmpty()) {
+                            informacion.append("\nJugadores: ").append(nombres);
+                        }
+                        else {
+                            informacion.append("\nNo hay avatares en esta casilla.");
+                        }
+                    }
+                    else {
+                        informacion.append("\nNo hay avatares en esta casilla.");
+                    }
+                    break;
+                case "especiales":
+                    if (this.getNombre() != null && this.getNombre().equalsIgnoreCase("parking")) {
+                        informacion.append("\nBote: ").append(valor);
+                    }
+                    else if (this.getNombre() != null && this.getNombre().equalsIgnoreCase("cárcel")) {
+                        informacion.append("\nSalir: 500000");
+                    }
+
+                    // El siguiente bloque es para cualquier especial menos para el irCarcel:
+                    if (!(this.getNombre().equalsIgnoreCase("ircarcel"))) {
+                        if (avatares != null && !avatares.isEmpty()) {
+                                ArrayList<String> nombres = new ArrayList<>(); // creamos la lista donde guardaremos los jugadores que están en la casilla
+
+                                for (Avatar av : avatares) {
+                                    if (av != null && av.getLugar() == this) { // comprobamos si la casilla en la que está el avatar coincide con la que describimos
+                                        nombres.add(av.getJugador().getNombre());
+                                    }
+                                }
+
+                                if (!nombres.isEmpty()) {
+                                    informacion.append("\nJugadores: ").append(nombres);
+                                }
+                            }
+                    }
+
+                    break;
         }
         return null; // si no existe una casilla con ese nombre devuelve null*/
     }
@@ -244,7 +337,8 @@ public class Casilla {
     /* Método para mostrar información de una casilla en venta.
      * Valor devuelto: texto con esa información.
      */
-    /*public String casEnVenta() {
-    }*/
+    public String casEnVenta() {
+        
+    }
 
 }

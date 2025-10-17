@@ -172,7 +172,7 @@ public class Tablero {
     //Método usado para buscar la casilla con el nombre pasado como argumento:
     public Casilla encontrar_casilla(String nombre){
         // Busco la casilla en cada lado del tablero:
-        for (arrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
+        for (ArrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
             for (Casilla c : lado) {
                 String n = c.getNombre();
                 if (n != null && n.equals(nombre)) {
