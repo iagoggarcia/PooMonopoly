@@ -194,15 +194,29 @@ public class Casilla {
                 return true;
             }
             // si es suya, nada que hacer
-            System.out.println("[" + this.nombre + "]")
+            System.out.println("[" + this.nombre + "]");
       }
     }
 
     /*Método usado para comprar una casilla determinada. Parámetros:
      * - Jugador que solicita la compra de la casilla.
      * - Banca del monopoly (es el dueño de las casillas no compradas aún).*/
-    /*public void comprarCasilla(Jugador solicitante, Jugador banca) {
-    }*/
+    public void comprarCasilla(Jugador solicitante, Jugador banca) {
+        //comprobaciones
+        if(this.duenho == solicitante) {
+            System.out.println("El jugador ya posee la casilla");
+        }
+        if(this.duenho != solicitante && this.duenho != banca) {
+            System.out.println("La casilla es propiedad de otro jugador");
+        }
+        else{
+            Casilla casilla = solicitante.getAvatar().getLugar();//casilla en la que cae el jugador (posicion del avatar)
+            solicitante.anhadirPropiedad(casilla);
+            casilla.setDuenho(solicitante);
+            solicitante.sumarFortuna(-casilla.getValor());//le pasamos un valor negativo para reflejar el gasto en la fortuna
+            banca.sumarFortuna(casilla.getValor());//se la compramos a la banca
+        }
+    }
 
     /*Método para añadir valor a una casilla. Utilidad:
      * - Sumar valor a la casilla de parking.
@@ -214,7 +228,9 @@ public class Casilla {
     /*Método para mostrar información sobre una casilla.
      * Devuelve una cadena con información específica de cada tipo de casilla.*/
     public String infoCasilla(String nombre) {
-        for (arrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
+
+        
+        /*for (arrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
             for (Casilla c : lado) {
                 String n = c.getNombre();
                 if (n != null && n.equals(nombre)) {
@@ -222,7 +238,7 @@ public class Casilla {
                 }
             }
         }
-        return null; // si no existe una casilla con ese nombre devuelve null
+        return null; // si no existe una casilla con ese nombre devuelve null*/
     }
 
     /* Método para mostrar información de una casilla en venta.

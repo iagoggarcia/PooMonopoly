@@ -29,7 +29,7 @@ public class Jugador {
     * avatares creados (usado para dos propósitos: evitar que dos jugadores tengan el mismo nombre y
     * que dos avatares tengan mismo ID). Desde este constructor también se crea el avatar.
      */
-/*
+
     public Jugador(String nombre, String tipoAvatar, Casilla inicio, ArrayList<Avatar> avCreados) {
         this.nombre = nombre;
         this.avatar = new Avatar(tipoAvatar, this, inicio, avCreados); // para el avatar hay que crearlo y por defecto le puse que lo cree en la casilla inicial
@@ -40,7 +40,7 @@ public class Jugador {
         this.vueltas = 0; 
         this.propiedades = new ArrayList<>(); // solo hay que inicializar propiedades como  una lista vaćía
     }
-*/
+
     public Jugador(float valor){
         this.fortuna = valor;
     }
