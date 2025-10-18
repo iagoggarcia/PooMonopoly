@@ -1,7 +1,7 @@
 package monopoly;
 
-import partida.*;
 import java.util.ArrayList;
+import partida.*;
 
 
 public class Casilla {
@@ -180,6 +180,7 @@ public class Casilla {
       String n = (this.nombre == null) ? " " : this.nombre.toLowerCase();
 
       switch (t) {
+        // casillas que se pueden comprar
         case "solar":
         case "servicios":
         case "transporte":
@@ -188,13 +189,65 @@ public class Casilla {
                 System.out.println("[" + this.nombre + "] Propiedad de " + this.valor + ". Usa el menú para comprar.");
                 return true;
             }
-            // si es de otro jugador, en esta parte aun no se cobra el alquiler
+            // si es de otro jugador, en esta parte aun no se cobra el alquiler (no se pide en el guión)
             if (this.duenho != actual) {
                 System.out.println("[" + this.nombre + "] Propiedad de " + this.duenho + ". (Alquiler: sin implementar)");
                 return true;
             }
             // si es suya, nada que hacer
             System.out.println("[" + this.nombre + "]");
+        // impuestos
+        case "impuestos":
+            float imp = this.impuesto;
+            // comprobamos solvencia, si no llega devolvemos false
+            if (actual.getFortuna() < imp) {
+                System.out.println("[" + this.nombre + "] Debes pagar " + actual.getFortuna() + ". Pago imposible.");
+                return false;
+            }
+            // paga: resta a fortuna y suma a gastos
+            actual.sumarFortuna(-imp);
+            actual.sumarGastos(imp);
+            System.out.println("[" + this.nombre + "] Pagas impuesto de " + imp + ".");
+            
+            return true;
+        // suerte / caja de comunidad
+        case "suerte":
+        case "caja de comunidad":
+            System.out.println("[" + this.nombre + "] Robar cartar (no implementado en parte 1).");
+            return true;
+        // especiales
+        case "especial":
+            if (n.equals("parking")) {
+                // cobre del bote (valor) y reseteo
+                if (this.valor > 0) {
+                    actual.sumarFortuna(this.valor);
+                    System.out.println("[Parking] Cobras el bote de " + this.valor + ". Se resetea a 0.");
+                    this.valor = 0;
+                } else {
+                    System.out.println("[Parking] Sin bote acumulado.");
+                }
+                return true;
+            } 
+            if (n.equals("salida")) {
+                // el cobro por pasar se gestiona en el menu
+                return true;
+            } 
+            if (n.equals("ircarcel") || n.equals("ir a la carcel") ||  n.equals("ir a la cárcel")) {
+                // el menu es el que tiene que mover a la carcel al jugador
+                // si caes aquí tienes que moverte a la carcel como preso inmediatamente
+                return true;
+            }
+            if (n.equals("cárcel") || n.equals("carcel")) {
+                // de visita o preso lo gestiona el menu
+                // caes por movimiento "normal", o ya estabas en la cárcel preso
+                return true;
+            }
+            System.out.println("[" + this.nombre + "] Casilla especial (sin acción en parte 1)");
+            return true;
+        // desconocido
+        default:
+            System.out.println("[" + this.nombre + "] Tipo no reconocido aún: " + this.tipo);
+            return true;
       }
     }
 
@@ -227,7 +280,7 @@ public class Casilla {
 
     /*Método para mostrar información sobre una casilla.
      * Devuelve una cadena con información específica de cada tipo de casilla.*/
-    public String infoCasilla(String nombre) {
+    /* public String infoCasilla(String nombre) {
 
         
         /*for (arrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
@@ -238,8 +291,8 @@ public class Casilla {
                 }
             }
         }
-        return null; // si no existe una casilla con ese nombre devuelve null*/
-    }
+        return null; // si no existe una casilla con ese nombre devuelve null
+    } 
 
     /* Método para mostrar información de una casilla en venta.
      * Valor devuelto: texto con esa información.
