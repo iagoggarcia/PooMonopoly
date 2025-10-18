@@ -42,6 +42,15 @@ public class Tablero {
         ladoNorte.add(new Casilla("Serv2", "servicios", 29, 500000, banca));
         ladoNorte.add(new Casilla("Solar17", "solar", 30, 2800000,banca));
         ladoNorte.add(new Casilla("IrCarcel", "especial", 31, banca));
+
+        // Grupos (NORTE)
+        Grupo rojo     = new Grupo(ladoNorte.get(1), ladoNorte.get(3), ladoNorte.get(4), Valor.RED);
+        grupos.put("rojo", rojo);
+
+        Grupo amarillo = new Grupo(ladoNorte.get(6), ladoNorte.get(7), ladoNorte.get(9), Valor.BROWN);
+        grupos.put("amarillo", amarillo);
+
+
         posiciones.add(ladoNorte); // meto el array "norte" (que a su vez es otro array con las casillas) en posiciones
     }
 
@@ -60,6 +69,14 @@ public class Tablero {
         ladoSur.add(new Casilla("Solar5", "solar", 10, 1200000, banca));
         ladoSur.add(new Casilla("Cárcel", "especial", 11, banca));
 
+        // Grupos (SUR)
+        Grupo marron  = new Grupo(ladoSur.get(1), ladoSur.get(3), Valor.BLACK); // o el ANSI que uses para marrón
+        grupos.put("marron", marron);
+
+        Grupo celeste = new Grupo(ladoSur.get(6), ladoSur.get(8), ladoSur.get(9), Valor.CYAN);
+        grupos.put("celeste", celeste);
+
+
         posiciones.add(ladoSur); // meto el array "sur" (que a su vez es otro array con las casillas) en posiciones
     }
 
@@ -76,6 +93,14 @@ public class Tablero {
         ladoOeste.add(new Casilla("Solar10", "solar", 19, 1800000, banca));
         ladoOeste.add(new Casilla("Solar11", "solar", 20, 2200000, banca));
 
+        // Grupos (OESTE)
+        Grupo rosa    = new Grupo(ladoOeste.get(0), ladoOeste.get(2), ladoOeste.get(3), Valor.PURPLE);
+        grupos.put("rosa", rosa);
+
+        Grupo naranja = new Grupo(ladoOeste.get(5), ladoOeste.get(7), ladoOeste.get(8), Valor.YELLOW);
+        grupos.put("naranja", naranja);
+
+
         posiciones.add(ladoOeste); // meto el array "oeste" (que a su vez es otro array con las casillas) en posiciones
     }
 
@@ -90,7 +115,16 @@ public class Tablero {
         ladoEste.add(new Casilla("Suerte", "suerte", 37, banca));
         ladoEste.add(new Casilla("Solar21", "solar", 38, 3500000, banca));
         ladoEste.add(new Casilla("Imp2", "impuestos", 39, banca));
-        ladoEste.add(new Casilla("Solar22", "solar", 40, 4000000, banca));
+        ladoEste.add(new Casilla("Solar22", "solar", 40, 40000000, banca));
+
+        // Grupos (ESTE)
+        Grupo verde = new Grupo(ladoEste.get(0), ladoEste.get(1), ladoEste.get(3), Valor.GREEN);
+        grupos.put("verde", verde);
+
+        Grupo azul  = new Grupo(ladoEste.get(6), ladoEste.get(8), Valor.BLUE);
+        grupos.put("azul", azul);
+
+
 
         posiciones.add(ladoEste); // meto el array "este" (que a su vez es otro array con las casillas) en posiciones
     }
@@ -124,51 +158,64 @@ public class Tablero {
     }
 
     //Para imprimir el tablero, modificamos el método toString().
-    //@Override
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("====TABLERO MONOPOLY====\n");
 
         ArrayList<Casilla> ladoNorte = posiciones.get(0);
-        ArrayList<Casilla> ladoSur = posiciones.get(1);
+        ArrayList<Casilla> ladoSur   = posiciones.get(1);
         ArrayList<Casilla> ladoOeste = posiciones.get(2);
-        ArrayList<Casilla> ladoEste = posiciones.get(3);
+        ArrayList<Casilla> ladoEste  = posiciones.get(3);
 
-        // Definir el ancho fijo para cada casilla
         final int ANCHO_CASILLA = 8;
 
+        // Usa directamente el ANSI almacenado en el Grupo
+        java.util.function.Function<Casilla, String> ansiGrupo = c -> {
+            String ansi = Valor.WHITE;
+            if (c.getGrupo() != null && c.getGrupo().getColorGrupo() != null) {
+                ansi = c.getGrupo().getColorGrupo(); // aquí viene ya Valor.RED, Valor.GREEN, etc.
+            }
+            return ansi;
+        };
 
-    // Primero imprimo el norte:
-        sb.append("_".repeat(ANCHO_CASILLA));
+
+        // Norte
         for (Casilla c : ladoNorte) {
-            String nombreFormateado = String.format("|%-" + ANCHO_CASILLA + "s", c.getNombre());
-            sb.append(nombreFormateado);
+            String celda = "|" + ansiGrupo.apply(c) + String.format("%-" + ANCHO_CASILLA + "s", c.getNombre()) + Valor.RESET;
+            sb.append(celda);
         }
+        sb.append("|\n"); // cierra la última celda
 
-        sb.append("\n");
-
-        // Ahora imprimo simultáneamente el oeste y el este:
+        // Oeste y Este
         for (int i = ladoOeste.size() - 1; i >= 0; i--) {
-            // Usar variables para hacer el código más claro
-            Casilla casillaOeste = ladoOeste.get(i);
-            Casilla casillaEste = ladoEste.get(ladoEste.size() - 1 - i);
+            Casilla o = ladoOeste.get(i);
+            Casilla e = ladoEste.get(ladoEste.size() - 1 - i);
+
             int espaciosCentro = ANCHO_CASILLA * (ladoNorte.size() - 2) + (ladoNorte.size() - 2);
 
-            sb.append(String.format("|%-" + ANCHO_CASILLA + "s", casillaOeste.getNombre()))
+            String celdaO = "|" + ansiGrupo.apply(o) + String.format("%-" + ANCHO_CASILLA + "s", o.getNombre()) + Valor.RESET;
+            String celdaE = "|" + ansiGrupo.apply(e) + String.format("%-" + ANCHO_CASILLA + "s", e.getNombre()) + Valor.RESET;
+
+            sb.append(celdaO)
                     .append(" ".repeat(espaciosCentro))
-                    .append(String.format("|%-" + ANCHO_CASILLA + "s", casillaEste.getNombre()))
+                    .append(celdaE)
                     .append("|\n");
         }
 
-        // Por último imprimo el sur:
-        for (Casilla c : ladoSur) {
-            String nombreFormateado = String.format("|%-" + ANCHO_CASILLA + "s", c.getNombre());
-            sb.append(nombreFormateado);
+        // Sur (inverso)
+        for (int i = ladoSur.size() - 1; i >= 0; i--) {
+            Casilla c = ladoSur.get(i);
+            String celda = "|" + ansiGrupo.apply(c) + String.format("%-" + ANCHO_CASILLA + "s", c.getNombre()) + Valor.RESET;
+            sb.append(celda);
         }
+        sb.append("|\n"); // cierra la última celda
 
         return sb.toString();
     }
-    
+
+
+
+
     //Método usado para buscar la casilla con el nombre pasado como argumento:
     public Casilla encontrar_casilla(String nombre){
         // Busco la casilla en cada lado del tablero:
@@ -183,3 +230,4 @@ public class Tablero {
         return null; // si no existe una casilla con ese nombre devuelve null
     }
 }
+

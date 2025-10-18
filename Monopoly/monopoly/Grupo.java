@@ -19,18 +19,60 @@ class Grupo {
     * Requiere como parámetros las dos casillas miembro y el color del grupo.
      */
     public Grupo(Casilla cas1, Casilla cas2, String colorGrupo) {
+        this();
+        this.colorGrupo = colorGrupo;
+        anhadirCasilla(cas1);
+        anhadirCasilla(cas2);
     }
+
 
     /*Constructor para cuando el grupo está formado por TRES CASILLAS:
     * Requiere como parámetros las tres casillas miembro y el color del grupo.
      */
     public Grupo(Casilla cas1, Casilla cas2, Casilla cas3, String colorGrupo) {
+    this();
+    this.colorGrupo = colorGrupo;
+    anhadirCasilla(cas1);
+    anhadirCasilla(cas2);
+    anhadirCasilla(cas3);
+    }
+
+
+    public String getColorGrupo() {
+        return colorGrupo;
+    }
+
+    public void setColorGrupo(String colorGrupo) {
+        this.colorGrupo = colorGrupo;
+    }
+
+    public ArrayList<Casilla> getMiembros() {
+        return miembros;
+    }
+
+    public void setMiembros(ArrayList<Casilla> miembros) {
+        this.miembros = miembros;
+    }
+
+    public int getNumCasillas() {
+        return numCasillas;
+    }
+
+    public void setNumCasillas(int numCasillas) {
+        this.numCasillas = numCasillas;
     }
 
     /* Método que añade una casilla al array de casillas miembro de un grupo.
     * Parámetro: casilla que se quiere añadir.
      */
     public void anhadirCasilla(Casilla miembro) {
+        if (miembro == null) return;
+        if (this.miembros == null) this.miembros = new ArrayList<>();
+        if (!this.miembros.contains(miembro)) {
+            this.miembros.add(miembro);
+            this.numCasillas = this.miembros.size();
+            miembro.setGrupo(this);
+        }
     }
 
     /*Método que comprueba si el jugador pasado tiene en su haber todas las casillas del grupo:
