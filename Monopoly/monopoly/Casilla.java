@@ -162,12 +162,6 @@ public class Casilla {
         this.avatares.remove(av);
     }
 
-    
-    public void sumarValor(float suma) {
-        this.valor += suma;
-        if (this.valor < 0) this.valor = 0; // por si acaso
-    }
-
     /*Método para evaluar qué hacer en una casilla concreta. Parámetros:
      * - Jugador cuyo avatar está en esa casilla.
      * - La banca (para ciertas comprobaciones).
@@ -200,17 +194,17 @@ public class Casilla {
         // casilla de impuestos
         case "impuestos":
             float imp = this.impuesto;
-            // comprobamos solvencia, si no llega devolvemos false
+
             if (actual.getFortuna() < imp) {
-                System.out.println("[" + this.nombre + "] " + actual.getNombre() + " no tiene suficiente dinero para pagar " + imp + "€. Fortuna actual: " + actual.getFortuna());   
+                System.out.println("[" + this.nombre + "] " + actual.getNombre() + " no tiene suficiente dinero para pagar los impuestos (" + imp + "€).");
                 return false;
             }
-            // paga: resta a fortuna y suma a gastos de actual, suma fortuna a la banca
+            // el jugador paga a la banca
             actual.sumarFortuna(-imp);
             actual.sumarGastos(imp);
             banca.sumarFortuna(imp);
 
-            System.out.println(actual.getNombre() + " paga " + imp + "€ de impuestos. ");      
+            System.out.println(actual.getNombre() + " paga " + imp + "€ en impuestos.");
             return true;
         // suerte / caja de comunidad
         case "suerte":
@@ -282,12 +276,37 @@ public class Casilla {
         System.out.println(solicitante.getNombre() + " ha comprado " + this.nombre + " por " + this.valor + "€. Fortuna restante: " + solicitante.getFortuna() + "€.");
     }
 
-    /*Método para añadir valor a una casilla. Utilidad:
-     * - Sumar valor a la casilla de parking.
-     * - Sumar valor a las casillas de solar al no comprarlas tras cuatro vueltas de todos los jugadores.
-     * Este método toma como argumento la cantidad a añadir del valor de la casilla.*/
-    /*public void sumarValor(float suma) {
-    }*/
+    /**
+     * Método para añadir valor a una casilla.
+     * Utilidad:
+     *  - Sumar valor a la casilla de Parking.
+     *  - Sumar valor a las casillas de tipo "Solar" al no comprarlas tras cuatro vueltas.
+     * Este método toma como argumento la cantidad a añadir al valor de la casilla.
+     */
+    public void sumarValor(float suma) {
+        if (suma <= 0) {
+            System.out.println("No se puede añadir un valor negativo o nulo a la casilla " + this.nombre + ".");
+            return;
+        }
+
+        // Si la casilla no admite valor (por ejemplo, cárcel o suerte), avisamos
+        if (this.tipo == null || 
+            this.tipo.equalsIgnoreCase("carcel") || 
+            this.tipo.equalsIgnoreCase("cárcel") || 
+            this.tipo.equalsIgnoreCase("ir a la cárcel") ||
+            this.tipo.equalsIgnoreCase("ircarcel") ||
+            this.tipo.equalsIgnoreCase("suerte") ||
+            this.tipo.equalsIgnoreCase("caja de comunidad")) {
+            System.out.println("No se puede modificar el valor de una casilla de tipo " + this.tipo + ".");
+            return;
+        }
+
+        // Suma el valor
+        this.valor += suma;
+
+        System.out.println("Se han añadido " + suma + "€ al valor de la casilla '" + this.nombre + "'. Nuevo valor: " + this.valor + "€.");
+    }
+
 
     /*Método para mostrar información sobre una casilla.
      * Devuelve una cadena con información específica de cada tipo de casilla.*/

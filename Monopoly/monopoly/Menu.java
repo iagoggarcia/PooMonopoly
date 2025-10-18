@@ -1,15 +1,12 @@
 package monopoly;
 
-import java.util.ArrayList;
-import java.util.Scanner;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
+import java.util.ArrayList;
+import java.util.Scanner;
 import partida.*;
-
-import static monopoly.Valor.FORTUNA_BANCA;
 
 public class Menu {
 
@@ -449,6 +446,7 @@ public class Menu {
         }
     }
 
+
     //  Método auxiliar con toda la lógica compartida
     private void realizarTirada(int valor1, int valor2) {//hice el proceso de la tirada fuera para no tener que copiarlo en ambas funciones de lanzar
         int suma = valor1 + valor2;
@@ -463,6 +461,8 @@ public class Menu {
         if (destino.getPosicion() < origen.getPosicion()) {
             actual.sumarFortuna(Valor.SUMA_VUELTA);
             System.out.println(actual.getNombre() + " pasa por Salida y recibe " + Valor.SUMA_VUELTA + "€.");
+
+            actual.setVueltas(actual.getVueltas() + 1);
         }
 
         destino.evaluarCasilla(actual, this.banca, suma);
@@ -477,6 +477,14 @@ public class Menu {
             actual.encarcelar(this.tablero.getPosiciones()); // mueve al avatar y marca enCarcel=true
             acabarTurno();
             return; // el turno termina inmediatamente tras ser encarcelado
+        }
+
+        // si la casilla es de tipo impuestos, añadir el dinero al Parking
+        if (destino.getTipo().equalsIgnoreCase("impuestos")) {
+            Casilla parking = this.tablero.encontrar_casilla("Parking");
+            if (parking != null) {
+                parking.sumarValor(destino.getImpuesto());  // usa tu método sumarValor()
+            }
         }
 
         // Control de dobles / turno
@@ -637,6 +645,37 @@ public class Menu {
 
         System.out.println("Le toca al jugador " + siguiente.getNombre() + ".");
 
+        comprobarSolaresNoComprados(); // cada vez que un turno acaba
+    }
+
+    private void comprobarSolaresNoComprados() {
+        // verifica si todos los jugadores han dado 4 vueltas o más
+        boolean todos4vueltas = true;
+        for (Jugador j : this.jugadores) {
+            if (j.getVueltas() < 4) {
+                todos4vueltas = false;
+                break;
+            }
+        }
+
+        if (todos4vueltas) {
+            System.out.println("Todos los jugadores han dado al menos 4 vueltas. Se incrementa el valor de los solares sin dueño.");
+
+            // recorremos todas las casillas del tablero
+            for (ArrayList<Casilla> lado: this.tablero.getPosiciones()) {
+                for (Casilla c : lado) {
+                    if (c.getTipo().equalsIgnoreCase("solar") && (c.getDuenho() == null || c.getDuenho() == this.banca)) {
+                        float incremento = 100000; // por poner algo pq ns cuanto es
+                        c.sumarValor(incremento);
+                    }
+                }
+            }
+
+            // reiniciamos las vueltas para volver a contar 4 más
+            for (Jugador j: this.jugadores) {
+                j.setVueltas(0);
+            }
+        }
     }
 }
 

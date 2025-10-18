@@ -76,6 +76,14 @@ public class Jugador {
         this.tiradasCarcel = tiradasCarcel;
     }
 
+    public int getVueltas() {
+        return vueltas;
+    }
+
+    public void setVueltas(int vueltas) {
+        this.vueltas = vueltas;
+    }
+
     //Otros métodos:
     //Método para añadir una propiedad al jugador (cuando la compra). Como parámetro, la casilla a añadir.
     public void anhadirPropiedad(Casilla casilla) {
