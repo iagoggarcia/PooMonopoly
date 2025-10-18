@@ -462,19 +462,19 @@ public class Menu {
         // aquí habría que añadir el paso por la salida, sumar el dinero  y demás
         // no se si se hace en otra parte del menu, por eso no pongo nada
 
-        evaluarCasilla(destino); 
+        destino.evaluarCasilla(actual, this.banca, suma);
         // CORRECCIÓN: como el metodo no esta definido en menu, hay que llamarlo a través de destino:
         // destino.evaluarCasilla(actual, this.banca, suma);
         // si no lo llamas asi salta el error de q el método esta indefinido para el tipo menu
 
         // Control de dobles / turno
-        if (suma == 12) { // criterio de "dobles" CORRECCIÓN: tendria que ser valor1 == valor2, porque si te tocan dos 4 son dobles pero no suman 12
+        if (valor1 == valor2){ // criterio de "dobles" CORRECCIÓN: tendria que ser valor1 == valor2, porque si te tocan dos 4 son dobles pero no suman 12
             System.out.println("¡" + actual.getNombre() + " ha sacado dobles!");
             dobles++;
             if (dobles < 3) {
                 lanzarDados(); // repite turno (solo usa aleatorio de nuevo)
             } else {
-                Casilla carcel = this.tablero.getPosiciones().get(1).get(11);
+                Casilla carcel = this.tablero.encontrar_casilla("Cárcel");
                 // esta linea devuelve el array con los 4 lados, accede al lado sur e intenta acceder a la duodecima casilla
                 // el tablero tiene los indices del 0-10 entonces esa casilla no existe, si sca tres dobles no va a funcionar
                 // CORRECCIÓN: Casilla carcel = tablero.encontrar_casilla("carcel")
@@ -514,8 +514,8 @@ public class Menu {
         }
 
         Jugador actual = this.jugadores.get(this.turno); // se podria poner como: Jugador actual = jugadores.get(turno);
-        Casilla casillaActual = actual.getAvatar().getLugar(); 
-        Casilla carcel = this.tablero.getPosiciones().get(1).get(11); // se tienr que poner como: Casilla casillaCarcel = tablero.getCasillaCarcel();
+        Casilla casillaActual = actual.getAvatar().getLugar();
+        Casilla carcel = this.tablero.encontrar_casilla("Cárcel"); // se tienr que poner como: Casilla casillaCarcel = tablero.getCasillaCarcel();
 
         // una forma más sencilla podría ser:
         // 1. comprobar if el jugador esta en la cárcel
