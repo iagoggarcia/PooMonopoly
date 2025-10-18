@@ -306,7 +306,22 @@ public class Casilla {
     /* Método para mostrar información de una casilla en venta.
      * Valor devuelto: texto con esa información.
      */
-    /*public String casEnVenta() {
-    }*/
+    public String casEnVenta() {
+        // Comprobamos si la casilla es comprable
+        if (this.tipo == null) return ""; //en el caso de que no se cumpla alguna condicion necesaria, devolvemos una cadena vacia
+        String tipoLower = this.tipo.toLowerCase();
+        boolean esComprable = tipoLower.equals("solar") || tipoLower.equals("transporte") || tipoLower.equals("servicios"); //solo es comprable si es de alguno de estos tipos
+
+        // Comprobamos si está en venta (sin dueño o con dueño banca)
+        boolean enVenta = esComprable && (this.duenho == null || (this.duenho.getNombre() != null && this.duenho.getNombre().equalsIgnoreCase("banca")));
+
+        if (!enVenta) return "";
+
+        // Si está en venta, devolvemos la información formateada
+        String info = "{ tipo: " + this.tipo + ", nombre: " + this.nombre + ", valor: " + (int)this.valor + " }";
+
+        return info; //devolvemos la cadena
+    }
+
 
 }

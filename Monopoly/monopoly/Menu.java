@@ -579,8 +579,30 @@ public class Menu {
     }
 
     private void listarVenta() {
-        for(Casilla casilla : this.)
+        if (this.tablero == null) {
+            System.out.println("No hay tablero inicializado.");
+            return;
+        }
+
+        System.out.println("=== Propiedades en venta ===");
+
+        for (ArrayList<Casilla> lado : this.tablero.getPosiciones()) { //recorremos el array de casillas, lado por lado
+            if (lado == null) continue;
+            for (Casilla c : lado) {
+                if (c == null) continue;
+
+                String info = c.casEnVenta(); //dentro ya se hace la comprobacion
+                if (!info.isBlank()) {
+                    System.out.println(info); //solo imprimimos si es comprable
+                }
+            }
+        }
+
+        System.out.println();
+        System.out.println(this.tablero.toString()); // Mostrar tablero al final (lo pide en el pdf)
     }
+
+
 
     private void listarJugadores() {
         for(Jugador jugador : this.jugadores){
