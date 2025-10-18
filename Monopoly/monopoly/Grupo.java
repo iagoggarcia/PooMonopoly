@@ -79,7 +79,19 @@ class Grupo {
     * Parámetro: jugador que se quiere evaluar.
     * Valor devuelto: true si es dueño de todas las casillas del grupo, false en otro caso.
      */
-    /*public boolean esDuenhoGrupo(Jugador jugador) {
-    }*/
+    public boolean esDuenhoGrupo(Jugador jugador) {
+        if (jugador == null || this.miembros == null || this.miembros.isEmpty()) return false;
+
+        for (Casilla c : this.miembros) {
+            Jugador d = c.getDuenho();
+            // Si no hay dueño, es banca o el dueño no es el jugador pasado, no controla el grupo
+            if (d == null) return false;
+            String nombreDuenho = d.getNombre();
+            if (nombreDuenho != null && nombreDuenho.equalsIgnoreCase("banca")) return false;
+            if (d != jugador) return false; // comparamos por instancia; en este diseño es lo más seguro
+        }
+        return true;
+    }
+
 
 }
