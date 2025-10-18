@@ -90,7 +90,7 @@ public class Tablero {
         ladoEste.add(new Casilla("Suerte", "suerte", 37, banca));
         ladoEste.add(new Casilla("Solar21", "solar", 38, 3500000, banca));
         ladoEste.add(new Casilla("Imp2", "impuestos", 39, banca));
-        ladoEste.add(new Casilla("Solar22", "solar", 40, 40000000, banca));
+        ladoEste.add(new Casilla("Solar22", "solar", 40, 4000000, banca));
 
         posiciones.add(ladoEste); // meto el array "este" (que a su vez es otro array con las casillas) en posiciones
     }

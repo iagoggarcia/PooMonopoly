@@ -27,12 +27,13 @@ public class Avatar {
         this.lugar = lugar; // la casilla  inicial donde aparecerá el avatar (salida normalmente)
         
         generarId(avCreados); // pone el this.id, no añade el avatar a avCreados, solo genera el id
-
+        
         // colocamos el avatar en la casilla que se pasa como argumento
-        if (this.lugar != null) {
+        if (lugar == null) {
+            System.err.println("Advertencia: avatar " + tipo + " creado sin casilla inicial.");
+        } else {
             this.lugar.anhadirAvatar(this); // coloca el avatar en la lista de avatares de la casilla
-        }
-
+}
         if (!avCreados.contains(this)) { // registramos el avatar en la lista de avatares
             avCreados.add(this);
         }
@@ -135,6 +136,8 @@ public class Avatar {
 
         // actualizar referencia interna
         this.lugar = destino;
+
+        System.out.println("El avatar " + id + " avanza " + valorTirada + " posiciones, desde " + this.lugar.getNombre() + " hasta " + destino.getNombre() + ".");
     }
 
     /*Método que permite generar un ID para un avatar. Sólo lo usamos en esta clase (por ello es privado).

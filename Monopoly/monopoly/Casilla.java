@@ -186,29 +186,29 @@ public class Casilla {
         case "transporte":
             // si la casilla es de la banca (o sin dueño), está en venta
             if (this.duenho == null || this.duenho == banca) {
-                System.out.println("[" + this.nombre + "] Propiedad de " + this.valor + ". Usa el menú para comprar.");
+                System.out.println("[" + this.nombre + "] Propiedad libre por " + this.valor + "€. Usa el comando 'comprar' para adquirirla.");
+                return true;
+            } else if (this.duenho != actual) { // si es de otro jugador, en esta parte aun no se cobra el alquiler (no se pide en el guión)
+                System.out.println("[" + this.nombre + "] Propiedad de " + this.duenho.getNombre() + ". (Alquiler aún no implementado).");
                 return true;
             }
-            // si es de otro jugador, en esta parte aun no se cobra el alquiler (no se pide en el guión)
-            if (this.duenho != actual) {
-                System.out.println("[" + this.nombre + "] Propiedad de " + this.duenho + ". (Alquiler: sin implementar)");
+            else { // si es suya nada q hacer
+                System.out.println("[" + this.nombre + "] Ya es tuya.");
                 return true;
             }
-            // si es suya, nada que hacer
-            System.out.println("[" + this.nombre + "]");
         // impuestos
         case "impuestos":
             float imp = this.impuesto;
             // comprobamos solvencia, si no llega devolvemos false
             if (actual.getFortuna() < imp) {
-                System.out.println("[" + this.nombre + "] Debes pagar " + actual.getFortuna() + ". Pago imposible.");
+                System.out.println("[" + this.nombre + "] " + actual.getNombre() + " no tiene suficiente dinero para pagar " + imp + "€. Fortuna actual: " + actual.getFortuna());   
                 return false;
             }
             // paga: resta a fortuna y suma a gastos
             actual.sumarFortuna(-imp);
             actual.sumarGastos(imp);
-            System.out.println("[" + this.nombre + "] Pagas impuesto de " + imp + ".");
-            
+            System.out.println(actual.getNombre() + " paga " + imp + "€ de impuestos. " + "El importe se añade al bote del Parking.");      
+
             return true;
         // suerte / caja de comunidad
         case "suerte":
@@ -221,10 +221,10 @@ public class Casilla {
                 // cobre del bote (valor) y reseteo
                 if (this.valor > 0) {
                     actual.sumarFortuna(this.valor);
-                    System.out.println("[Parking] Cobras el bote de " + this.valor + ". Se resetea a 0.");
+                    System.out.println(actual.getNombre() + " cobra el bote del Parking: " + this.valor + "€.");
                     this.valor = 0;
                 } else {
-                    System.out.println("[Parking] Sin bote acumulado.");
+                    System.out.println("[Parking] No hay bote acumulado.");
                 }
                 return true;
             } 
@@ -235,11 +235,13 @@ public class Casilla {
             if (n.equals("ircarcel") || n.equals("ir a la carcel") ||  n.equals("ir a la cárcel")) {
                 // el menu es el que tiene que mover a la carcel al jugador
                 // si caes aquí tienes que moverte a la carcel como preso inmediatamente
+                System.out.println(actual.getNombre() + " debe ir a la Cárcel.");
                 return true;
             }
             if (n.equals("cárcel") || n.equals("carcel")) {
                 // de visita o preso lo gestiona el menu
                 // caes por movimiento "normal", o ya estabas en la cárcel preso
+                System.out.println(actual.getNombre() + " está en la Cárcel (visita o preso).");
                 return true;
             }
             System.out.println("[" + this.nombre + "] Casilla especial (sin acción en parte 1)");
@@ -256,19 +258,25 @@ public class Casilla {
      * - Banca del monopoly (es el dueño de las casillas no compradas aún).*/
     public void comprarCasilla(Jugador solicitante, Jugador banca) {
         //comprobaciones
-        if(this.duenho == solicitante) {
-            System.out.println("El jugador ya posee la casilla");
+        if (this.duenho == solicitante) {
+            System.out.println("Ya posees la casilla " + this.nombre + ".");
+            return;
         }
-        if(this.duenho != solicitante && this.duenho != banca) {
-            System.out.println("La casilla es propiedad de otro jugador");
+        if (this.duenho != banca && this.duenho != null) {
+            System.out.println("No puedes comprar " + this.nombre + ": pertenece a " + this.duenho.getNombre() + ".");
+            return;
         }
-        else{
-            Casilla casilla = solicitante.getAvatar().getLugar();//casilla en la que cae el jugador (posicion del avatar)
-            solicitante.anhadirPropiedad(casilla);
-            casilla.setDuenho(solicitante);
-            solicitante.sumarFortuna(-casilla.getValor());//le pasamos un valor negativo para reflejar el gasto en la fortuna
-            banca.sumarFortuna(casilla.getValor());//se la compramos a la banca
+        if (solicitante.getFortuna() < this.valor) {
+            System.out.println("No tienes suficiente dinero para comprar " + this.nombre + ".");
+            return;
         }
+        
+        solicitante.sumarFortuna(-this.valor);
+        solicitante.sumarGastos(this.valor);
+        solicitante.anhadirPropiedad(this);
+        this.setDuenho(solicitante);
+        banca.sumarFortuna(this.valor);
+        System.out.println(solicitante.getNombre() + " ha comprado " + this.nombre + " por " + this.valor + "€. Fortuna restante: " + solicitante.getFortuna() + "€.");
     }
 
     /*Método para añadir valor a una casilla. Utilidad:

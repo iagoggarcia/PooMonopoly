@@ -415,7 +415,7 @@ public class Menu {
     //Método que ejecuta todas las acciones relacionadas con el comando 'lanzar dados'.
     private int dobles=0;
 
-    private void lanzarDados() {//funcion para valores random de dados
+    private void lanzarDados() { //funcion para valores random de dados
         if (this.jugadores == null || this.jugadores.size() < 2) {
             System.err.println("Error: no hay suficientes jugadores (mínimo 2) para lanzar dados.");
             return;
@@ -428,6 +428,8 @@ public class Menu {
 
         int valor1 = this.dado1.hacerTirada();
         int valor2 = this.dado2.hacerTirada();
+
+        // System.out.println("Dados: " + valor1 + " y " + valor2 + " (suma = " + (valor1 + valor2) + ")");
 
         realizarTirada(valor1, valor2);
     }
@@ -447,7 +449,7 @@ public class Menu {
         }
     }
 
-    // 🔹 Método auxiliar con toda la lógica compartida
+    //  Método auxiliar con toda la lógica compartida
     private void realizarTirada(int valor1, int valor2) {//hice el proceso de la tirada fuera para no tener que copiarlo en ambas funciones de lanzar
         int suma = valor1 + valor2;
         Jugador actual = this.jugadores.get(this.turno);
@@ -456,15 +458,26 @@ public class Menu {
 
         av.moverAvatar(this.tablero.getPosiciones(), suma);
         Casilla destino = av.getLugar();
-        evaluarCasilla(destino);
+
+        // aquí habría que añadir el paso por la salida, sumar el dinero  y demás
+        // no se si se hace en otra parte del menu, por eso no pongo nada
+
+        evaluarCasilla(destino); 
+        // CORRECCIÓN: como el metodo no esta definido en menu, hay que llamarlo a través de destino:
+        // destino.evaluarCasilla(actual, this.banca, suma);
+        // si no lo llamas asi salta el error de q el método esta indefinido para el tipo menu
 
         // Control de dobles / turno
-        if (suma == 12) { // criterio de "dobles"
+        if (suma == 12) { // criterio de "dobles" CORRECCIÓN: tendria que ser valor1 == valor2, porque si te tocan dos 4 son dobles pero no suman 12
+            System.out.println("¡" + actual.getNombre() + " ha sacado dobles!");
             dobles++;
             if (dobles < 3) {
                 lanzarDados(); // repite turno (solo usa aleatorio de nuevo)
             } else {
                 Casilla carcel = this.tablero.getPosiciones().get(1).get(11);
+                // esta linea devuelve el array con los 4 lados, accede al lado sur e intenta acceder a la duodecima casilla
+                // el tablero tiene los indices del 0-10 entonces esa casilla no existe, si sca tres dobles no va a funcionar
+                // CORRECCIÓN: Casilla carcel = tablero.encontrar_casilla("carcel")
                 av.setLugar(carcel);
                 dobles = 0;
                 this.turno = (this.turno + 1) % this.jugadores.size();
@@ -481,11 +494,14 @@ public class Menu {
     */
     private void comprar(String nombre) {
         Casilla casilla = this.tablero.encontrar_casilla(nombre);
+        
         if (casilla == null) {
             System.out.println("No existe una casilla con el nombre '" + nombre + "'.");
             return;
         }
+
         Jugador comprador = this.jugadores.get(this.turno); // jugador del turno
+        System.out.println(jugadores.get(turno).getNombre() + " intenta comprar " + nombre + "...");
         casilla.comprarCasilla(comprador,this.banca);
     }
 
@@ -496,16 +512,28 @@ public class Menu {
             System.out.println("No hay jugadores.");
             return;
         }
-        Jugador actual = this.jugadores.get(this.turno);
-        Casilla casillaActual = actual.getAvatar().getLugar();
-        Casilla carcel = this.tablero.getPosiciones().get(1).get(11);
+
+        Jugador actual = this.jugadores.get(this.turno); // se podria poner como: Jugador actual = jugadores.get(turno);
+        Casilla casillaActual = actual.getAvatar().getLugar(); 
+        Casilla carcel = this.tablero.getPosiciones().get(1).get(11); // se tienr que poner como: Casilla casillaCarcel = tablero.getCasillaCarcel();
+
+        // una forma más sencilla podría ser:
+        // 1. comprobar if el jugador esta en la cárcel
+        // 2. comrpobar if el jugador es solvente (actual.getFortuna() < 500000) para poder pagar la fianza, si no puede se declara en bancarrota
+        // 3. una vez pasados los if, sumar ya el valor negativo a fortuna del jugador y sumarlo a los gastos, sumar positivo a la banca,
+        // y, IMPORTANTE, actual.setEnCarcel == false. Luego, lanzardados.
+
+        // de todas formas, creo que habría que hacer una modificación mucho mas grande
+        // habria que, elegir si pagar la fianza, si no se quiere pagar lanzar los dados y comprobar si se saca doble
+        // si se saca doble, se sale gratis, si no, sigue encarcelado hasta que agote los tres intentos
+        // si se agotan los tres intentos y no se sacan dobles, se paga la fianza y se sale, y avanzas hasta la casilla del valor de los dados
+
         if(casillaActual == carcel){
             actual.sumarFortuna(-500000);
             this.banca.sumarFortuna(500000);
-            // según tu enunciado, puede lanzar los dados:
             lanzarDados();
         }
-        else{
+        else {
             System.out.println("El jugador " + actual.getNombre() + "no está en la cárcel");
         }
     }
@@ -535,13 +563,19 @@ public class Menu {
     }
 
     private void acabarTurno() {
-    Jugador actual = this.jugadores.get(this.turno);
-    System.out.println("El jugador " + actual.getNombre() + " termina su turno.");
+        // aquí se podría añadir la comprobación de que hay jugadores en la partida
+        
+        Jugador actual = this.jugadores.get(this.turno);
+        System.out.println("El jugador " + actual.getNombre() + " termina su turno.");
 
-    this.turno = (this.turno + 1) % this.jugadores.size();
+        // si reinicias el contador de dobles aqui no tienes que acordarte de hacerlo cada vez que uses el método
+        // this.dobles = 0;
+        // se puede poner aqui o al final, es indiferente
 
-    Jugador siguiente = this.jugadores.get(this.turno);
-    System.out.println("Le toca al jugador " + siguiente.getNombre() + ".");
+        this.turno = (this.turno + 1) % this.jugadores.size();
+        Jugador siguiente = this.jugadores.get(this.turno);
+
+        System.out.println("Le toca al jugador " + siguiente.getNombre() + ".");
 
     }
 }

@@ -3,8 +3,6 @@ package partida;
 import java.util.ArrayList;
 import monopoly.*;
 
-import static monopoly.Valor.FORTUNA_INICIAL;
-
 
 public class Jugador {
 
@@ -76,6 +74,7 @@ public class Jugador {
         if (!propiedades.contains(casilla)) { // comprobamos que la casilla no está ya en la lista de propiedades del jugador
             propiedades.add(casilla); // si no está, la añadimos
             System.out.println(nombre + " ha adquirido la propiedad " + casilla.getNombre() + ".");
+            System.out.println("Ahora posee " + propiedades.size() + " propiedades.");
             // aqui creo que se añadiria casilla.setPropietario(this), pero en esta entrega creo que aun no se pide
         } else {
             System.out.println(nombre + " ya posee la propiedad " + casilla.getNombre() + ".");            
@@ -91,7 +90,8 @@ public class Jugador {
         if (propiedades.contains(casilla)) { // comprobamos que la  casilla está en la lista de propiedades del jugador
             propiedades.remove(casilla); // si está, la eliminamos
             System.out.println(nombre + " ha perdido la propiedad " + casilla.getNombre() + ".");
-            // aqui creo que se añadiria casilla.setPropietario(null), pero en esta entrega creo que aun no se pide
+            System.out.println("Ahora posee " + propiedades.size() + " propiedades.");
+            // aqui creo que se añadiria casilla.setPropietario(banca), pero en esta entrega creo que aun no se pide
         } else {
             System.out.println(nombre + " no posee la propiedad " + casilla.getNombre() + ".");
         }
@@ -101,6 +101,9 @@ public class Jugador {
     //Como parámetro se pide el valor a añadir. Si hay que restar fortuna, se pasaría un valor negativo.
     public void sumarFortuna(float valor) { 
         this.fortuna += valor; 
+        if (this.fortuna < 0) {
+            System.out.println(nombre + "ha caído en bancarrota. Fortuna actual: " + this.fortuna);
+        }
     }
 
     //Método para sumar gastos a un jugador.
@@ -132,7 +135,7 @@ public class Jugador {
     }
     
     // por ahora solo mueve fisicamente el avatar a la carcel y marca el estado en enCarcel y modifica tiradasCarcel
-    // las otras "reglas" (cobrar o pagar dinero, comprobar si se puede salir, etc) se gestionan desde otro sitio, por ejemplo el menu
+    // las otras "reglas" (cobrar o pagar dinero, comprobar si se puede salir, etc) se gestionan desde otro sitio, por ejemplo evaluarcasilla
     public void encarcelar(ArrayList<ArrayList<Casilla>> pos) {
         if (pos == null || pos.isEmpty()) {
             throw new IllegalArgumentException("El tablero (pos) no puede ser nulo ni vacío");
@@ -154,5 +157,6 @@ public class Jugador {
 
         this.enCarcel = true;
         this.tiradasCarcel = 0;
+        System.out.println(nombre + " ha sido encarcelado y trasladado a la casilla " + carcel.getNombre() + ".");
     }
 }
