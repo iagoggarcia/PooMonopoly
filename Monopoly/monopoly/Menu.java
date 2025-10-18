@@ -429,7 +429,7 @@ public class Menu {
         int valor1 = this.dado1.hacerTirada();
         int valor2 = this.dado2.hacerTirada();
 
-        // System.out.println("Dados: " + valor1 + " y " + valor2 + " (suma = " + (valor1 + valor2) + ")");
+        System.out.println("Dados: " + valor1 + " y " + valor2 + " (suma = " + (valor1 + valor2) + ")");
 
         realizarTirada(valor1, valor2);
     }
@@ -460,25 +460,37 @@ public class Menu {
         Casilla destino = av.getLugar();
 
         // aquí habría que añadir el paso por la salida, sumar el dinero  y demás
-        // no se si se hace en otra parte del menu, por eso no pongo nada
+        if (destino.getPosicion() < origen.getPosicion()) {
+            actual.sumarFortuna(Valor.SUMA_VUELTA);
+            System.out.println(actual.getNombre() + " pasa por Salida y recibe " + Valor.SUMA_VUELTA + "€.");
+        }
 
         destino.evaluarCasilla(actual, this.banca, suma);
-        // CORRECCIÓN: como el metodo no esta definido en menu, hay que llamarlo a través de destino:
-        // destino.evaluarCasilla(actual, this.banca, suma);
-        // si no lo llamas asi salta el error de q el método esta indefinido para el tipo menu
+        
+        // si el jugador cayó en 'Ir a la Cárcel', se aplica el encarcelamiento
+        // esto pensé que iba en evaluarcasilla, pero como no tengo acceso al tablero desde casilla, tiene que ser desde aquí
+        if (destino.getNombre().equalsIgnoreCase("Ir a la cárcel") ||
+            destino.getNombre().equalsIgnoreCase("Ir a carcel") ||
+            destino.getNombre().equalsIgnoreCase("Ircarcel")) {
+
+            System.out.println(actual.getNombre() + " es trasladado a la Cárcel.");
+            actual.encarcelar(this.tablero.getPosiciones()); // mueve al avatar y marca enCarcel=true
+            acabarTurno();
+            return; // el turno termina inmediatamente tras ser encarcelado
+        }
 
         // Control de dobles / turno
-        if (valor1 == valor2){ // criterio de "dobles" CORRECCIÓN: tendria que ser valor1 == valor2, porque si te tocan dos 4 son dobles pero no suman 12
+        if (valor1 == valor2){ 
             System.out.println("¡" + actual.getNombre() + " ha sacado dobles!");
             dobles++;
+
             if (dobles < 3) {
                 lanzarDados(); // repite turno (solo usa aleatorio de nuevo)
             } else {
+                System.out.println(actual.getNombre() + " ha sacado tres dobles seguidos y va a la cárcel.");
                 Casilla carcel = this.tablero.encontrar_casilla("Cárcel");
-                // esta linea devuelve el array con los 4 lados, accede al lado sur e intenta acceder a la duodecima casilla
-                // el tablero tiene los indices del 0-10 entonces esa casilla no existe, si sca tres dobles no va a funcionar
-                // CORRECCIÓN: Casilla carcel = tablero.encontrar_casilla("carcel")
                 av.setLugar(carcel);
+                // estas dos líneas de aquí se pueden cambiar por acabarTUrno()
                 dobles = 0;
                 this.turno = (this.turno + 1) % this.jugadores.size();
             }
@@ -548,8 +560,6 @@ public class Menu {
             System.out.println(jugador.getAvatar());
             System.out.println(jugador.getFortuna());
             System.out.println(jugador.getPropiedades());
-            //System.out.println(jugador.getHipotecas()); aun no hacemos esta parte del proyecto en la primera entrega
-            //System.out.println(jugador.getEdificios());
         }
     }
 

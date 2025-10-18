@@ -175,12 +175,13 @@ public class Casilla {
      * Valor devuelto: true en caso de ser solvente (es decir, de cumplir las deudas), y false
      * en caso de no cumplirlas.*/
     public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
-      if  (actual == null) return true;
-      String t = (this.tipo == null) ? " " : this.tipo.toLowerCase();
+      if  (actual == null || banca == null) throw new IllegalArgumentException("Los jugadores (actual o banca) no pueden ser nulos.");
+      
+      String tipoCasilla = (this.tipo == null) ? " " : this.tipo.toLowerCase();
       String n = (this.nombre == null) ? " " : this.nombre.toLowerCase();
 
-      switch (t) {
-        // casillas que se pueden comprar
+      switch (tipoCasilla) {
+        // casillas de tipo solar, servicios o transporte
         case "solar":
         case "servicios":
         case "transporte":
@@ -193,10 +194,10 @@ public class Casilla {
                 return true;
             }
             else { // si es suya nada q hacer
-                System.out.println("[" + this.nombre + "] Ya es tuya.");
+                System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");
                 return true;
             }
-        // impuestos
+        // casilla de impuestos
         case "impuestos":
             float imp = this.impuesto;
             // comprobamos solvencia, si no llega devolvemos false
@@ -204,16 +205,17 @@ public class Casilla {
                 System.out.println("[" + this.nombre + "] " + actual.getNombre() + " no tiene suficiente dinero para pagar " + imp + "€. Fortuna actual: " + actual.getFortuna());   
                 return false;
             }
-            // paga: resta a fortuna y suma a gastos
+            // paga: resta a fortuna y suma a gastos de actual, suma fortuna a la banca
             actual.sumarFortuna(-imp);
             actual.sumarGastos(imp);
-            System.out.println(actual.getNombre() + " paga " + imp + "€ de impuestos. " + "El importe se añade al bote del Parking.");      
+            banca.sumarFortuna(imp);
 
+            System.out.println(actual.getNombre() + " paga " + imp + "€ de impuestos. ");      
             return true;
         // suerte / caja de comunidad
         case "suerte":
         case "caja de comunidad":
-            System.out.println("[" + this.nombre + "] Robar cartar (no implementado en parte 1).");
+            System.out.println(actual.getNombre() + " ha caído en una casilla de " + this.tipo + ". (Aún no implementado).");
             return true;
         // especiales
         case "especial":
@@ -224,23 +226,24 @@ public class Casilla {
                     System.out.println(actual.getNombre() + " cobra el bote del Parking: " + this.valor + "€.");
                     this.valor = 0;
                 } else {
-                    System.out.println("[Parking] No hay bote acumulado.");
+                    System.out.println(actual.getNombre() + " descansa en el Parking. No hay bote acumulado.");
                 }
                 return true;
             } 
             if (n.equals("salida")) {
-                // el cobro por pasar se gestiona en el menu
+                System.out.println(actual.getNombre() + " está en la casilla de Salida. ¡Buen viaje!");
                 return true;
             } 
             if (n.equals("ircarcel") || n.equals("ir a la carcel") ||  n.equals("ir a la cárcel")) {
                 // el menu es el que tiene que mover a la carcel al jugador
                 // si caes aquí tienes que moverte a la carcel como preso inmediatamente
-                System.out.println(actual.getNombre() + " debe ir a la Cárcel.");
+                System.out.println(actual.getNombre() + " ha caído en 'Ir a la Cárcel'. Será trasladado al finalizar la tirada.");
                 return true;
             }
             if (n.equals("cárcel") || n.equals("carcel")) {
                 // de visita o preso lo gestiona el menu
                 // caes por movimiento "normal", o ya estabas en la cárcel preso
+                System.out.println(actual.getNombre() + " está visitando la Cárcel. No está arrestado.");
                 System.out.println(actual.getNombre() + " está en la Cárcel (visita o preso).");
                 return true;
             }
@@ -248,7 +251,7 @@ public class Casilla {
             return true;
         // desconocido
         default:
-            System.out.println("[" + this.nombre + "] Tipo no reconocido aún: " + this.tipo);
+            System.out.println("Casilla no reconocida o sin comportamiento definido.");
             return true;
       }
     }
