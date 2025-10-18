@@ -291,10 +291,8 @@ public class Casilla {
 
     /*Método para mostrar información sobre una casilla.
      * Devuelve una cadena con información específica de cada tipo de casilla.*/
-    /* public String infoCasilla(String nombre) {
-
-        
-        /*for (arrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
+    public String infoCasilla(String nombre, ArrayList<ArrayList<Casilla>> posiciones) {
+        for (ArrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
             for (Casilla c : lado) {
                 String n = c.getNombre();
                 if (n != null && n.equals(nombre)) {

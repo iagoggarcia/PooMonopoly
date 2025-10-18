@@ -60,8 +60,20 @@ public class Jugador {
         return enCarcel;
     }
 
+    public void setEnCarcel(boolean enCarcel) {
+        this.enCarcel = enCarcel;
+    }
+
     public ArrayList<Casilla> getPropiedades() {
         return propiedades;
+    }
+
+    public int getTiradasCarcel() {
+        return this.tiradasCarcel;
+    }
+
+    public void setTiradasCarcel(int tiradasCarcel) {
+        this.tiradasCarcel = tiradasCarcel;
     }
 
     //Otros métodos:

@@ -491,11 +491,11 @@ public class Menu {
                 Casilla carcel = this.tablero.encontrar_casilla("Cárcel");
                 av.setLugar(carcel);
                 // estas dos líneas de aquí se pueden cambiar por acabarTUrno()
-                dobles = 0;
-                this.turno = (this.turno + 1) % this.jugadores.size();
+                // dobles = 0;
+                // this.turno = (this.turno + 1) % this.jugadores.size();
+                acabarTurno();
             }
         } else {
-            dobles = 0;
             acabarTurno();
         }
     }
@@ -521,33 +521,61 @@ public class Menu {
     // Solo puede ejecutarlo el jugador cuyo índice coincide con 'turno' (o si en el comando se especificó ese jugador).
     private void salirCarcel() {
         if (this.jugadores == null || this.jugadores.isEmpty()) {
-            System.out.println("No hay jugadores.");
+            System.out.println("No hay jugadores en la partida.");
             return;
         }
 
-        Jugador actual = this.jugadores.get(this.turno); // se podria poner como: Jugador actual = jugadores.get(turno);
+        Jugador actual = this.jugadores.get(this.turno); 
         Casilla casillaActual = actual.getAvatar().getLugar();
-        Casilla carcel = this.tablero.encontrar_casilla("Cárcel"); // se tienr que poner como: Casilla casillaCarcel = tablero.getCasillaCarcel();
+        Casilla carcel = this.tablero.encontrar_casilla("Cárcel"); 
 
-        // una forma más sencilla podría ser:
-        // 1. comprobar if el jugador esta en la cárcel
-        // 2. comrpobar if el jugador es solvente (actual.getFortuna() < 500000) para poder pagar la fianza, si no puede se declara en bancarrota
-        // 3. una vez pasados los if, sumar ya el valor negativo a fortuna del jugador y sumarlo a los gastos, sumar positivo a la banca,
-        // y, IMPORTANTE, actual.setEnCarcel == false. Luego, lanzardados.
-
-        // de todas formas, creo que habría que hacer una modificación mucho mas grande
-        // habria que, elegir si pagar la fianza, si no se quiere pagar lanzar los dados y comprobar si se saca doble
-        // si se saca doble, se sale gratis, si no, sigue encarcelado hasta que agote los tres intentos
-        // si se agotan los tres intentos y no se sacan dobles, se paga la fianza y se sale, y avanzas hasta la casilla del valor de los dados
-
-        if(casillaActual == carcel){
-            actual.sumarFortuna(-500000);
-            this.banca.sumarFortuna(500000);
-            lanzarDados();
+        // comprobamos si el jugador está realmente en la carcel
+        if (casillaActual != carcel) {
+            System.out.println("El jugador " + actual.getNombre() + " no está en la cárcel.");
+            return;
         }
-        else {
-            System.out.println("El jugador " + actual.getNombre() + "no está en la cárcel");
+
+        System.out.println(actual.getNombre() + " está en la cárcel e intenta salir tirando los dados...");
+
+        // tirada de dados para intentar sacar dobles
+        int valor1 = this.dado1.hacerTirada();
+        int valor2 = this.dado2.hacerTirada();
+        System.out.println("Dados: " + valor1 + " y " + valor2 + " (suma = " + (valor1 + valor2) + ")");
+
+        // si saca dobles sale sin pagar
+        if (valor1 == valor2) {
+            System.out.println("¡" + actual.getNombre() + " ha sacado dobles y sale de la cárcel!");
+            actual.setEnCarcel(false);
+            actual.setTiradasCarcel(0);
+            realizarTirada(valor1, valor2);
+            return;
         }
+
+        // no saca dobles, pierde un intento
+        actual.setTiradasCarcel(actual.getTiradasCarcel() + 1);
+        System.out.println("No ha sacado dobles (" + actual.getTiradasCarcel() + " intento/s).");
+
+        // si pierde los tres turnos sin sacar dobles, tiene que pagar
+        if (actual.getTiradasCarcel() >= 3) {
+            System.out.println("Tras tres turnos sin sacar dobles, " + actual.getNombre() + " debe pagar 500.000€ para salir de la cárcel.");
+            
+            if (actual.getFortuna() >= 500000) {
+                actual.sumarFortuna(-500000);
+                actual.sumarGastos(500000);
+                this.banca.sumarFortuna(500000);
+                actual.setEnCarcel(false);
+                actual.setTiradasCarcel(0);
+                System.out.println("Tras tres turnos sin sacar dobles, " + actual.getNombre() + " debe pagar 500.000€ para salir de la cárcel.");
+                realizarTirada(valor1, valor2);
+            } else {
+            System.out.println(actual.getNombre() + " no puede pagar la fianza y se declara en bancarrota.");
+            // lo de bancarrota no se como implementarlo
+            }
+        } else { // si aun no llego al tercer intento, sigue preso
+            System.out.println(actual.getNombre() + " permanece en la cárcel.");  
+            acabarTurno();
+        }
+
     }
 
     private void listarVenta() {
@@ -579,7 +607,7 @@ public class Menu {
         System.out.println("El jugador " + actual.getNombre() + " termina su turno.");
 
         // si reinicias el contador de dobles aqui no tienes que acordarte de hacerlo cada vez que uses el método
-        // this.dobles = 0;
+        this.dobles = 0;
         // se puede poner aqui o al final, es indiferente
 
         this.turno = (this.turno + 1) % this.jugadores.size();
