@@ -126,19 +126,21 @@ public class Avatar {
         if (destino == null)
             throw new IllegalStateException("No se pudo localizar la casilla destino (índice " + indiceNuevo + ")");
 
+        // --- guardar nombre de origen antes de mover (cambio mínimo) ---
+        String nombreOrigen = (this.lugar != null && this.lugar.getNombre() != null)
+                ? this.lugar.getNombre() : "(desconocida)";
+
         // quitar de origen y poner en destino (solo movimiento físico)
-        try {
-            if (this.lugar != null) this.lugar.eliminarAvatar(this);
-        } catch (UnsupportedOperationException ignored) {} // por si aún es stub
-        try {
-            destino.anhadirAvatar(this);
-        } catch (UnsupportedOperationException ignored) {}
+        try { if (this.lugar != null) this.lugar.eliminarAvatar(this); } catch (UnsupportedOperationException ignored) {}
+        try { destino.anhadirAvatar(this); } catch (UnsupportedOperationException ignored) {}
 
         // actualizar referencia interna
         this.lugar = destino;
 
-        System.out.println("El avatar " + id + " avanza " + valorTirada + " posiciones, desde " + this.lugar.getNombre() + " hasta " + destino.getNombre() + ".");
+        System.out.println("El avatar " + id + " avanza " + valorTirada + " posiciones, desde "
+                + nombreOrigen + " hasta " + destino.getNombre() + ".");
     }
+
 
     /*Método que permite generar un ID para un avatar. Sólo lo usamos en esta clase (por ello es privado).
     * El ID generado será una letra mayúscula. Parámetros:

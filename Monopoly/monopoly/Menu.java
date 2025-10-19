@@ -103,17 +103,18 @@ public class Menu {
 
             System.out.println("\n--- Turno de " + actual.getNombre() + " ---");
             System.out.println("Comandos:");
-            System.out.println(" - Crear jugador <nombre> <tipo>");
+            //System.out.println(" - Crear jugador <nombre> <tipo>");
+            System.out.println(" - Ver tablero");
             System.out.println(" - Lanzar dados");
-            System.out.println(" - Lanzar dados <X+Y>");
-            System.out.println(" - Describir jugador <nombre>");
-            System.out.println(" - Describir casilla <nombre>");
-            System.out.println(" - Describir avatar <id>");
+            System.out.println(" - Lanzar dados X+Y");
+            System.out.println(" - Describir jugador nombre");
+            System.out.println(" - Describir casilla nombre");
+            //System.out.println(" - Describir avatar <id>");
             System.out.println(" - Listar jugadores");
-            System.out.println(" - Listar avatares");
+            //System.out.println(" - Listar avatares");
             System.out.println(" - Listar propiedades en venta");
-            System.out.println(" - Comprar una propiedad <nombre-casilla>");
-            System.out.println(" - Salir de la cárcel <nombre-jugador>");
+            System.out.println(" - Comprar una propiedad nombre-casilla");
+            System.out.println(" - Salir de la cárcel nombre-jugador");
             System.out.println(" - Acabar turno");
             System.out.println(" - salir  (para terminar)\n");
 
@@ -229,6 +230,10 @@ public class Menu {
     }
 
     private void analizarComando(String comando) {
+        if (comando.equals("Ver tablero")) {
+            imprimirTablero();
+            return;
+        }
         if (comando.startsWith("Describir jugador")) {
             String nombreJugador = comando.substring("Describir jugador ".length()).trim();
             descJugador(nombreJugador);
@@ -489,6 +494,15 @@ public class Menu {
         }
     }
 
+    // Imprime el tablero tal y como está ahora mismo
+    private void imprimirTablero() {
+        if (this.tablero != null) {
+            System.out.println();
+            System.out.println(this.tablero); // usa Tablero.toString()
+            System.out.println();
+        }
+    }
+
 
     //  Método auxiliar con toda la lógica compartida
     private void realizarTirada(int valor1, int valor2) {//hice el proceso de la tirada fuera para no tener que copiarlo en ambas funciones de lanzar
@@ -508,7 +522,9 @@ public class Menu {
         }
 
         destino.evaluarCasilla(actual, this.banca, suma);
-        
+
+        imprimirTablero();//se imprime el tablero en el estado actual
+
         // si el jugador cayó en 'Ir a la Cárcel', se aplica el encarcelamiento
         // esto pensé que iba en evaluarcasilla, pero como no tengo acceso al tablero desde casilla, tiene que ser desde aquí
         if (destino.getNombre().equalsIgnoreCase("Ir a la cárcel") ||
