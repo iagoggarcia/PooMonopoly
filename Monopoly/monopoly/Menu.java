@@ -37,7 +37,7 @@ public class Menu {
         Tablero tablero = new Tablero(banca);
 
         // 2. Obtener la casilla "Salida" donde se colocan los avatares
-        Casilla salida = tablero.getPosiciones().get(1).get(0);
+        Casilla salida = tablero.getPosiciones().get(0).get(0);
 
         // 3. Preguntar número de jugadores
         int numJugadores = 0;
@@ -103,19 +103,19 @@ public class Menu {
             System.out.println("\n--- Turno de " + actual.getNombre() + " ---");
             System.out.println("Comandos:");
             //System.out.println(" - Crear jugador <nombre> <tipo>");
-            System.out.println(" - Ver tablero");
-            System.out.println(" - Lanzar dados");
-            System.out.println(" - Lanzar dados X+Y");
-            System.out.println(" - Describir jugador nombre");
-            System.out.println(" - Describir casilla nombre");
+            System.out.println(" - ver tablero");
+            System.out.println(" - lanzar dados");
+            System.out.println(" - lanzar dados X+Y");
+            System.out.println(" - describir jugador nombre");
+            System.out.println(" - describir nombre");
             //System.out.println(" - Describir avatar <id>");
-            System.out.println(" - Listar jugadores");
+            System.out.println(" - listar jugadores");
             //System.out.println(" - Listar avatares");
-            System.out.println(" - Listar propiedades en venta");
-            System.out.println(" - Comprar una propiedad nombre-casilla");
-            System.out.println(" - Salir de la cárcel nombre-jugador");
-            System.out.println(" - Acabar turno");
-            System.out.println(" - salir  (para terminar)\n");
+            System.out.println(" - listar enventa");
+            System.out.println(" - comprar nombre");
+            System.out.println(" - salir cárcel");
+            System.out.println(" - acabar turno");
+            System.out.println(" - salir (para terminar)\n");
 
             System.out.print("> "); // prompt
             String cmd = in.nextLine().trim();
@@ -172,16 +172,16 @@ public class Menu {
                     analizarComando("lanzar dados " + resto);
                 }
                 else if (l.startsWith("describir jugador")) {
-                    String resto = linea.substring("describir jugador".length()).trim();
+                    String resto = linea.substring("describir jugador ".length()).trim();
                     if (resto.isEmpty()) {
                         analizarComando("describir jugador");
                     } else {
                         analizarComando("describir jugador " + resto);
                     }
                 }
-                else if (l.startsWith("describir ")) {
+                else if (l.startsWith("describir")) {
                     String nombre = linea.substring("describir".length()).trim();
-                    analizarComando("describir casilla " + nombre);
+                    analizarComando("describir " + nombre);
                 }
                 else if (l.equals("listar jugadores")) {
                     analizarComando("listar jugadores");
@@ -210,7 +210,7 @@ public class Menu {
                 }
                 else if (l.startsWith("comprar ")) {
                     String prop = linea.substring("comprar".length()).trim();
-                    analizarComando("comprar una propiedad " + prop);
+                    analizarComando("comprar " + prop);
                 }
                 else if (l.startsWith("describir avatar ")) {
                     String id = linea.substring("describir avatar".length()).trim();
@@ -249,8 +249,8 @@ public class Menu {
             String Idavatar = comando.substring("describir avatar ".length()).trim();
             descAvatar(Idavatar);
         }
-        else if (comando.startsWith("describir casilla")) {
-            String nombreCasilla = comando.substring("describir casilla".length()).trim();
+        else if (comando.startsWith("describir")) {
+            String nombreCasilla = comando.substring("describir".length()).trim();
             descCasilla(nombreCasilla);
         }
         else if (comando.startsWith("lanzar dados")) {
@@ -263,13 +263,12 @@ public class Menu {
                 lanzarDadosValor(valores);
             }
         }
-        else if (comando.startsWith("comprar una propiedad")) {
-            String nombrePropiedad = comando.substring("Comprar una propiedad".length()).trim();
+        else if (comando.startsWith("comprar")) {
+            String nombrePropiedad = comando.substring("comprar".length()).trim();
             comprar(nombrePropiedad);
         }
-        else if (comando.startsWith("salir de la cárcel")) {
-            // Puede venir "Salir de la cárcel" o "Salir de la cárcel <Nombre>"
-            String resto = comando.substring("salir de la cárcel".length()).trim();
+        else if (comando.startsWith("salir cárcel")) {
+            String resto = comando.substring("salir cárcel".length()).trim();
             if (resto.isEmpty()) {
                 // Sólo puede salir el jugador del turno
                 salirCarcel();
@@ -290,7 +289,7 @@ public class Menu {
                 }
             }
         }
-        else if (comando.equalsIgnoreCase("listar propiedades en venta")) {
+        else if (comando.equalsIgnoreCase("listar enventa")) {
             listarVenta();
         }
         else if (comando.equalsIgnoreCase("listar jugadores")) {
@@ -362,7 +361,7 @@ public class Menu {
     // --- Describir jugador: delega en avatar y casilla ---
     private void descJugador(String nombreJugador) {
         if (nombreJugador == null || nombreJugador.isBlank()) {
-            System.err.println("Uso correcto: Describir jugador <Nombre>");
+            System.err.println("Uso correcto: Describir <Nombre>");
             return;
         }
         Jugador j = buscarJugadorPorNombre(nombreJugador.trim());
@@ -404,7 +403,7 @@ public class Menu {
     // --- Describir casilla por nombre (usa Tablero.encontrar_casilla) ---
     private void descCasilla(String nombreCasilla) {
         if (nombreCasilla == null || nombreCasilla.isBlank()) {
-            System.err.println("Uso correcto: Describir casilla <Nombre>");
+            System.err.println("Uso correcto: describir <Nombre>");
             return;
         }
         if (this.tablero == null) {

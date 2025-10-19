@@ -22,9 +22,9 @@ public class Tablero {
     
     //Método para crear todas las casillas del tablero. Formado a su vez por cuatro métodos (1/lado).
     private void generarCasillas() {
-        this.insertarLadoNorte();
         this.insertarLadoSur();
         this.insertarLadoOeste();
+        this.insertarLadoNorte();
         this.insertarLadoEste();
     }
     
@@ -194,12 +194,12 @@ public class Tablero {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        ArrayList<Casilla> ladoNorte = posiciones.get(0);
-        ArrayList<Casilla> ladoSur   = posiciones.get(1);
-        ArrayList<Casilla> ladoOeste = posiciones.get(2);
+        ArrayList<Casilla> ladoSur = posiciones.get(0);
+        ArrayList<Casilla> ladoOeste   = posiciones.get(1);
+        ArrayList<Casilla> ladoNorte = posiciones.get(2);
         ArrayList<Casilla> ladoEste  = posiciones.get(3);
 
-        final int ANCHO_CASILLA = 8;
+        final int ANCHO_CASILLA = 10;
 
         // Usamos directamente el ANSI almacenado en el Grupo
         java.util.function.Function<Casilla, String> ansiGrupo = c -> {
@@ -210,7 +210,6 @@ public class Tablero {
             return ansi;
         };
 
-        sb.append("\nhola\n");
         // Norte
         for (Casilla c : ladoNorte) {
             String celda = "|" + ansiGrupo.apply(c)
