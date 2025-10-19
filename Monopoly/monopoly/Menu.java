@@ -87,6 +87,49 @@ public class Menu {
         this.enCurso = true;
 
         System.out.println("\nPartida inicializada correctamente con " + numJugadores + " jugadores.\n");
+
+        // === Bucle interactivo por turno (simple y robusto) ===
+        java.util.Scanner in = new java.util.Scanner(System.in);
+        while (this.enCurso) {
+
+            // Defensa: que haya jugadores y turno válido
+            if (this.jugadores == null || this.jugadores.isEmpty()) {
+                System.out.println("No hay jugadores en la partida. Terminando...");
+                this.enCurso = false;
+                break;
+            }
+
+            Jugador actual = this.jugadores.get(this.turno);
+
+            System.out.println("\n--- Turno de " + actual.getNombre() + " ---");
+            System.out.println("Comandos:");
+            System.out.println(" - Crear jugador <nombre> <tipo>");
+            System.out.println(" - Lanzar dados");
+            System.out.println(" - Lanzar dados <X+Y>");
+            System.out.println(" - Describir jugador <nombre>");
+            System.out.println(" - Describir casilla <nombre>");
+            System.out.println(" - Describir avatar <id>");
+            System.out.println(" - Listar jugadores");
+            System.out.println(" - Listar avatares");
+            System.out.println(" - Listar propiedades en venta");
+            System.out.println(" - Comprar una propiedad <nombre-casilla>");
+            System.out.println(" - Salir de la cárcel <nombre-jugador>");
+            System.out.println(" - Acabar turno");
+            System.out.println(" - salir  (para terminar)\n");
+
+            System.out.print("> "); // prompt
+            String cmd = in.nextLine().trim();
+            if (cmd.equalsIgnoreCase("salir")) {
+                System.out.println("Fin de la partida.");
+                this.enCurso = false;
+                break;
+            }
+            if (cmd.isEmpty()) continue;
+
+            analizarComando(cmd);
+        }
+
+
     }
 
     /*Método que interpreta el comando introducido y toma la accion correspondiente.
