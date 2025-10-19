@@ -24,13 +24,13 @@ public class Casilla {
     /*Constructor para casillas tipo Solar, Servicios o Transporte:
      * Parámetros: nombre casilla, tipo (debe ser solar, serv. o transporte), posición en el tablero, valor y dueño.
      */
-    public Casilla(String nombre, String tipo, int posicion, float valor, Jugador duenho) {
+    public Casilla(String nombre, String tipo, int posicion, float valor, Jugador duenho, float impuesto) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.posicion = posicion;
         this.valor = valor;
         this.duenho = duenho; // aquí puse dueño pero al crear la casilla por primera vez hay que poner banca, que es el dueño por defecto
-        this.impuesto = 0;
+        this.impuesto = impuesto;
         this.hipoteca = 0;
         this.grupo = new Grupo();
         this.avatares = new ArrayList<>();
@@ -173,32 +173,136 @@ public class Casilla {
       
       String tipoCasilla = (this.tipo == null) ? " " : this.tipo.toLowerCase();
       String n = (this.nombre == null) ? " " : this.nombre.toLowerCase();
-
+        
       switch (tipoCasilla) {
         // casillas de tipo solar, servicios o transporte
         case "solar":
+            // si la casilla es de la banca (o sin dueño), está en venta
+            if (this.duenho == null || this.duenho == banca) {
+                System.out.println("[" + this.nombre + "] Propiedad libre por " + this.valor + "€. Usa el comando 'comprar' para adquirirla.");
+                return true;
+            }
+            if (this.duenho == actual) { 
+                System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");                
+                return true;
+            }
+            // si pertenece a otro jugador, calculamos el alquiler
+            float alquilerGrupo = this.impuesto; // alquiler base, definido en el tablero
+            // comprobamos si el dueño tiene todo el grupo
+            if (this.grupo != null && this.grupo.esDuenhoGrupo(this.duenho)) {
+                // si tiene todo el grupo y no hay edificaciones (edificaciones no implementamos)
+                alquilerGrupo *= 2;
+                System.out.println(this.duenho.getNombre() + " posee todo el grupo de " + this.grupo.getColorGrupo() + ". Se cobra el doble del alquiler.");
+            }
+
+            // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
+            if (actual.getFortuna() < alquilerGrupo) {
+                System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
+                for (Casilla c : actual.getPropiedades()) {
+                    c.setDuenho(this.duenho); // las pasa al propietario de la deuda
+                    this.duenho.anhadirPropiedad(c);
+                }
+                actual.getPropiedades().clear();
+                return false;
+            }
+
+            // realizamos el pago
+            actual.sumarFortuna(-alquilerGrupo);
+            actual.sumarGastos(alquilerGrupo);
+            this.duenho.sumarFortuna(alquilerGrupo);
+            System.out.println(actual.getNombre() + " paga " + (int) alquilerGrupo + "€ de alquiler a " + this.duenho.getNombre() + " por caer en " + this.nombre + ".");
+            return true;
         case "servicios":
+            // si la casilla es de la banca (o sin dueño), está en venta
+            if (this.duenho == null || this.duenho == banca) {
+                System.out.println("[" + this.nombre + "] Propiedad libre por " + this.valor + "€. Usa el comando 'comprar' para adquirirla.");
+                return true;
+            }
+            if (this.duenho == actual) { 
+                System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");                
+                return true;
+            }
+
+            int serviciosPropietario = 0;
+            for (Casilla c : this.duenho.getPropiedades()) {
+                if (c.getTipo().equalsIgnoreCase("servicios")) {
+                    serviciosPropietario++;
+                }
+            }
+            // factor base (impuesto) viene del constructor
+            float factor = this.impuesto;
+            float alquiler;
+
+            if (serviciosPropietario == 2) {
+                alquiler = 10 * tirada * factor;
+            } else {
+                alquiler = 4 * tirada * factor;
+            }
+            // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
+            if (actual.getFortuna() < alquiler) {
+                System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
+                for (Casilla c : actual.getPropiedades()) {
+                    c.setDuenho(this.duenho); // las pasa al propietario de la deuda
+                    this.duenho.anhadirPropiedad(c);
+                }
+                actual.getPropiedades().clear();
+                return false;
+            }
+            // realizamos el pago
+            actual.sumarFortuna(-alquiler);
+            actual.sumarGastos(alquiler);
+            this.duenho.sumarFortuna(alquiler);
+            System.out.println(actual.getNombre() + " paga " + (int) alquiler + "€ de alquiler a " + this.duenho.getNombre() + " por usar el servicio (" + serviciosPropietario + "servicio/s poseídos, tirada = " + tirada + ").");
+            return true;    
         case "transporte":
             // si la casilla es de la banca (o sin dueño), está en venta
             if (this.duenho == null || this.duenho == banca) {
                 System.out.println("[" + this.nombre + "] Propiedad libre por " + this.valor + "€. Usa el comando 'comprar' para adquirirla.");
                 return true;
-            } else if (this.duenho != actual) { // si es de otro jugador, en esta parte aun no se cobra el alquiler (no se pide en el guión)
-                System.out.println("[" + this.nombre + "] Propiedad de " + this.duenho.getNombre() + ". (Alquiler aún no implementado).");
+            }
+            if (this.duenho == actual) { 
+                System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");                
                 return true;
             }
-            else { // si es suya nada q hacer
-                System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");
-                return true;
+            // si pertenece a otro jugador, calcular el alquiler total
+            float alquilerTotal = 0;
+            int contarTransporte = 0;
+            for (Casilla c : this.duenho.getPropiedades()) {
+                if (c.getTipo().equalsIgnoreCase("transporte")) {
+                    alquilerTotal += c.getImpuesto(); // suma los alquileres de todos sus transportes
+                    contarTransporte++;
+                }
             }
+            // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
+            if (actual.getFortuna() < alquilerTotal) {
+                System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
+                for (Casilla c : actual.getPropiedades()) {
+                    c.setDuenho(this.duenho); // las pasa al propietario de la deuda
+                    this.duenho.anhadirPropiedad(c);
+                }
+                actual.getPropiedades().clear();
+                return false;
+            }
+             // realizamos el pago
+            actual.sumarFortuna(-alquilerTotal);
+            actual.sumarGastos(alquilerTotal);
+            this.duenho.sumarFortuna(alquilerTotal);
+            System.out.println(actual.getNombre() + " paga " + (int) alquilerTotal + "€ de alquiler a " + this.duenho.getNombre() + " por usar el transporte (" + contarTransporte + "transporte/s poseídos).");
+            return true;   
         // casilla de impuestos
         case "impuestos":
             float imp = this.impuesto;
 
+            // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
             if (actual.getFortuna() < imp) {
-                System.out.println("[" + this.nombre + "] " + actual.getNombre() + " no tiene suficiente dinero para pagar los impuestos (" + imp + "€).");
+                System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
+                for (Casilla c : actual.getPropiedades()) {
+                    c.setDuenho(banca); // las pasa al propietario de la deuda
+                    banca.anhadirPropiedad(c);
+                }
+                actual.getPropiedades().clear();
                 return false;
-            }
+            } 
             // el jugador paga a la banca
             actual.sumarFortuna(-imp);
             actual.sumarGastos(imp);
