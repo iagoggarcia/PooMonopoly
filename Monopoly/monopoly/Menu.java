@@ -88,7 +88,6 @@ public class Menu {
 
         System.out.println("\nPartida inicializada correctamente con " + numJugadores + " jugadores.\n");
 
-        // === Bucle interactivo por turno (simple y robusto) ===
         java.util.Scanner in = new java.util.Scanner(System.in);
         while (this.enCurso) {
 
@@ -154,7 +153,7 @@ public class Menu {
 
                 String l = linea.toLowerCase();
 
-                // === mapear formato del PDF -> formato que espera tu analizarComando ===
+
                 if (l.startsWith("crear jugador")) {
                     String[] p = linea.split("\\s+");
                     if (p.length >= 4) {
@@ -166,62 +165,65 @@ public class Menu {
                     }
                 }
                 else if (l.equals("lanzar dados")) {
-                    analizarComando("Lanzar dados");
+                    analizarComando("lanzar dados");
                 }
                 else if (l.startsWith("lanzar dados ")) {
                     String resto = linea.substring(linea.toLowerCase().indexOf("lanzar dados") + "lanzar dados".length()).trim();
-                    analizarComando("Lanzar dados " + resto);
+                    analizarComando("lanzar dados " + resto);
                 }
                 else if (l.startsWith("describir jugador")) {
                     String resto = linea.substring("describir jugador".length()).trim();
                     if (resto.isEmpty()) {
-                        analizarComando("Describir jugador");
+                        analizarComando("describir jugador");
                     } else {
-                        analizarComando("Describir jugador " + resto);
+                        analizarComando("describir jugador " + resto);
                     }
                 }
                 else if (l.startsWith("describir ")) {
                     String nombre = linea.substring("describir".length()).trim();
-                    analizarComando("Describir casilla " + nombre);
+                    analizarComando("describir casilla " + nombre);
                 }
                 else if (l.equals("listar jugadores")) {
-                    analizarComando("Listar jugadores");
+                    analizarComando("listar jugadores");
                 }
                 else if (l.equals("listar enventa") || l.equals("listar propiedades en venta")) {
-                    analizarComando("Listar propiedades en venta");
+                    analizarComando("listar propiedades en venta");
                 }
                 else if (l.equals("acabar turno")) {
-                    analizarComando("Acabar turno");
+                    analizarComando("acabar turno");
                 }
                 else if (l.equals("salir carcel") || l.equals("salir cárcel")
                         || l.equals("salir de la carcel") || l.equals("salir de la cárcel")
                         || l.startsWith("salir carcel ") || l.startsWith("salir cárcel ")
                         || l.startsWith("salir de la carcel ") || l.startsWith("salir de la cárcel ")) {
                     // Normalizamos a "Salir de la cárcel ..."
-                    String canon = "Salir de la cárcel" + linea.substring(linea.indexOf("salir")).substring("salir".length()).replaceFirst("(?i)\\s*de\\s*la\\s*c(a|á)rcel", "").trim();
+                    String canon = "salir de la cárcel" + linea.substring(linea.indexOf("salir")).substring("salir".length()).replaceFirst("(?i)\\s*de\\s*la\\s*c(a|á)rcel", "").trim();
                     // canon ahora es "Salir de la cárcel" + (opcional nombre)
                     String resto = linea.toLowerCase().startsWith("salir") ? linea.substring(linea.indexOf(' ')).trim() : "";
                     // más simple: llamamos directamente con el formato estándar
                     String nombrePosible = linea.substring(linea.indexOf("salir") + "salir".length()).replaceAll("(?i)\\s*de\\s*la\\s*c[aá]rcel", "").trim();
                     if (nombrePosible.isEmpty()) {
-                        analizarComando("Salir de la cárcel");
+                        analizarComando("salir de la cárcel");
                     } else {
-                        analizarComando("Salir de la cárcel " + nombrePosible);
+                        analizarComando("salir de la cárcel " + nombrePosible);
                     }
                 }
                 else if (l.startsWith("comprar ")) {
                     String prop = linea.substring("comprar".length()).trim();
-                    analizarComando("Comprar una propiedad " + prop);
+                    analizarComando("comprar una propiedad " + prop);
                 }
                 else if (l.startsWith("describir avatar ")) {
                     String id = linea.substring("describir avatar".length()).trim();
-                    analizarComando("Describir avatar " + id);
+                    analizarComando("describir avatar " + id);
                 }
                 else if (l.equals("listar avatares")) {
-                    analizarComando("Listar avatares");
+                    analizarComando("listar avatares");
+                }
+                else if (l.equals("jugador")) {
+                    analizarComando("jugador");
                 }
                 else {
-                    System.err.println("Comando no reconocido en el archivo: " + lineaOriginal);
+                    System.err.println("comando no reconocido en el archivo: " + lineaOriginal);
                 }
             }
         } catch (IOException e) {
@@ -230,24 +232,29 @@ public class Menu {
     }
 
     private void analizarComando(String comando) {
-        if (comando.equals("Ver tablero")) {
+        if(comando.equals("jugador")){
+            Jugador actual = jugadores.get(turno);//dependiendo de que turno sea (cada jugador tiene un turno asociado) nos devuelve a uno u otro
+            System.out.println("{\n" + "Nombre: " + actual.getNombre() + "\n" + "Avatar: " + actual.getAvatar().getId() + "\n}");
+        }
+
+        if (comando.equals("ver tablero")) {
             imprimirTablero();
             return;
         }
-        if (comando.startsWith("Describir jugador")) {
-            String nombreJugador = comando.substring("Describir jugador ".length()).trim();
+        if (comando.startsWith("describir jugador")) {
+            String nombreJugador = comando.substring("describir jugador ".length()).trim();
             descJugador(nombreJugador);
         }
-        else if (comando.startsWith("Describir avatar")) {
-            String Idavatar = comando.substring("Describir avatar ".length()).trim();
+        else if (comando.startsWith("describir avatar")) {
+            String Idavatar = comando.substring("describir avatar ".length()).trim();
             descAvatar(Idavatar);
         }
-        else if (comando.startsWith("Describir casilla")) {
-            String nombreCasilla = comando.substring("Describir casilla".length()).trim();
+        else if (comando.startsWith("describir casilla")) {
+            String nombreCasilla = comando.substring("describir casilla".length()).trim();
             descCasilla(nombreCasilla);
         }
-        else if (comando.startsWith("Lanzar dados")) {
-            String cadenaComprobar = comando.substring("Lanzar dados".length()).trim();
+        else if (comando.startsWith("lanzar dados")) {
+            String cadenaComprobar = comando.substring("lanzar dados".length()).trim();
             if (cadenaComprobar.isEmpty()) {
                 lanzarDados();
             }
@@ -256,13 +263,13 @@ public class Menu {
                 lanzarDadosValor(valores);
             }
         }
-        else if (comando.startsWith("Comprar una propiedad")) {
+        else if (comando.startsWith("comprar una propiedad")) {
             String nombrePropiedad = comando.substring("Comprar una propiedad".length()).trim();
             comprar(nombrePropiedad);
         }
-        else if (comando.startsWith("Salir de la cárcel")) {
+        else if (comando.startsWith("salir de la cárcel")) {
             // Puede venir "Salir de la cárcel" o "Salir de la cárcel <Nombre>"
-            String resto = comando.substring("Salir de la cárcel".length()).trim();
+            String resto = comando.substring("salir de la cárcel".length()).trim();
             if (resto.isEmpty()) {
                 // Sólo puede salir el jugador del turno
                 salirCarcel();
@@ -283,25 +290,25 @@ public class Menu {
                 }
             }
         }
-        else if (comando.equals("Listar propiedades en venta")) {
+        else if (comando.equalsIgnoreCase("listar propiedades en venta")) {
             listarVenta();
         }
-        else if (comando.equals("Listar jugadores")) {
+        else if (comando.equalsIgnoreCase("listar jugadores")) {
             listarJugadores();
         }
-        else if (comando.equals("Listar avatares")) {
+        else if (comando.equalsIgnoreCase("listar avatares")) {
             listarAvatares();
         }
-        else if (comando.equals("Acabar turno")) {
+        else if (comando.equalsIgnoreCase("acabar turno")) {
             acabarTurno();
         }
-        else if (comando.startsWith("Crear jugador")) {
-            String datosJugador = comando.substring("Crear jugador".length()).trim();
+        else if (comando.startsWith("crear jugador")) {
+            String datosJugador = comando.substring("crear jugador".length()).trim();
             String[] partes = datosJugador.isEmpty() ? new String[0] : datosJugador.split("\\s+");
             if (partes.length >= 2) {
                 crearJugadorArchivo(partes); // partes[0]=nombre, partes[1]=tipo
             } else {
-                System.err.println("Formato inválido para 'Crear jugador'. Uso: Crear jugador <Nombre> <Tipo>");
+                System.err.println("Formato inválido para 'crear jugador'. Uso: crear jugador <Nombre> <Tipo>");
             }
         }
     }
@@ -323,9 +330,7 @@ public class Menu {
         if(this.tablero == null){
             this.tablero = new Tablero(banca);
         }
-        /* if(this.jugadores == null){
-            this.jugadores = new ArrayList<>();
-        } */ // esta comprobación ya está hecha arriba
+
         if(this.avatares == null){
             this.avatares = new ArrayList<>();
         }
@@ -368,32 +373,8 @@ public class Menu {
 
         System.out.println("===== Información del jugador =====");
         System.out.println("Nombre: " + j.getNombre());
+        System.out.println("Avatar: " + j.getAvatar().getId());
         System.out.println("Fortuna: " + j.getFortuna());
-        System.out.println("¿En cárcel?: " + (j.isEnCarcel() ? "Sí" : "No"));
-
-        // 1) Describir avatar del jugador
-        if (j.getAvatar() != null && j.getAvatar().getId() != null) {
-            descAvatar(j.getAvatar().getId());
-        } else {
-            System.out.println("(El jugador no tiene avatar asociado)");
-        }
-
-        // 2) Describir la casilla actual del jugador
-        if (j.getAvatar() != null && j.getAvatar().getLugar() != null) {
-            descCasilla(j.getAvatar().getLugar().getNombre());
-        }
-
-        // 3) Describir sus propiedades (reutilizando también descCasilla)
-        if (j.getPropiedades() == null || j.getPropiedades().isEmpty()) {
-            System.out.println("Propiedades: (ninguna)");
-        } else {
-            System.out.println("Propiedades:");
-            for (Casilla c : j.getPropiedades()) {
-                if (c != null && c.getNombre() != null) {
-                    descCasilla(c.getNombre());
-                }
-            }
-        }
         System.out.println("===================================");
     }
 
@@ -672,10 +653,13 @@ public class Menu {
 
     private void listarJugadores() {
         for(Jugador jugador : this.jugadores){
-            System.out.println(jugador.getNombre());
-            System.out.println(jugador.getAvatar());
-            System.out.println(jugador.getFortuna());
-            System.out.println(jugador.getPropiedades());
+            System.out.println("{");
+            System.out.println("Nombre: " + jugador.getNombre());
+            System.out.println("Avatar: " + jugador.getAvatar().getId());
+            System.out.println("Fortuna: " + jugador.getFortuna());
+            System.out.println("Propiedades: " + jugador.getPropiedades());
+            System.out.println("}");
+            System.out.print("\n");
         }
     }
 

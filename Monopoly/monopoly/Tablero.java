@@ -173,7 +173,23 @@ public class Tablero {
         return nombre + etiquetaAvatares(c);
     }
 
-    // ====== toString() con el orden original + avatares & + hueco central ======
+    // Función para poner la inicial del avatar en la casilla en la que está
+    private String nombreConIniciales(Casilla c) {
+        String nombre = (c != null && c.getNombre() != null) ? c.getNombre() : "";
+        if (c == null || c.getAvatares() == null || c.getAvatares().isEmpty()) return nombre;
+
+        StringBuilder sb = new StringBuilder(nombre);
+        for (Avatar a : c.getAvatares()) {
+            if (a == null || a.getJugador() == null || a.getJugador().getNombre() == null) continue;
+            String n = a.getJugador().getNombre().trim();
+            if (!n.isEmpty()) {
+                sb.append(" ").append(Character.toUpperCase(n.charAt(0))); // añade la inicial
+            }
+        }
+        return sb.toString();
+    }
+
+    //Para imprimir el tablero, modificamos el método toString().
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -185,57 +201,59 @@ public class Tablero {
 
         final int ANCHO_CASILLA = 8;
 
-        // Color ANSI según grupo (si no hay grupo, blanco)
+        // Usamos directamente el ANSI almacenado en el Grupo
         java.util.function.Function<Casilla, String> ansiGrupo = c -> {
             String ansi = Valor.WHITE;
-            if (c != null && c.getGrupo() != null && c.getGrupo().getColorGrupo() != null) {
-                ansi = c.getGrupo().getColorGrupo();
+            if (c.getGrupo() != null && c.getGrupo().getColorGrupo() != null) {
+                ansi = c.getGrupo().getColorGrupo(); // aquí viene ya Valor.RED, Valor.GREEN, etc.
             }
             return ansi;
         };
 
-        // ---------- NORTE (igual que al principio) ----------
+        sb.append("\nhola\n");
+        // Norte
         for (Casilla c : ladoNorte) {
             String celda = "|" + ansiGrupo.apply(c)
-                    + String.format("%-" + ANCHO_CASILLA + "s", etiquetaCasilla(c))
+                    + String.format("%-" + ANCHO_CASILLA + "s", nombreConIniciales(c))
                     + Valor.RESET;
             sb.append(celda);
         }
-        sb.append("|\n");
+        sb.append("|\n"); // cierra la última celda
 
-        // ---------- OESTE (izquierda) | HUECO | ESTE (derecha) ----------
-        // Hueco central del ancho de las casillas interiores (todas menos esquinas)
-        int numCentrales = ladoNorte.size() - 2;               // ej. 11 arriba -> 9 huecos
-        int anchoHueco   = numCentrales * (ANCHO_CASILLA + 1); // +1 por cada separador '|'
-        String hueco     = String.format("%" + anchoHueco + "s", "");
-
-        // Mantenemos el orden original: OESTE a la izquierda (descendiendo), ESTE a la derecha (simétrico)
+        // Oeste y Este
         for (int i = ladoOeste.size() - 1; i >= 0; i--) {
             Casilla o = ladoOeste.get(i);
             Casilla e = ladoEste.get(ladoEste.size() - 1 - i);
 
+            int espaciosCentro = ANCHO_CASILLA * (ladoNorte.size() - 2) + (ladoNorte.size() - 2);
+
             String celdaO = "|" + ansiGrupo.apply(o)
-                    + String.format("%-" + ANCHO_CASILLA + "s", etiquetaCasilla(o))
+                    + String.format("%-" + ANCHO_CASILLA + "s", nombreConIniciales(o))
                     + Valor.RESET;
 
             String celdaE = "|" + ansiGrupo.apply(e)
-                    + String.format("%-" + ANCHO_CASILLA + "s", etiquetaCasilla(e))
+                    + String.format("%-" + ANCHO_CASILLA + "s", nombreConIniciales(e))
                     + Valor.RESET;
 
-            sb.append(celdaO).append(hueco).append(celdaE).append("|\n");
+            sb.append(celdaO)
+                    .append(" ".repeat(espaciosCentro))
+                    .append(celdaE)
+                    .append("|\n");
         }
 
-        // ---------- SUR (igual que al principio) ----------
-        for (Casilla c : ladoSur) {
+        // Sur (inverso, para que salga la salida a la derecha)
+        for (int i = ladoSur.size() - 1; i >= 0; i--) {
+            Casilla c = ladoSur.get(i);
             String celda = "|" + ansiGrupo.apply(c)
-                    + String.format("%-" + ANCHO_CASILLA + "s", etiquetaCasilla(c))
+                    + String.format("%-" + ANCHO_CASILLA + "s", nombreConIniciales(c))
                     + Valor.RESET;
             sb.append(celda);
         }
-        sb.append("|\n");
+        sb.append("|\n"); // cierra la última celda
 
         return sb.toString();
     }
+
 
 
     //Método usado para buscar la casilla con el nombre pasado como argumento:

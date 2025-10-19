@@ -93,5 +93,21 @@ class Grupo {
         return true;
     }
 
+    // Función para usar en listar en venta
+    public String getNombreColorGrupo() {
+        if (this.colorGrupo == null) return "";
+        String c = this.colorGrupo;
+        if (c.equals(Valor.RED))    return "rojo";
+        if (c.equals(Valor.GREEN))  return "verde";
+        if (c.equals(Valor.BLUE))   return "azul";
+        if (c.equals(Valor.YELLOW)) return "amarillo";
+        if (c.equals(Valor.PURPLE)) return "rosa";     // o "morado" si prefieres
+        if (c.equals(Valor.CYAN))   return "celeste";  // coincide con tu uso en Tablero
+        if (c.equals(Valor.BROWN))  return "marrón";
+        if (c.equals(Valor.BLACK))  return "negro";
+        if (c.equals(Valor.WHITE))  return "blanco";
+        return "";
+    }
+
 
 }

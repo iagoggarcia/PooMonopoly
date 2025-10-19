@@ -414,17 +414,45 @@ public class Casilla {
 
     /*Método para mostrar información sobre una casilla.
      * Devuelve una cadena con información específica de cada tipo de casilla.*/
-    public String infoCasilla(String nombre, ArrayList<ArrayList<Casilla>> posiciones) {
-        for (ArrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
-            for (Casilla c : lado) {
-                String n = c.getNombre();
-                if (n != null && n.equals(nombre)) {
-                    System.out.println("Nombre: ");
+    public String infoCasilla() {
+
+        StringBuilder informacion = new StringBuilder(); // aquí guardamos la info de la casilla
+
+        switch(tipo.toLowerCase()) {
+            case "solar":
+                informacion.append("\nTipo: ").append(tipo).append("\nGrupo: ").append(grupo).append("\nPropietario: ").append(duenho).append("\nValor: ").append(valor);
+                break;
+            case "impuesto":
+                informacion.append("\nTipo: ").append(tipo)
+                        .append("\nA pagar: ").append(impuesto);
+
+                informacion.append(infoJugadoresEnEstaCasilla());
+                break;
+            case "transporte":
+                informacion.append("\nValor: ").append(valor);
+                informacion.append(infoJugadoresEnEstaCasilla());
+                break;
+            case "servicios":
+                informacion.append("\nValor: ").append(valor);
+                informacion.append(infoJugadoresEnEstaCasilla());
+                break;
+            case "especiales":
+                if (this.getNombre() != null && this.getNombre().equalsIgnoreCase("parking")) {
+                    informacion.append("\nBote: ").append(valor);
                 }
-            }
+                else if (this.getNombre() != null && this.getNombre().equalsIgnoreCase("cárcel")) {
+                    informacion.append("\nSalir: 500000");
+                }
+
+                // El siguiente bloque es para cualquier especial menos para el irCarcel:
+                if (!(this.getNombre().equalsIgnoreCase("ircarcel"))) {
+                    informacion.append(infoJugadoresEnEstaCasilla());
+                }
+
+                break;
         }
-        return null; // si no existe una casilla con ese nombre devuelve null
-    } 
+        return informacion.toString(); // si no existe una casilla con ese nombre devuelve null*/
+    }
 
     /* Método para mostrar información de una casilla en venta.
      * Valor devuelto: texto con esa información.
@@ -436,14 +464,44 @@ public class Casilla {
         boolean esComprable = tipoLower.equals("solar") || tipoLower.equals("transporte") || tipoLower.equals("servicios"); //solo es comprable si es de alguno de estos tipos
 
         // Comprobamos si está en venta (sin dueño o con dueño banca)
-        boolean enVenta = esComprable && (this.duenho == null || (this.duenho.getNombre() != null && this.duenho.getNombre().equalsIgnoreCase("banca")));
+        boolean enVenta = esComprable && (this.duenho == null || this.duenho.getNombre() == null || this.duenho.getNombre().equalsIgnoreCase("banca"));
+
 
         if (!enVenta) return "";
 
         // Si está en venta, devolvemos la información formateada
-        String info = "{ tipo: " + this.tipo + ", nombre: " + this.nombre + ", valor: " + (int)this.valor + " }";
+        String nombreColor = (this.grupo != null) ? this.grupo.getNombreColorGrupo() : "";
+
+        String info = "{ tipo: " + this.tipo
+                + ", \nvalor: " + (int) this.valor
+                + ", \ngrupo: " + nombreColor
+                + " }";
 
         return info; //devolvemos la cadena
+    }
+
+
+    /**
+     * Devuelve un texto con los jugadores (por nombre) que están en esta casilla.
+     * Si no hay ninguno, devuelve una cadena vacía.
+     */
+    private String infoJugadoresEnEstaCasilla() {
+        if (avatares == null || avatares.isEmpty()) {
+            return ""; // no hay jugadores
+        }
+
+        ArrayList<String> nombres = new ArrayList<>();
+        for (Avatar av : avatares) {
+            if (av != null && av.getLugar() == this && av.getJugador() != null) {
+                nombres.add(av.getJugador().getNombre());
+            }
+        }
+
+        if (nombres.isEmpty()) {
+            return "";
+        }
+
+        return "\nJugadores: " + nombres;
     }
 
 
