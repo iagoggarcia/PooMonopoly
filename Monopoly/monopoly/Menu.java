@@ -37,7 +37,7 @@ public class Menu {
         Tablero tablero = new Tablero(banca);
 
         // 2. Obtener la casilla "Salida" donde se colocan los avatares
-        Casilla salida = tablero.getPosiciones().get(1).get(1);
+        Casilla salida = tablero.getPosiciones().get(1).get(0);
 
         // 3. Preguntar número de jugadores
         int numJugadores = 0;
@@ -275,9 +275,9 @@ public class Menu {
         if(this.tablero == null){
             this.tablero = new Tablero(banca);
         }
-        if(this.jugadores == null){
+        /* if(this.jugadores == null){
             this.jugadores = new ArrayList<>();
-        }
+        } */ // esta comprobación ya está hecha arriba
         if(this.avatares == null){
             this.avatares = new ArrayList<>();
         }
@@ -457,7 +457,6 @@ public class Menu {
         av.moverAvatar(this.tablero.getPosiciones(), suma);
         Casilla destino = av.getLugar();
 
-        // aquí habría que añadir el paso por la salida, sumar el dinero  y demás
         if (destino.getPosicion() < origen.getPosicion()) {
             actual.sumarFortuna(Valor.SUMA_VUELTA);
             System.out.println(actual.getNombre() + " pasa por Salida y recibe " + Valor.SUMA_VUELTA + "€.");
