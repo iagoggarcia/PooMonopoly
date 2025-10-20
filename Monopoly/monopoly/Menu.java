@@ -37,7 +37,7 @@ public class Menu {
         Tablero tablero = new Tablero(banca);
 
         // 2. Obtener la casilla "Salida" donde se colocan los avatares
-        Casilla salida = tablero.getPosiciones().get(1).get(0);
+        Casilla salida = tablero.getPosiciones().get(0).get(0);
 
         // 3. Preguntar número de jugadores
         int numJugadores = 0;
