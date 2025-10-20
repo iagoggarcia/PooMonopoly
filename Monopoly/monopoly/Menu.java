@@ -192,22 +192,11 @@ public class Menu {
                 else if (l.equals("acabar turno")) {
                     analizarComando("acabar turno");
                 }
-                else if (l.equals("salir carcel") || l.equals("salir cárcel")
-                        || l.equals("salir de la carcel") || l.equals("salir de la cárcel")
-                        || l.startsWith("salir carcel ") || l.startsWith("salir cárcel ")
-                        || l.startsWith("salir de la carcel ") || l.startsWith("salir de la cárcel ")) {
-                    // Normalizamos a "Salir de la cárcel ..."
-                    String canon = "salir de la cárcel" + linea.substring(linea.indexOf("salir")).substring("salir".length()).replaceFirst("(?i)\\s*de\\s*la\\s*c(a|á)rcel", "").trim();
-                    // canon ahora es "Salir de la cárcel" + (opcional nombre)
-                    String resto = linea.toLowerCase().startsWith("salir") ? linea.substring(linea.indexOf(' ')).trim() : "";
-                    // más simple: llamamos directamente con el formato estándar
-                    String nombrePosible = linea.substring(linea.indexOf("salir") + "salir".length()).replaceAll("(?i)\\s*de\\s*la\\s*c[aá]rcel", "").trim();
-                    if (nombrePosible.isEmpty()) {
-                        analizarComando("salir de la cárcel");
-                    } else {
-                        analizarComando("salir de la cárcel " + nombrePosible);
-                    }
+                else if(l.startsWith("salir cárcel")){
+                    String resto = l.substring("salir cárcel".length()).trim();
+                    analizarComando("salir cárcel " + resto);
                 }
+
                 else if (l.startsWith("comprar ")) {
                     String prop = linea.substring("comprar".length()).trim();
                     analizarComando("comprar " + prop);
@@ -340,7 +329,7 @@ public class Menu {
 
     //EN LAS FUNCIONES DE DESCRIBIR Y LISTAR SOLAMENTE HAY QUE HACER PRINTS, LAS HAGO DE ÚLTIMO
 
-    // --- helpers opcionales para no repetir búsquedas ---
+//helpers
     private Jugador buscarJugadorPorNombre(String nombre) {
         if (this.jugadores == null) return null;
         for (Jugador j : this.jugadores) {
@@ -358,7 +347,7 @@ public class Menu {
         return null;
     }
 
-    // --- Describir jugador: delega en avatar y casilla ---
+
     private void descJugador(String nombreJugador) {
         if (nombreJugador == null || nombreJugador.isBlank()) {
             System.err.println("Uso correcto: Describir <Nombre>");
@@ -377,7 +366,7 @@ public class Menu {
         System.out.println("===================================");
     }
 
-    // --- Describir avatar por ID ---
+
     private void descAvatar(String id) {
         if (id == null || id.isBlank()) {
             System.err.println("Uso correcto: Describir avatar <ID>");
@@ -400,7 +389,6 @@ public class Menu {
         }
     }
 
-    // --- Describir casilla por nombre (usa Tablero.encontrar_casilla) ---
     private void descCasilla(String nombreCasilla) {
         if (nombreCasilla == null || nombreCasilla.isBlank()) {
             System.err.println("Uso correcto: describir <Nombre>");
@@ -423,7 +411,7 @@ public class Menu {
         System.out.println("Posición: " + c.getPosicion());
         System.out.println("Valor: " + c.getValor());
         System.out.println("Dueño: " + (c.getDuenho() != null ? c.getDuenho().getNombre() : "(sin dueño)"));
-        // Si quieres, también: avatares presentes
+
         if (c.getAvatares() != null && !c.getAvatares().isEmpty()) {
             System.out.print("Avatares en la casilla: ");
             boolean primero = true;
@@ -583,7 +571,10 @@ public class Menu {
 
         System.out.println(actual.getNombre() + " está en la cárcel e intenta salir tirando los dados...");
 
-        // tirada de dados para intentar sacar dobles
+        //provisional
+        if (this.dado1 == null) this.dado1 = new Dado();
+        if (this.dado2 == null) this.dado2 = new Dado();
+
         int valor1 = this.dado1.hacerTirada();
         int valor2 = this.dado2.hacerTirada();
         System.out.println("Dados: " + valor1 + " y " + valor2 + " (suma = " + (valor1 + valor2) + ")");
