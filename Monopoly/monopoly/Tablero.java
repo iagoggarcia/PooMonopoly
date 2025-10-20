@@ -21,13 +21,12 @@ public class Tablero {
 
     
     //Método para crear todas las casillas del tablero. Formado a su vez por cuatro métodos (1/lado).
-private void generarCasillas() {
-    this.insertarLadoSur();    // empieza en Salida
-    this.insertarLadoOeste();
-    this.insertarLadoNorte();
-    this.insertarLadoEste();   // último tramo antes de volver a Salida
-}
-
+    private void generarCasillas() {
+        this.insertarLadoNorte();
+        this.insertarLadoSur();
+        this.insertarLadoOeste();
+        this.insertarLadoEste();
+    }
     
     //Método para insertar las casillas del lado norte.
     private void insertarLadoNorte() {
@@ -162,13 +161,12 @@ private void generarCasillas() {
 public String toString() {
     StringBuilder sb = new StringBuilder();
 
-    // Orden correcto del recorrido del tablero
-    ArrayList<Casilla> ladoSur   = posiciones.get(0);
-    ArrayList<Casilla> ladoOeste = posiciones.get(1);
-    ArrayList<Casilla> ladoNorte = posiciones.get(2);
-    ArrayList<Casilla> ladoEste  = posiciones.get(3);
+        ArrayList<Casilla> ladoNorte = posiciones.get(0);
+        ArrayList<Casilla> ladoSur   = posiciones.get(1);
+        ArrayList<Casilla> ladoOeste = posiciones.get(2);
+        ArrayList<Casilla> ladoEste  = posiciones.get(3);
 
-    final int ANCHO_CASILLA = 10;
+        final int ANCHO_CASILLA = 8;
 
     // Función para obtener el color del grupo
     java.util.function.Function<Casilla, String> ansiGrupo = c -> {
@@ -179,59 +177,22 @@ public String toString() {
         return ansi;
     };
 
-    // === LADO NORTE (izquierda → derecha) ===
-    for (int i = 0; i < ladoNorte.size(); i++) {
-        Casilla c = ladoNorte.get(i);
-
-        // mostrar los avatares si hay
-        String avataresTexto = "";
-        if (c.getAvatares() != null && !c.getAvatares().isEmpty()) {
-            StringBuilder ids = new StringBuilder();
-            for (Avatar av : c.getAvatares()) {
-                ids.append(av.getId());
-            }
-            avataresTexto = "[" + ids + "]";
+        sb.append("\nhola\n");
+        // Norte
+        for (Casilla c : ladoNorte) {
+            String celda = "|" + ansiGrupo.apply(c)
+                    + String.format("%-" + ANCHO_CASILLA + "s", nombreConIniciales(c))
+                    + Valor.RESET;
+            sb.append(celda);
         }
+        sb.append("|\n"); // cierra la última celda
 
-        String nombreCelda = c.getNombre() + avataresTexto;
-        String celda = "|" + ansiGrupo.apply(c)
-                + String.format("%-" + ANCHO_CASILLA + "s", nombreCelda)
-                + Valor.RESET;
-        sb.append(celda);
-    }
-    sb.append("|\n");
+        // Oeste y Este
+        for (int i = ladoOeste.size() - 1; i >= 0; i--) {
+            Casilla o = ladoOeste.get(i);
+            Casilla e = ladoEste.get(ladoEste.size() - 1 - i);
 
-    // === LADOS OESTE y ESTE (verticales) ===
-    int altura = Math.min(ladoOeste.size(), ladoEste.size());
-    for (int i = altura - 1; i >= 0; i--) {
-        Casilla o = ladoOeste.get(i);              // de arriba a abajo
-        Casilla e = ladoEste.get(altura - 1 - i);  // de abajo a arriba
-
-        int espaciosCentro = ANCHO_CASILLA * (ladoNorte.size() - 2)
-                + (ladoNorte.size() - 2);
-
-        // avatares en el lado Oeste
-        String avataresO = "";
-        if (o.getAvatares() != null && !o.getAvatares().isEmpty()) {
-            StringBuilder ids = new StringBuilder();
-            for (Avatar av : o.getAvatares()) {
-                ids.append(av.getId());
-            }
-            avataresO = "[" + ids + "]";
-        }
-
-        // avatares en el lado Este
-        String avataresE = "";
-        if (e.getAvatares() != null && !e.getAvatares().isEmpty()) {
-            StringBuilder ids = new StringBuilder();
-            for (Avatar av : e.getAvatares()) {
-                ids.append(av.getId());
-            }
-            avataresE = "[" + ids + "]";
-        }
-
-        String nombreO = o.getNombre() + avataresO;
-        String nombreE = e.getNombre() + avataresE;
+            int espaciosCentro = ANCHO_CASILLA * (ladoNorte.size() - 2) + (ladoNorte.size() - 2);
 
         String celdaO = "|" + ansiGrupo.apply(o)
                 + String.format("%-" + ANCHO_CASILLA + "s", nombreO)
