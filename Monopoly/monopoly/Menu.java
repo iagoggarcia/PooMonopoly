@@ -71,10 +71,11 @@ public class Menu {
             Jugador jugador = new Jugador(nombre, tipoAvatar, salida, avatares);
             jugadores.add(jugador);
 
+            System.out.println("Jugador creado: ");
             System.out.println("{");
-            System.out.println("  nombre: " + nombre + ",");
+            System.out.println("  nombre: " + jugador.getNombre() + ",");
             System.out.println("  avatar: " + jugador.getAvatar().getId());
-            System.out.println("}");
+            System.out.println("}\n");
         }
 
         // 6. Guardar la información en los atributos de Menu
@@ -105,7 +106,7 @@ public class Menu {
             do {
                 System.out.println("\n--- Turno de " + actual.getNombre() + " ---");
                 System.out.println("Comandos:");
-                //System.out.println(" - Crear jugador <nombre> <tipo>");
+                System.out.println(" - crear jugador <nombre> <tipo>");
                 System.out.println(" - ver tablero");
                 System.out.println(" - lanzar dados");
                 System.out.println(" - lanzar dados X+Y");
@@ -327,9 +328,16 @@ public class Menu {
         if(this.avatares == null){
             this.avatares = new ArrayList<>();
         }
-        Casilla salida = tablero.getPosiciones().get(1).get(0);
+        Casilla salida = tablero.getPosiciones().get(0).get(0);
         Jugador jugador = new Jugador(partes[0], partes[1], salida, avatares);
         this.jugadores.add(jugador);
+
+        // Faltaba printear esto cuando se crea un jugador nuevo:
+        System.out.println("Jugador creado: ");
+        System.out.println("{");
+        System.out.println("  nombre: " + jugador.getNombre() + ",");
+        System.out.println("  avatar: " + jugador.getAvatar().getId());
+        System.out.println("}\n");
     }
 
     //EN LAS FUNCIONES DE DESCRIBIR Y LISTAR SOLAMENTE HAY QUE HACER PRINTS, LAS HAGO DE ÚLTIMO
@@ -548,13 +556,26 @@ public class Menu {
             imprimirTablero();//se imprime el tablero en el estado actual
             lanzamientos++;
 
-            if (lanzamientos < 3) {
+            // Voy a comentar esto que es lo que habíamos hablado de no tirar aleatoriamente nada más sacar dobles:
+            
+            /*if (lanzamientos < 3) {
                 lanzarDados(); // repite turno (solo usa aleatorio de nuevo)
             } else {
                 System.out.println(actual.getNombre() + " ha sacado tres dobles seguidos y va a la cárcel.");
                 Casilla carcel = this.tablero.encontrar_casilla("Cárcel");
                 av.setLugar(carcel);
+            }*/
+            if (lanzamientos < 3) {
+                // ahora en vez de lanzar aleatoriamente como antes, dejamos un aviso de que puede hacer la acción que quiera y ya está
+                // para que pueda comprar la casilla (si puede), que lance los dados con un valor específico, o que lo haga de forma aleatoria
+                System.out.println("Tienes un lanzamiento extra");
+                // después de este print debería salir el menú otra vez y poder hacer lo que sea
+            } else {
+                System.out.println(actual.getNombre() + " ha sacado tres dobles seguidos y va a la cárcel.");
+                actual.encarcelar(this.tablero.getPosiciones());
+                lanzamientos = 0; // reiniciamos los lanzamientos aquí también
             }
+           
         }
         else{
             lanzamientos = 0;

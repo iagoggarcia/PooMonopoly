@@ -189,23 +189,23 @@ public class Tablero {
         return sb.toString();
     }
 
-    //Para imprimir el tablero, modificamos el método toString().
+    // Para imprimir el tablero, modificamos el método toString().
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        ArrayList<Casilla> ladoSur = posiciones.get(0);
-        ArrayList<Casilla> ladoOeste   = posiciones.get(1);
+        // ¡Este es el orden correcto!
+        ArrayList<Casilla> ladoSur   = posiciones.get(0);
+        ArrayList<Casilla> ladoOeste = posiciones.get(1);
         ArrayList<Casilla> ladoNorte = posiciones.get(2);
         ArrayList<Casilla> ladoEste  = posiciones.get(3);
 
-        final int ANCHO_CASILLA = 10;
+        final int ANCHO_CASILLA = 12;
 
-        // Usamos directamente el ANSI almacenado en el Grupo
         java.util.function.Function<Casilla, String> ansiGrupo = c -> {
             String ansi = Valor.WHITE;
             if (c.getGrupo() != null && c.getGrupo().getColorGrupo() != null) {
-                ansi = c.getGrupo().getColorGrupo(); // aquí viene ya Valor.RED, Valor.GREEN, etc.
+                ansi = c.getGrupo().getColorGrupo();
             }
             return ansi;
         };
@@ -217,9 +217,9 @@ public class Tablero {
                     + Valor.RESET;
             sb.append(celda);
         }
-        sb.append("|\n"); // cierra la última celda
+        sb.append("|\n");
 
-        // Oeste y Este
+        // Oeste y Este (ambos tienen 9)
         for (int i = ladoOeste.size() - 1; i >= 0; i--) {
             Casilla o = ladoOeste.get(i);
             Casilla e = ladoEste.get(ladoEste.size() - 1 - i);
@@ -240,7 +240,7 @@ public class Tablero {
                     .append("|\n");
         }
 
-        // Sur (inverso, para que salga la salida a la derecha)
+        // Sur (inverso)
         for (int i = ladoSur.size() - 1; i >= 0; i--) {
             Casilla c = ladoSur.get(i);
             String celda = "|" + ansiGrupo.apply(c)
@@ -248,12 +248,10 @@ public class Tablero {
                     + Valor.RESET;
             sb.append(celda);
         }
-        sb.append("|\n"); // cierra la última celda
+        sb.append("|\n");
 
         return sb.toString();
     }
-
-
 
     //Método usado para buscar la casilla con el nombre pasado como argumento:
     public Casilla encontrar_casilla(String nombre){
@@ -269,4 +267,3 @@ public class Tablero {
         return null; // si no existe una casilla con ese nombre devuelve null
     }
 }
-
