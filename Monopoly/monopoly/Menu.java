@@ -698,7 +698,9 @@ public class Menu {
             System.out.println("Nombre: " + jugador.getNombre());
             System.out.println("Avatar: " + jugador.getAvatar().getId());
             System.out.println("Fortuna: " + jugador.getFortuna());
-            System.out.println("Propiedades: " + jugador.getPropiedades());
+            if (jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty()) {
+                System.out.println("Propiedades: " + jugador.getPropiedades());
+            }
             System.out.println("}");
             System.out.print("\n");
         }

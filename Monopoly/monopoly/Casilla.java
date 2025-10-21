@@ -504,5 +504,11 @@ public class Casilla {
         return "\nJugadores: " + nombres;
     }
 
+    // Esto lo pongo porque si no no sale el nombre de la casilla al listar las propiedades de los jugadores, sale algo como: monopoly.Casilla@3feba861
+    // Puede haber un toString por clase y solo hay otra en tablero así que no hay problema
+    @Override
+    public String toString() {
+        return this.nombre; // imprime el nombre de la casilla
+    }
 
 }
