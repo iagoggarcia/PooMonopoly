@@ -530,7 +530,7 @@ public class Menu {
             actual.setVueltas(actual.getVueltas() + 1);//suma una vuelta
         }
 
-        destino.evaluarCasilla(actual, this.banca, suma);//evaluamos casilla
+        this.solvente = destino.evaluarCasilla(actual, this.banca, suma);//evaluamos casilla
 
         // si el jugador cayó en 'Ir a la Cárcel', se aplica el encarcelamiento
         // esto pensé que iba en evaluarcasilla, pero como no tengo acceso al tablero desde casilla, tiene que ser desde aquí
