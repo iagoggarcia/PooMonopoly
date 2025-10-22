@@ -22,9 +22,9 @@ public class Tablero {
     
     //Método para crear todas las casillas del tablero. Formado a su vez por cuatro métodos (1/lado).
     private void generarCasillas() {
-        this.insertarLadoNorte();
         this.insertarLadoSur();
         this.insertarLadoOeste();
+        this.insertarLadoNorte();
         this.insertarLadoEste();
     }
     
@@ -157,27 +157,59 @@ public class Tablero {
         this.banca = banca;
     }
 
-    @Override
-public String toString() {
-    StringBuilder sb = new StringBuilder();
+    // ====== Helpers nuevos (solo texto, NO cambian el orden del tablero) ======
+    private String etiquetaAvatares(Casilla c) {
+        if (c == null || c.getAvatares() == null || c.getAvatares().isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        for (partida.Avatar a : c.getAvatares()) {
+            if (a == null || a.getId() == null) continue;
+            sb.append(" &").append(a.getId());
+        }
+        return sb.toString();
+    }
 
-        ArrayList<Casilla> ladoNorte = posiciones.get(0);
-        ArrayList<Casilla> ladoSur   = posiciones.get(1);
-        ArrayList<Casilla> ladoOeste = posiciones.get(2);
+    private String etiquetaCasilla(Casilla c) {
+        String nombre = (c != null && c.getNombre() != null) ? c.getNombre() : "";
+        return nombre + etiquetaAvatares(c);
+    }
+
+    // Función para poner la inicial del avatar en la casilla en la que está
+    private String nombreConIniciales(Casilla c) {
+        String nombre = (c != null && c.getNombre() != null) ? c.getNombre() : "";
+        if (c == null || c.getAvatares() == null || c.getAvatares().isEmpty()) return nombre;
+
+        StringBuilder sb = new StringBuilder(nombre);
+        for (Avatar a : c.getAvatares()) {
+            if (a == null || a.getJugador() == null || a.getJugador().getNombre() == null) continue;
+            String n = a.getJugador().getNombre().trim();
+            if (!n.isEmpty()) {
+                sb.append(" ").append(Character.toUpperCase(n.charAt(0))); // añade la inicial
+            }
+        }
+        return sb.toString();
+    }
+
+    // Para imprimir el tablero, modificamos el método toString().
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        // ¡Este es el orden correcto!
+        ArrayList<Casilla> ladoSur   = posiciones.get(0);
+        ArrayList<Casilla> ladoOeste = posiciones.get(1);
+        ArrayList<Casilla> ladoNorte = posiciones.get(2);
         ArrayList<Casilla> ladoEste  = posiciones.get(3);
 
-        final int ANCHO_CASILLA = 8;
+        final int ANCHO_CASILLA = 12;
 
-    // Función para obtener el color del grupo
-    java.util.function.Function<Casilla, String> ansiGrupo = c -> {
-        String ansi = Valor.WHITE;
-        if (c.getGrupo() != null && c.getGrupo().getColorGrupo() != null) {
-            ansi = c.getGrupo().getColorGrupo();
-        }
-        return ansi;
-    };
+        java.util.function.Function<Casilla, String> ansiGrupo = c -> {
+            String ansi = Valor.WHITE;
+            if (c.getGrupo() != null && c.getGrupo().getColorGrupo() != null) {
+                ansi = c.getGrupo().getColorGrupo();
+            }
+            return ansi;
+        };
 
-        sb.append("\nhola\n");
         // Norte
         for (Casilla c : ladoNorte) {
             String celda = "|" + ansiGrupo.apply(c)
@@ -185,55 +217,41 @@ public String toString() {
                     + Valor.RESET;
             sb.append(celda);
         }
-        sb.append("|\n"); // cierra la última celda
+        sb.append("|\n");
 
-        // Oeste y Este
+        // Oeste y Este (ambos tienen 9)
         for (int i = ladoOeste.size() - 1; i >= 0; i--) {
             Casilla o = ladoOeste.get(i);
             Casilla e = ladoEste.get(ladoEste.size() - 1 - i);
 
             int espaciosCentro = ANCHO_CASILLA * (ladoNorte.size() - 2) + (ladoNorte.size() - 2);
 
-        String celdaO = "|" + ansiGrupo.apply(o)
-                + String.format("%-" + ANCHO_CASILLA + "s", nombreO)
-                + Valor.RESET;
-        String celdaE = "|" + ansiGrupo.apply(e)
-                + String.format("%-" + ANCHO_CASILLA + "s", nombreE)
-                + Valor.RESET;
+            String celdaO = "|" + ansiGrupo.apply(o)
+                    + String.format("%-" + ANCHO_CASILLA + "s", nombreConIniciales(o))
+                    + Valor.RESET;
 
-        sb.append(celdaO)
-          .append(" ".repeat(espaciosCentro))
-          .append(celdaE)
-          .append("|\n");
-    }
+            String celdaE = "|" + ansiGrupo.apply(e)
+                    + String.format("%-" + ANCHO_CASILLA + "s", nombreConIniciales(e))
+                    + Valor.RESET;
 
-    // === LADO SUR (derecha → izquierda, Salida abajo a la derecha) ===
-    for (int i = ladoSur.size() - 1; i >= 0; i--) {
-        Casilla c = ladoSur.get(i);
-
-        String avataresTexto = "";
-        if (c.getAvatares() != null && !c.getAvatares().isEmpty()) {
-            StringBuilder ids = new StringBuilder();
-            for (Avatar av : c.getAvatares()) {
-                ids.append(av.getId());
-            }
-            avataresTexto = "[" + ids + "]";
+            sb.append(celdaO)
+                    .append(" ".repeat(espaciosCentro))
+                    .append(celdaE)
+                    .append("|\n");
         }
 
-        String nombreCelda = c.getNombre() + avataresTexto;
-        String celda = "|" + ansiGrupo.apply(c)
-                + String.format("%-" + ANCHO_CASILLA + "s", nombreCelda)
-                + Valor.RESET;
-        sb.append(celda);
+        // Sur (inverso)
+        for (int i = ladoSur.size() - 1; i >= 0; i--) {
+            Casilla c = ladoSur.get(i);
+            String celda = "|" + ansiGrupo.apply(c)
+                    + String.format("%-" + ANCHO_CASILLA + "s", nombreConIniciales(c))
+                    + Valor.RESET;
+            sb.append(celda);
+        }
+        sb.append("|\n");
+
+        return sb.toString();
     }
-    sb.append("|\n");
-
-    return sb.toString();
-}
-
-
-
-
 
     //Método usado para buscar la casilla con el nombre pasado como argumento:
     public Casilla encontrar_casilla(String nombre){
@@ -249,4 +267,3 @@ public String toString() {
         return null; // si no existe una casilla con ese nombre devuelve null
     }
 }
-
