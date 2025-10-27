@@ -856,7 +856,8 @@ public class Menu {
             }
         }
     }
-    
+
+    //imprime las casillas mas frecuentadas (en caso de que una sobresalga sobre el resto solo imprime esa)
     private void casillasfrecuentadas(){
 
         if(this.tablero == null){
@@ -888,6 +889,7 @@ public class Menu {
         }
     }
 
+    //imprime las estadisticas de la partida
     private void estadisticaspartida(){
         casillasfrecuentadas();
     }
@@ -931,7 +933,6 @@ public class Menu {
             }
         }
     }
-
 }
 
 
