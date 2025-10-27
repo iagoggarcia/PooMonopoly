@@ -426,8 +426,12 @@ public class Menu {
         System.out.println("Nombre: " + c.getNombre());
         System.out.println("Tipo: " + c.getTipo());
         System.out.println("Posición: " + c.getPosicion());
-        System.out.println("Valor: " + c.getValor());
-        System.out.println("Dueño: " + (c.getDuenho() != null ? c.getDuenho().getNombre() : "(sin dueño)"));
+        if(c.getValor() > 0) {
+            System.out.println("Valor: " + c.getValor());
+        }
+        if(c.getDuenho() != banca && c.getDuenho() != null){
+            System.out.println("Dueño: " + c.getDuenho());
+        }
 
         if (c.getAvatares() != null && !c.getAvatares().isEmpty()) {
             System.out.print("Avatares en la casilla: ");
