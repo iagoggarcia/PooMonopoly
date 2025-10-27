@@ -69,6 +69,7 @@ public class Menu {
             }
 
             Jugador jugador = new Jugador(nombre, tipoAvatar, salida, avatares);
+            salida.setContador(salida.getContador+1); //aumento el contador de casilla por cada jugador que se cree
             jugadores.add(jugador);
 
             System.out.println("Jugador creado: ");
@@ -217,6 +218,10 @@ public class Menu {
                 else if (l.equals("jugador")) {
                     analizarComando("jugador");
                 }
+                else if (l.startsWith("hipotecar ")) {
+                    String nombre = linea.substring("hipotecar".length()).trim();
+                    analizarComando("hipotecar " + nombre);
+                }
                 else {
                     System.err.println("comando no reconocido en el archivo: " + lineaOriginal);
                 }
@@ -305,6 +310,10 @@ public class Menu {
                 System.err.println("Formato inválido para 'crear jugador'. Uso: crear jugador <Nombre> <Tipo>");
             }
         }
+        else if (comando.startsWith("hipotecar ")) {
+            String nombreCasilla = comando.substring("hipotecar".length()).trim();
+            hipotecar(nombreCasilla);
+        }
     }
 
     //función para crear jugador desde archivo
@@ -331,6 +340,7 @@ public class Menu {
         Casilla salida = tablero.getPosiciones().get(0).get(0);
         Jugador jugador = new Jugador(partes[0], partes[1], salida, avatares);
         this.jugadores.add(jugador);
+        salida.setContador(salida.getContador+1); //si creo un jugador desde el archivo tambien aumento el contador de salida
 
         // Faltaba printear esto cuando se crea un jugador nuevo:
         System.out.println("Jugador creado: ");
@@ -526,6 +536,7 @@ public class Menu {
 
         av.moverAvatar(this.tablero.getPosiciones(), suma);
         Casilla destino = av.getLugar();
+        destino.setContador(destino.getContador+1); //aumentamos el contador de la casilla en la que caemos
 
         if (destino.getPosicion() < origen.getPosicion()) {//comprobacion de si pasa la casilla salida
             actual.sumarFortuna(Valor.SUMA_VUELTA);
@@ -611,6 +622,75 @@ public class Menu {
             System.out.println("El jugador intenta comprar una casilla en la que no está posicionado");
         }
     }
+
+    private void hipotecar(String nombre) {
+        Casilla casilla = this.tablero.encontrar_casilla(nombre);
+
+        if (casilla == null) {
+            System.out.println("No existe una casilla con el nombre '" + nombre + "'.");
+            return;
+        }
+
+        Jugador actual = this.jugadores.get(this.turno);
+
+        if (!casilla.getTipo(),equalsIgnoreCase("solar")) {
+            System.out.println("No puedes hipotecar una casilla de tipo '" + c.getTipo() + "'.");
+            return;
+        }
+
+        if (casilla.getDuenho() == NULL || casilla.getDuenho() != actual) {
+            System.out.println("No puedes hipotecar " + c.getNombre + " porque no eres su propietario.");
+            return;
+        }
+
+        if (casilla.isHipotecada()) {
+            System.ou.println("Laa casilla '" + c.getNombre() + "' ya está hipotecada.");
+            return;
+        }
+
+        // añadir después: si tiene edificios, pedir que los venda y demás
+
+        float valorHipoteca = casilla.getHipoteca();
+        casilla.setHipotecada(true);
+        actual.sumarFortuna(valorHipotecateca);
+
+        System.out.println(actual.getNombre() + " recibe " + valorHipoteca + "€ por la hipoteca de " + casilla.getNombre() + ". No se puede recibir alquileres ni edificar en el grupo " + casilla.getGrupo().getColorGrupo());
+    }
+
+    private void deshipotecar(String nombre) {
+        Casilla casilla = this.tablero.encontrar_casilla(nombre);
+
+        if (casilla == null) {
+            System.out.println("No existe una casilla con el nombre '" + nombre + "'.");
+            return;
+        }
+
+        Jugador actual = this.jugadores.get(this.turno);
+
+        if (!casilla.getTipo(),equalsIgnoreCase("solar")) {
+            System.out.println("No puedes deshipotecar una casilla de tipo '" + c.getTipo() + "'.");
+            return;
+        }
+
+        if (casilla.getDuenho() == NULL || casilla.getDuenho() != actual) {
+            System.out.println("No puedes deshipotecar " + c.getNombre + " porque no eres su propietario.");
+            return;
+        }
+
+        if (casilla.isHipotecada()) {
+            System.ou.println("La casilla '" + c.getNombre() + "' no está hipotecada.");
+            return;
+        }
+
+        // añadir después: si tiene edificios, pedir que los venda y demás
+
+        float valorHipoteca = casilla.getHipoteca();
+        casilla.setHipotecada(true);
+        actual.sumarFortuna(valorHipoteca);
+
+        System.out.println(actual.getNombre() + " recibe " + valorHipoteca + "€ por la hipoteca de " + casilla.getNombre() + ". No se puede recibir alquileres ni edificar en el grupo " + casilla.getGrupo().getColorGrupo());
+    }
+
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'salir carcel'.
     // Solo puede ejecutarlo el jugador cuyo índice coincide con 'turno' (o si en el comando se especificó ese jugador).
@@ -764,6 +844,42 @@ public class Menu {
             }
         }
     }
+    
+    private void casillasfrecuentadas(){
+
+        if(this.tablero == null){
+            System.out.println("El tablero no está inicializado.");
+            return;
+        }
+        if(this.tablero.getPosiciones() == null){
+            System.out.println("No hay casillas inicializadas en el tablero.");
+            return;
+        }
+        int maximo = 0;
+        ArrayList<Casilla> provisional = new ArrayList<>();
+
+        for (ArrayList<Casilla> lado : this.tablero.getPosiciones()) { //recorremos el array de casillas, lado por lado
+            if (lado == null) continue;
+            for (Casilla c : lado) {
+                if (c == null) continue;
+                if(maximo <= c.getContador()){
+                    maximo = c.getContador();
+                    provisional.add(c);
+                }
+            }
+        }
+
+        for(Casilla c : provisional){
+            if(c.getContador() == maximo){
+                System.out.println("La casilla " + c.getNombre() + " es la mas visitada/de las mas visitadas con " + c.getContador() + " visitas.");
+            }
+        }
+    }
+
+    private void estadisticaspartida(){
+        casillasfrecuentadas();
+    }
+
 }
 
 
