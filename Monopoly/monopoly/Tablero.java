@@ -40,7 +40,7 @@ public class Tablero {
         ladoNorte.add(new Casilla("Solar15", "solar", 27, 2600000, banca, 220000, 1300000, 1500000, 300000, 600000));
         ladoNorte.add(new Casilla("Solar16", "solar", 28, 2600000, banca,220000, 1300000, 1500000, 300000, 600000));
         ladoNorte.add(new Casilla("Serv2", "servicios", 29, 500000, banca,50000));
-        ladoNorte.add(new Casilla("Solar17", "solar", 30, 2800000,banca,240000, 1400000, 1500000. 300000, 600000));
+        ladoNorte.add(new Casilla("Solar17", "solar", 30, 2800000,banca,240000, 1400000, 1500000, 300000, 600000));
         ladoNorte.add(new Casilla("IrCarcel", "especial", 31, banca));
 
         // Grupos (NORTE)
@@ -194,7 +194,6 @@ public class Tablero {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        // ¡Este es el orden correcto!
         ArrayList<Casilla> ladoSur   = posiciones.get(0);
         ArrayList<Casilla> ladoOeste = posiciones.get(1);
         ArrayList<Casilla> ladoNorte = posiciones.get(2);

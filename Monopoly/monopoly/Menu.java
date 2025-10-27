@@ -69,7 +69,7 @@ public class Menu {
             }
 
             Jugador jugador = new Jugador(nombre, tipoAvatar, salida, avatares);
-            salida.setContador(salida.getContador+1); //aumento el contador de casilla por cada jugador que se cree
+            salida.setContador(salida.getContador()+1); //aumento el contador de casilla por cada jugador que se cree
             jugadores.add(jugador);
 
             System.out.println("Jugador creado: ");
@@ -107,17 +107,18 @@ public class Menu {
             do {
                 System.out.println("\n--- Turno de " + actual.getNombre() + " ---");
                 System.out.println("Comandos:");
-                System.out.println(" - crear jugador <nombre> <tipo>");
+                System.out.println(" - crear jugador <nombreJugador> <tipoAvatar>");
                 System.out.println(" - ver tablero");
                 System.out.println(" - lanzar dados");
                 System.out.println(" - lanzar dados X+Y");
-                System.out.println(" - describir jugador nombre");
-                System.out.println(" - describir nombre");
+                System.out.println(" - describir jugador <nombreJugador>");
+                System.out.println(" - describir <nombreCasilla>");
                 //System.out.println(" - Describir avatar <id>");
                 System.out.println(" - listar jugadores");
                 //System.out.println(" - Listar avatares");
                 System.out.println(" - listar enventa");
-                System.out.println(" - comprar nombre");
+                System.out.println(" - comprar <nombreCasilla>");
+                System.out.println(" - edificar <tipoEdificio>");
                 System.out.println(" - salir cárcel");
                 System.out.println(" - acabar turno");
                 System.out.println(" - salir (para terminar)\n");
@@ -222,6 +223,10 @@ public class Menu {
                     String nombre = linea.substring("hipotecar".length()).trim();
                     analizarComando("hipotecar " + nombre);
                 }
+                else if (l.startsWith("edificar ")) {
+                    String nombre = linea.substring("edificar".length()).trim();
+                    analizarComando("edificar " + nombre);
+                }
                 else {
                     System.err.println("comando no reconocido en el archivo: " + lineaOriginal);
                 }
@@ -314,6 +319,10 @@ public class Menu {
             String nombreCasilla = comando.substring("hipotecar".length()).trim();
             hipotecar(nombreCasilla);
         }
+        else if (comando.startsWith("edificar ")) {
+            String tipoEdificio = comando.substring("edificar".length()).trim();
+            crearEdificio(tipoEdificio);
+        }
     }
 
     //función para crear jugador desde archivo
@@ -340,7 +349,7 @@ public class Menu {
         Casilla salida = tablero.getPosiciones().get(0).get(0);
         Jugador jugador = new Jugador(partes[0], partes[1], salida, avatares);
         this.jugadores.add(jugador);
-        salida.setContador(salida.getContador+1); //si creo un jugador desde el archivo tambien aumento el contador de salida
+        salida.setContador(salida.getContador()+1); //si creo un jugador desde el archivo tambien aumento el contador de salida
 
         // Faltaba printear esto cuando se crea un jugador nuevo:
         System.out.println("Jugador creado: ");
@@ -536,7 +545,7 @@ public class Menu {
 
         av.moverAvatar(this.tablero.getPosiciones(), suma);
         Casilla destino = av.getLugar();
-        destino.setContador(destino.getContador+1); //aumentamos el contador de la casilla en la que caemos
+        destino.setContador(destino.getContador()+1); //aumentamos el contador de la casilla en la que caemos
 
         if (destino.getPosicion() < origen.getPosicion()) {//comprobacion de si pasa la casilla salida
             actual.sumarFortuna(Valor.SUMA_VUELTA);
@@ -633,18 +642,18 @@ public class Menu {
 
         Jugador actual = this.jugadores.get(this.turno);
 
-        if (!casilla.getTipo(),equalsIgnoreCase("solar")) {
-            System.out.println("No puedes hipotecar una casilla de tipo '" + c.getTipo() + "'.");
+        if (!casilla.getTipo().equalsIgnoreCase("solar")) {
+            System.out.println("No puedes hipotecar una casilla de tipo '" + casilla.getTipo() + "'.");
             return;
         }
 
-        if (casilla.getDuenho() == NULL || casilla.getDuenho() != actual) {
-            System.out.println("No puedes hipotecar " + c.getNombre + " porque no eres su propietario.");
+        if (casilla.getDuenho() == null || casilla.getDuenho() != actual) {
+            System.out.println("No puedes hipotecar " + casilla.getNombre() + " porque no eres su propietario.");
             return;
         }
 
         if (casilla.isHipotecada()) {
-            System.ou.println("Laa casilla '" + c.getNombre() + "' ya está hipotecada.");
+            System.out.println("Laa casilla '" + casilla.getNombre() + "' ya está hipotecada.");
             return;
         }
 
@@ -652,7 +661,7 @@ public class Menu {
 
         float valorHipoteca = casilla.getHipoteca();
         casilla.setHipotecada(true);
-        actual.sumarFortuna(valorHipotecateca);
+        actual.sumarFortuna(valorHipoteca);
 
         System.out.println(actual.getNombre() + " recibe " + valorHipoteca + "€ por la hipoteca de " + casilla.getNombre() + ". No se puede recibir alquileres ni edificar en el grupo " + casilla.getGrupo().getColorGrupo());
     }
@@ -667,18 +676,18 @@ public class Menu {
 
         Jugador actual = this.jugadores.get(this.turno);
 
-        if (!casilla.getTipo(),equalsIgnoreCase("solar")) {
-            System.out.println("No puedes deshipotecar una casilla de tipo '" + c.getTipo() + "'.");
+        if (!casilla.getTipo().equalsIgnoreCase("solar")) {
+            System.out.println("No puedes deshipotecar una casilla de tipo '" + casilla.getTipo() + "'.");
             return;
         }
 
-        if (casilla.getDuenho() == NULL || casilla.getDuenho() != actual) {
-            System.out.println("No puedes deshipotecar " + c.getNombre + " porque no eres su propietario.");
+        if (casilla.getDuenho() == null || casilla.getDuenho() != actual) {
+            System.out.println("No puedes deshipotecar " + casilla.getNombre() + " porque no eres su propietario.");
             return;
         }
 
         if (casilla.isHipotecada()) {
-            System.ou.println("La casilla '" + c.getNombre() + "' no está hipotecada.");
+            System.out.println("La casilla '" + casilla.getNombre() + "' no está hipotecada.");
             return;
         }
 
@@ -783,7 +792,10 @@ public class Menu {
             System.out.println("Avatar: " + jugador.getAvatar().getId());
             System.out.println("Fortuna: " + jugador.getFortuna());
             if (jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty()) {
-                System.out.println("Propiedades: " + jugador.getPropiedades());
+                System.out.println("Propiedades: " + jugador.getPropiedades().toString());
+            }
+            if (jugador.getEdificios() != null &&  !jugador.getEdificios().isEmpty()) {
+                System.out.println("Edificios en propiedad: " + jugador.getEdificios().toString());
             }
             System.out.println("}");
             System.out.print("\n");
@@ -878,6 +890,46 @@ public class Menu {
 
     private void estadisticaspartida(){
         casillasfrecuentadas();
+    }
+
+    /* Función que crea el edificio si se cumplen los requisitos necesarios
+     * Se le llama desde el menú de esta forma: crearEdificio(tipoEdificio, jugadores.getTurno())
+     */
+    public void crearEdificio(String tipoEdificio) {
+        Jugador actual = this.jugadores.get(this.turno);
+        Casilla casilla = actual.getAvatar().getLugar();
+        int precio;
+        switch (tipoEdificio.toLowerCase()) {
+            case "casa":
+            case "hotel":
+                precio = casilla.getValorCasayHotel();
+                break;
+            case "piscina":
+                precio = casilla.getValorPiscina();
+                break;
+            case "pista":
+                precio = casilla.getValorPistaDeporte();
+                break;
+            default:
+                System.err.println("Tipo de edificio no válido.");
+                return;
+        }
+
+        if (actual.getFortuna() < precio ) {
+            System.err.println("La fortuna de " + actual.getNombre() + " no es suficiente para edificar un/a " + tipoEdificio + " en la casilla " + casilla.getNombre());
+        }
+        else {
+            if (casilla.getDuenho() == actual) {
+                Edificio e = new Edificio(tipoEdificio, actual, casilla);
+                casilla.anhadirEdificioACasilla(e); // añadimos el nuevo edificio a la casilla
+                actual.anhadirEdificioAJugador(e); // añadimos el edificio también al jugador
+                actual.sumarFortuna(-precio); // restamos lo que se acaba de gastar
+                System.out.println("Se ha edificado un/a " +  tipoEdificio + " en " +  casilla.getNombre() + ". La fortuna de " + actual.getNombre() + " se reduce en " + precio + "€");
+            }
+            else {
+                System.err.println(actual.getNombre() + " no puede edificar en " + casilla.getNombre() + " porque no le pertenece");
+            }
+        }
     }
 
 }

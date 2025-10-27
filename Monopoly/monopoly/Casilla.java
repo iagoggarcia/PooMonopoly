@@ -18,10 +18,11 @@ public class Casilla {
     private ArrayList<Avatar> avatares; //Avatares que están situados en la casilla.
     private boolean hipotecada; // indica si la casilla está hipotecada
     private int contador; // indica cuantas veces ha caido un jugador en esa casilla
-    private int valorCasayHotel; // Indica el coste de edificar una casa en una casilla específica
-    private int valorHotel; // Indica el coste de edificar un hotel en una casilla específica
+    private int valorCasayHotel; // Indica el coste de edificar una casa o un hotel en una casilla específica (es la misma variable porque cuestan lo mismo)
     private int valorPiscina; // Indica el coste de edificar una piscina en una casilla específica
     private int valorPistaDeporte; // Indica el coste de edificar una pista de deporte en una casilla específica
+    private ArrayList<Edificio> edificios; // ArrayList donde guardaré los edificios de cada casilla
+
 
     //Constructores:
     public Casilla() {
@@ -42,6 +43,7 @@ public class Casilla {
         this.avatares = new ArrayList<>();
         this.hipoteca = hipoteca;
         this.valorCasayHotel = valorCasayHotel;
+        this.edificios = new ArrayList<>();
     }
 
     /*Constructor para casillas Servicios o Transporte:
@@ -178,16 +180,40 @@ public class Casilla {
         return hipotecada;
     }
 
-    public void setHipoteca(boolean hipotecada) {
+    public void setHipotecada(boolean hipotecada) {
         this.hipotecada = hipotecada;
     }
 
-    public int getValorCasa() {
-        return valorCasa;
+    public int getValorCasayHotel() {
+        return valorCasayHotel;
     }
 
-    public void setValorCasa(int valorCasa) {
-        this.valorCasa = valorCasa;
+    public void setValorCasayHotel(int valorCasa) {
+        this.valorCasayHotel = valorCasayHotel;
+    }
+
+    public int getValorPiscina() {
+        return valorPiscina;
+    }
+
+    public void setValorPiscina(int valorPiscina) {
+        this.valorPiscina = valorPiscina;
+    }
+
+    public int getValorPistaDeporte() {
+        return valorPistaDeporte;
+    }
+
+    public void setValorPistaDeporte(int valorPistaDeporte) {
+        this.valorPistaDeporte = valorPistaDeporte;
+    }
+
+    public ArrayList<Edificio> getEdificios() {
+        return edificios;
+    }
+
+    public void setEdificios(ArrayList<Edificio> edificios) {
+        this.edificios = edificios;
     }
 
     //Método utilizado para añadir un avatar al array de avatares en casilla.
@@ -549,5 +575,25 @@ public class Casilla {
         }
 
         return "\nJugadores: " + nombres;
+    }
+
+    /* Esta función añade un edificio nuevo al array edificios
+    * de la casilla en la que se encuentra el jugador
+     */
+    public void anhadirEdificioACasilla(Edificio edificio) {
+        if (edificio == null) {
+            System.out.println("No se puede añadir un edificio nulo.");
+            return;
+        }
+        edificios.add(edificio);
+    }
+
+    /** Se puede tener un toString por clase, así que hice este
+    * para que salgan los nombres de las casillas bien printeados
+    * en el array propiedades del jugador
+    * */
+    @Override
+    public String toString() {
+        return this.nombre;
     }
 }

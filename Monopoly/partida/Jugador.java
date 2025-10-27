@@ -15,6 +15,8 @@ public class Jugador {
     private int tiradasCarcel; //Cuando está en la carcel, contará las tiradas sin éxito que ha hecho allí para intentar salir (se usa para limitar el numero de intentos).
     private int vueltas; //Cuenta las vueltas dadas al tablero.
     private ArrayList<Casilla> propiedades; //Propiedades que posee el jugador.
+    private ArrayList<Edificio> edificios; // ArrayList donde guardaré los edificios de cada casilla
+
 
     //Constructor vacío. Se usará para crear la banca.
     // estaba mal, como pone en el esqueleto es VACÍO, no hay que completar nada
@@ -37,6 +39,7 @@ public class Jugador {
         this.tiradasCarcel = 0; // antes = tiradasCarcel
         this.vueltas = 0; 
         this.propiedades = new ArrayList<>(); // solo hay que inicializar propiedades como  una lista vaćía
+        this.edificios = new ArrayList<>(); // aquí guardamos los edificios que creó el jugador
     }
 
     public Jugador(float valor){
@@ -82,6 +85,14 @@ public class Jugador {
 
     public void setVueltas(int vueltas) {
         this.vueltas = vueltas;
+    }
+
+    public ArrayList<Edificio> getEdificios() {
+        return edificios;
+    }
+
+    public void setEdificios(ArrayList<Edificio> edificios) {
+        this.edificios = edificios;
     }
 
     //Otros métodos:
@@ -178,5 +189,13 @@ public class Jugador {
         this.enCarcel = true;
         this.tiradasCarcel = 0;
         System.out.println(nombre + " ha sido encarcelado y trasladado a la casilla " + carcel.getNombre() + ".");
+    }
+
+    public void anhadirEdificioAJugador(Edificio edificio) {
+        if (edificio == null) {
+            System.out.println("No se puede añadir un edificio nulo.");
+            return;
+        }
+        edificios.add(edificio);
     }
 }
