@@ -27,7 +27,18 @@ public class Edificio {
         this.tipo = tipo;
         this.propietario = propietario;
         this.lugar = lugar;
-        this.precio = lugar.getValorCasayHotel();
+        // El switch es para asignarle un valor concreto que tiene ese tipo de edificio en la casilla en la que se quiere construir
+        switch (this.tipo) {
+            case "casa":
+            case "hotel":
+                precio = lugar.getValorCasayHotel();
+                break;
+            case "piscina":
+                precio = lugar.getValorPiscina();
+                break;
+            case "pista":
+                precio = lugar.getValorPistaDeporte();
+        }
         this.id = generarId(); // falta por crear la función que genera los id para los edificios
     }
 
@@ -71,10 +82,13 @@ public class Edificio {
         this.precio = precio;
     }
 
+
+    /* Función que crea un id para cada edificio utilizando su tipo de edificio
+     * y el número de edificio
+     */
     public String generarId() {
         int numId = 0;
-        char numIdChar;
-        String id = "";
+        String id = ""; // la inicializo vacía
 
         switch (tipo) {
             case "casa":
@@ -94,10 +108,9 @@ public class Edificio {
                 numId = contadorPistasDeporte;
                 break;
             default:
-                throw new IllegalArgumentException("Tipo desconocido: " + tipo);
+                throw new IllegalArgumentException("Tipo desconocido: " + tipo); // mensaje de error
         }
 
-        numIdChar = (char) numId;
         id = tipo + '-' + numId;
 
         return id;

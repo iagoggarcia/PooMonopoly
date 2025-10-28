@@ -22,6 +22,10 @@ public class Casilla {
     private int valorPiscina; // Indica el coste de edificar una piscina en una casilla específica
     private int valorPistaDeporte; // Indica el coste de edificar una pista de deporte en una casilla específica
     private ArrayList<Edificio> edificios; // ArrayList donde guardaré los edificios de cada casilla
+    private int numCasas; // Para controlar que se puedan construir 4 casas en una casilla COMO MÁXIMO
+    private int numHoteles; // Para controlar que haya un ÚNICO hotel si ya se han construido 4 casas, y las casas se sustituyen por el hotel
+    private int numPiscinas; // Para construir una ÚNICA piscina si ya hay un hotel
+    private int numPistas; // Para construir una ÚNICA pista de deporte si ya hay un hotel y una piscina
 
 
     //Constructores:
@@ -43,7 +47,13 @@ public class Casilla {
         this.avatares = new ArrayList<>();
         this.hipoteca = hipoteca;
         this.valorCasayHotel = valorCasayHotel;
+        this.valorPiscina = valorPiscina;
+        this.valorPistaDeporte = valorPistaDeporte;
         this.edificios = new ArrayList<>();
+        this.numCasas = 0;
+        this.numHoteles = 0;
+        this.numPiscinas = 0;
+        this.numPistas = 0;
     }
 
     /*Constructor para casillas Servicios o Transporte:
@@ -214,6 +224,38 @@ public class Casilla {
 
     public void setEdificios(ArrayList<Edificio> edificios) {
         this.edificios = edificios;
+    }
+
+    public int getNumCasas() {
+        return numCasas;
+    }
+
+    public void setNumCasas(int numCasas) {
+        this.numCasas = numCasas;
+    }
+
+    public int getNumHoteles() {
+        return numHoteles;
+    }
+
+    public void setNumHoteles(int numHoteles) {
+        this.numHoteles = numHoteles;
+    }
+
+    public int getNumPiscinas() {
+        return numPiscinas;
+    }
+
+    public void setNumPiscinas(int numPiscinas) {
+        this.numPiscinas = numPiscinas;
+    }
+
+    public int getNumPistas() {
+        return numPistas;
+    }
+
+    public void setNumPistas(int numPistas) {
+        this.numPistas = numPistas;
     }
 
     //Método utilizado para añadir un avatar al array de avatares en casilla.
@@ -586,7 +628,43 @@ public class Casilla {
             return;
         }
         edificios.add(edificio);
+        switch (edificio.getTipo()) {
+            case "casa":
+                numCasas++;
+                break;
+            case "hotel":
+                numHoteles++;
+                break;
+            case "piscina":
+                numPiscinas++;
+                break;
+            case "pista":
+                numPistas++;
+                break;
+        }
     }
+
+    /* Función que va iterando sobre el array de edificios que son del jugador
+     * y va comprobando si el tipo de cada edificio es casa, si lo es,
+     * se elimina del array
+     */
+    public void quitarCuatroCasas() {
+        int retiradas = 0; // para controlar que solo se eliminen 4
+        for (int i = 0; i < edificios.size() && retiradas < 4; i++) { // mientras no se hayan eliminado 4 casas y no se sobrepase el tamaño del array
+            Edificio e = edificios.get(i); // cogemos el edificio número i del array
+            if (e != null && "casa".equalsIgnoreCase(e.getTipo())) { // comprobamos que no es null y que su tipo es "casa
+                edificios.remove(i);   // quito la casa del array
+                numCasas--;            // actualizo contador
+                i--;                   // retrocedo índice porque la lista ha disminuido, ahora el último elemento es el anterior
+                retiradas++;
+            }
+
+            if (e.getPropietario() != null) {
+                e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos las casas de los edificios del jugador
+            }
+        }
+    }
+
 
     /** Se puede tener un toString por clase, así que hice este
     * para que salgan los nombres de las casillas bien printeados
