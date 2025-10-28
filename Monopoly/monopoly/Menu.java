@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import partida.*;
 
@@ -119,6 +120,7 @@ public class Menu {
                 System.out.println(" - listar enventa");
                 System.out.println(" - comprar <nombreCasilla>");
                 System.out.println(" - edificar <tipoEdificio>");
+                System.out.println(" - estadisticas");
                 System.out.println(" - salir cárcel");
                 System.out.println(" - acabar turno");
                 System.out.println(" - salir (para terminar)\n");
@@ -227,6 +229,13 @@ public class Menu {
                     String nombre = linea.substring("edificar".length()).trim();
                     analizarComando("edificar " + nombre);
                 }
+                else if(l.equals("estadisticas")){
+                    analizarComando("estadisticas");
+                }
+                else if(l.startsWith("estadisticas ")) {
+                    String nombre = linea.substring("estadisticas".length()).trim();
+                    analizarComando("estadisticas " + nombre);
+                }
                 else {
                     System.err.println("comando no reconocido en el archivo: " + lineaOriginal);
                 }
@@ -323,6 +332,12 @@ public class Menu {
             String tipoEdificio = comando.substring("edificar".length()).trim();
             crearEdificio(tipoEdificio);
         }
+        else if(comando.equalsIgnoreCase("estadisticas")) {
+            estadisticas();
+        }
+        //else if(comando.startsWith("estadisticas ")){
+
+        //}
     }
 
     //función para crear jugador desde archivo
@@ -875,6 +890,7 @@ public class Menu {
             if (lado == null) continue;
             for (Casilla c : lado) {
                 if (c == null) continue;
+
                 if(maximo <= c.getContador()){
                     maximo = c.getContador();
                     provisional.add(c);
@@ -884,14 +900,169 @@ public class Menu {
 
         for(Casilla c : provisional){
             if(c.getContador() == maximo){
-                System.out.println("La casilla " + c.getNombre() + " es la mas visitada/de las mas visitadas con " + c.getContador() + " visitas.");
+                System.out.println("casillaMasFrecuentada: " + c.getNombre()  + ",");
+            }
+        }
+    }
+
+    private void masvueltas(){
+        if(this.jugadores == null || this.jugadores.isEmpty()){
+            System.out.println("No hay jugadores registrados en la partida");
+            return;
+        }
+        else{
+            int maximo = 0;
+            ArrayList<Jugador> provisional = new ArrayList<>();
+            //ArrayList<Jugador> definitivo = new ArrayList<>(); //dejo esto comentado por si luego me piden el que mas adelantado vaya en la vuelta
+            for (Jugador j : this.jugadores) {
+                if (j.getVueltas() >= maximo) {
+                    maximo = j.getVueltas();
+                    provisional.add(j);
+                }
+            }
+            for (Jugador j : provisional) {
+                if(j.getVueltas() == maximo){
+                    System.out.println("jugadorMasVueltas: " + j.getNombre() + ",");
+                    //definitivo.add(j);
+                }
+            }
+        }
+    }
+
+    //funcion que imprime el jugador con mas valor de toda la partida (dinero, edificios, casillas)
+    private void encabeza(){
+        if(this.jugadores == null ||  this.jugadores.isEmpty()){
+            System.out.println("No hay jugadores registrados en la partida");
+            return;
+        }
+        else{
+            float maximo = 0;
+            Jugador maspatrimonio = null;
+            for(Jugador j: this.jugadores){
+                j.getPatrimonio();
+                if(j.getPatrimonio() >= maximo){
+                    maximo = j.getPatrimonio();
+                    maspatrimonio = j;
+                }
+            }
+            System.out.println("jugadorEnCabeza: " + maspatrimonio.getNombre() + ",");
+        }
+    }
+
+
+    //funcion que imprime los datos de la casilla mas rentable
+    private void casillarentable() {
+        if (this.jugadores == null || this.jugadores.isEmpty()) {
+            System.out.println("No hay jugadores registrados en la partida");
+            return;
+        } else {
+            ArrayList<Casilla> rentables = new ArrayList<>();
+            float maximo = Float.NEGATIVE_INFINITY;
+            for (Jugador j : this.jugadores) {
+                for (Casilla c : j.getPropiedades()) {
+                    c.getRentabilidad();//actualizo las rentabilidades
+                    if (c.getRentabilidad() >= maximo) {
+                        if(c.getDuenho() != this.banca && c.getDuenho() != null) {
+                            maximo = c.getRentabilidad();
+                            rentables.add(c);
+                        }
+                    }
+                }
+            }
+            if (rentables.isEmpty()) {
+                System.out.println("Ningun jugador tiene casillas en propiedad\n");
+                return;
+            } else {
+                for (Casilla c : rentables) {
+                    if (c.getRentabilidad() == maximo) {
+                        System.out.println("casillaMasRentable: " + c.getNombre() + ",");
+                    }
+                }
+            }
+        }
+    }
+
+
+    private int grupoduenho(Grupo g){
+        int tiene_duenho = 0;
+        if(g == null || g.getMiembros().isEmpty()){
+            System.out.println("Grupo no valido.\n");
+            return tiene_duenho;
+        }
+        else{
+            for(Casilla c: g.getMiembros()){
+                if(c.getDuenho() != this.banca && c.getDuenho() != null) {
+                    tiene_duenho = 1;
+                    return tiene_duenho;
+                }
+            }
+        }
+        return tiene_duenho;
+    }
+    //funcion que hace de setter para la rentabilidad de los grupos, no uso el setter directamente, se usa esta funcion para tenerlo actualizado siempre
+    private void rentabilidadgrupos(){
+        if(this.tablero == null){
+            System.out.println("No hay tablero inicializado\n");
+            return;
+        }
+        if(this.tablero.getGrupos() == null || this.tablero.getGrupos().isEmpty()){
+            System.out.println("No hay grupos\n");
+            return;
+        }
+        else{
+            HashMap<String,Grupo> grupos = this.tablero.getGrupos();
+            for(Grupo g : grupos.values()){
+                float rentacum = 0;
+                for(Casilla c : g.getMiembros()){
+                    if(c.getDuenho() != this.banca && c.getDuenho() != null) {
+                        c.getRentabilidad();
+                        rentacum += c.getRentabilidad();
+                    }
+                }
+                g.setRentabilidadgrupo(rentacum);
+            }
+        }
+    }
+
+    private void gruporentable(){
+        if(this.tablero == null){
+            System.out.println("No hay tablero registrado en la partida\n");
+            return;
+        }
+        else{
+            float maximo = Float.NEGATIVE_INFINITY;
+            HashMap<String,Grupo> grupos = this.tablero.getGrupos();
+            if(grupos == null || grupos.isEmpty()){
+                System.out.println("No hay grupos\n");
+                return;
+            }
+            else {
+                rentabilidadgrupos(); //actualizo las rentabilidades
+                for (Grupo g : grupos.values()) {
+                    if(grupoduenho(g) == 1) {
+                        if (g.getRentabilidadgrupo() > maximo) {
+                            maximo = g.getRentabilidadgrupo();
+                        }
+                    }
+                }
+                for (Grupo g : grupos.values()) {
+                    if (grupoduenho(g) == 1) {
+                        if (g.getRentabilidadgrupo() == maximo) {
+                            System.out.println("grupoMasRentable: " + g.getColorGrupo() + ",");
+                        }
+                    }
+                }
             }
         }
     }
 
     //imprime las estadisticas de la partida
-    private void estadisticaspartida(){
+    private void estadisticas(){
+        casillarentable();
+        gruporentable();
         casillasfrecuentadas();
+        masvueltas();
+        encabeza();
     }
 
     /* Función que crea el edificio si se cumplen los requisitos necesarios
