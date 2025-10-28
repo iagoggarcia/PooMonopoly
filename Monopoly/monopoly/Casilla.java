@@ -301,8 +301,14 @@ public class Casilla {
                     System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");
                     return true;
                 }
+                //  si la casilla está hipotecada, no se cobra el alquiler
+                if (this.isHipotecada()) {
+                    System.out.println("[" + this.nombre + "] está hipotecada. No se cobra alquiler.");
+                    return true;
+                }
                 // si pertenece a otro jugador, calculamos el alquiler
                 float alquilerGrupo = this.impuesto; // alquiler base, definido en el tablero
+
                 // comprobamos si el dueño tiene todo el grupo
                 if (this.grupo != null && this.grupo.esDuenhoGrupo(this.duenho)) {
                     // si tiene todo el grupo y no hay edificaciones (edificaciones no implementamos)
@@ -310,17 +316,30 @@ public class Casilla {
                     System.out.println(this.duenho.getNombre() + " posee todo el grupo de " + this.grupo.getColorGrupo() + ". Se cobra el doble del alquiler.");
                 }
 
-                // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
+                // Si no se puede pagar, se le da la opción a hipotecar 
                 if (actual.getFortuna() < alquilerGrupo) {
-                    System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
+                    System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean solaresHipotecables = false;
                     for (Casilla c : actual.getPropiedades()) {
-                        c.setDuenho(this.duenho); // las pasa al propietario de la deuda
-                        this.duenho.anhadirPropiedad(c);
+                        if (c.getTipo().equalsIgnoreCase("solar") && !c.isHipotecada()) {
+                            solaresHipotecables = true;
+                            break;
+                        }
                     }
-                    actual.getPropiedades().clear();
-                    return false;
+                    if (solaresHipotecables) {
+                        System.out.println("Debe hipotecar alguna propiedad para poder pagar o se declarará en bancarrota.");
+                        return true;
+                    } else {
+                        System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
+                        for (Casilla c : actual.getPropiedades()) {
+                            c.setDuenho(this.duenho); // las pasa al propietario de la deuda
+                            this.duenho.anhadirPropiedad(c);
+                        }
+                        actual.getPropiedades().clear();
+                        return false;
+                    }
                 }
-
                 // realizamos el pago
                 actual.sumarFortuna(-alquilerGrupo);
                 actual.sumarGastos(alquilerGrupo);

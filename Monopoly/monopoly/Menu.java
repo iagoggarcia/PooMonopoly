@@ -229,6 +229,10 @@ public class Menu {
                     String nombre = linea.substring("hipotecar".length()).trim();
                     analizarComando("hipotecar " + nombre);
                 }
+                else if (l.startsWith("deshipotecar ")) {
+                    String nombre = linea.substring("deshipotecar".lenght()).trim();
+                    analizarComando("deshipotecar " + nombre);
+                }
                 else if (l.startsWith("edificar ")) {
                     String nombre = linea.substring("edificar".length()).trim();
                     analizarComando("edificar " + nombre);
@@ -327,6 +331,10 @@ public class Menu {
         else if (comando.startsWith("hipotecar ")) {
             String nombreCasilla = comando.substring("hipotecar".length()).trim();
             hipotecar(nombreCasilla);
+        }
+        else if (comando.startsWith("deshipotecar ")) {
+            String nombreCasilla = comando.substring("deshipotecar ".length()).trim();
+            deshipotecar(nombreCasilla);
         }
         else if (comando.startsWith("edificar ")) {
             String tipoEdificio = comando.substring("edificar".length()).trim();
@@ -579,6 +587,12 @@ public class Menu {
 
         this.solvente = destino.evaluarCasilla(actual, this.banca, suma);//evaluamos casilla
 
+        if (!this.solvente) {
+            System.out.println(actual.getNombre() + " ha quedado en bancarrota y queda fuera del juego.");
+            acabarTurno();
+            return;
+        }
+
         // si el jugador cayó en 'Ir a la Cárcel', se aplica el encarcelamiento
         // esto pensé que iba en evaluarcasilla, pero como no tengo acceso al tablero desde casilla, tiene que ser desde aquí
         if (destino.getNombre().equalsIgnoreCase("Ir a la cárcel") ||
@@ -676,21 +690,26 @@ public class Menu {
         }
 
         if (casilla.isHipotecada()) {
-            System.out.println("Laa casilla '" + casilla.getNombre() + "' ya está hipotecada.");
+            System.out.println("La casilla '" + casilla.getNombre() + "' ya está hipotecada.");
             return;
         }
 
         // añadir después: si tiene edificios, pedir que los venda y demás
+        if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
+            System.out.println("No puedes hipotecar " + casilla.getNombre() + " porque tiene edificios. Véndelos antes.");
+            return;
+        }
 
         float valorHipoteca = casilla.getHipoteca();
         casilla.setHipotecada(true);
         actual.sumarFortuna(valorHipoteca);
 
-        System.out.println(actual.getNombre() + " recibe " + valorHipoteca + "€ por la hipoteca de " + casilla.getNombre() + ". No se puede recibir alquileres ni edificar en el grupo " + casilla.getGrupo().getColorGrupo());
+        String colorGrupo = (casilla.getGrupo() != null && casilla.getGrupo().getNombreColorGrupo() != null ) ? casilla.getGrupo().getNombreColorGrupo() : "sin grupo";
+        System.out.println(actual.getNombre() + " recibe " + valorHipoteca + "€ por la hipoteca de " + casilla.getNombre() + ". No se puede recibir alquileres ni edificar en el grupo " + colorGrupo + ".");
     }
 
     private void deshipotecar(String nombre) {
-        Casilla casilla = this.tablero.encontrar_casilla(nombre);
+        Casilla casilla = this.tablero.encontrar_casilla(nombre.toLowerCase());
 
         if (casilla == null) {
             System.out.println("No existe una casilla con el nombre '" + nombre + "'.");
@@ -709,20 +728,26 @@ public class Menu {
             return;
         }
 
-        if (casilla.isHipotecada()) {
+        if (!casilla.isHipotecada()) {
             System.out.println("La casilla '" + casilla.getNombre() + "' no está hipotecada.");
             return;
         }
 
-        // añadir después: si tiene edificios, pedir que los venda y demás
-
         float valorHipoteca = casilla.getHipoteca();
-        casilla.setHipotecada(true);
-        actual.sumarFortuna(valorHipoteca);
 
-        System.out.println(actual.getNombre() + " recibe " + valorHipoteca + "€ por la hipoteca de " + casilla.getNombre() + ". No se puede recibir alquileres ni edificar en el grupo " + casilla.getGrupo().getColorGrupo());
+        if (actual.getFortuna() < valorHipoteca) {
+            System.out.println("La fortuna de " + actual.getNombre() + " no es suficiente para deshipotecar " + casilla.getNombre() + ".");
+            return;
+        }
+
+        casilla.setHipotecada(false);
+        actual.sumarFortuna(-valorHipoteca);
+        actual.sumarGastos(valorHipoteca);
+
+        String colorGrupo = (casilla.getGrupo() != null && casilla.getGrupo().getNombreColorGrupo() != null ) ? casilla.getGrupo().getNombreColorGrupo() : "sin grupo";
+        System.out.println(actual.getNombre() + " paga " + valorHipoteca + "€ por deshipotecar " + casilla.getNombre() + ". Ahora puede recibir alquileres y edificar en el grupo " + colorGrupo + ".");
+
     }
-
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'salir carcel'.
     // Solo puede ejecutarlo el jugador cuyo índice coincide con 'turno' (o si en el comando se especificó ese jugador).
