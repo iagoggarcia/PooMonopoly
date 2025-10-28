@@ -101,8 +101,8 @@ class Grupo {
         if (c.equals(Valor.GREEN))  return "verde";
         if (c.equals(Valor.BLUE))   return "azul";
         if (c.equals(Valor.YELLOW)) return "amarillo";
-        if (c.equals(Valor.PURPLE)) return "rosa";     // o "morado" si prefieres
-        if (c.equals(Valor.CYAN))   return "celeste";  // coincide con tu uso en Tablero
+        if (c.equals(Valor.PURPLE)) return "rosa";
+        if (c.equals(Valor.CYAN))   return "celeste";
         if (c.equals(Valor.BROWN))  return "marrón";
         if (c.equals(Valor.BLACK))  return "negro";
         if (c.equals(Valor.WHITE))  return "blanco";

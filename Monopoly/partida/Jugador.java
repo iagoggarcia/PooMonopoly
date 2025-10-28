@@ -14,7 +14,9 @@ public class Jugador {
     private boolean enCarcel; //Será true si el jugador está en la carcel
     private int tiradasCarcel; //Cuando está en la carcel, contará las tiradas sin éxito que ha hecho allí para intentar salir (se usa para limitar el numero de intentos).
     private int vueltas; //Cuenta las vueltas dadas al tablero.
-    private ArrayList<Casilla> propiedades; //Propiedades que posee el jugador.
+    private ArrayList<Casilla> propiedades; // Propiedades que posee el jugador (casillas).
+    private ArrayList<Edificio> edificios; // ArrayList donde se guardan los edificios que le pertenecen al jugador
+
 
     //Constructor vacío. Se usará para crear la banca.
     // estaba mal, como pone en el esqueleto es VACÍO, no hay que completar nada
@@ -27,7 +29,6 @@ public class Jugador {
     * avatares creados (usado para dos propósitos: evitar que dos jugadores tengan el mismo nombre y
     * que dos avatares tengan mismo ID). Desde este constructor también se crea el avatar.
      */
-
     public Jugador(String nombre, String tipoAvatar, Casilla inicio, ArrayList<Avatar> avCreados) {
         this.nombre = nombre;
         this.avatar = new Avatar(tipoAvatar, this, inicio, avCreados); // para el avatar hay que crearlo y por defecto le puse que lo cree en la casilla inicial
@@ -37,6 +38,7 @@ public class Jugador {
         this.tiradasCarcel = 0; // antes = tiradasCarcel
         this.vueltas = 0; 
         this.propiedades = new ArrayList<>(); // solo hay que inicializar propiedades como  una lista vaćía
+        this.edificios = new ArrayList<>(); // aquí guardamos los edificios que creó el jugador
     }
 
     public Jugador(float valor){
@@ -82,6 +84,14 @@ public class Jugador {
 
     public void setVueltas(int vueltas) {
         this.vueltas = vueltas;
+    }
+
+    public ArrayList<Edificio> getEdificios() {
+        return edificios;
+    }
+
+    public void setEdificios(ArrayList<Edificio> edificios) {
+        this.edificios = edificios;
     }
 
     //Otros métodos:
@@ -179,4 +189,34 @@ public class Jugador {
         this.tiradasCarcel = 0;
         System.out.println(nombre + " ha sido encarcelado y trasladado a la casilla " + carcel.getNombre() + ".");
     }
+
+    /* Función que simplemente coge un edificio
+     * y lo añade a los edificios que le pertenecen
+     * al jugador
+     */
+    public void anhadirEdificioAJugador(Edificio edificio) {
+        if (edificio == null) {
+            System.out.println("No se puede añadir un edificio nulo.");
+            return;
+        }
+        edificios.add(edificio);
+    }
+
+    /* Esta función recibe un edificio, comprueba si está en el array
+    * edificios del jugador y si está, lo elimina
+    * Se usa al construir un hotel porque hay que quitar 4 casas
+    * y más adelante también lo uso en venderEdificio
+     */
+    public void eliminarEdificioDeJugador(Edificio edificio) {
+        if (edificio == null) {
+            System.out.println("No se puede eliminar un edificio nulo.");
+            return;
+        }
+        if (edificios.contains(edificio)) { // miro si está en los edificios que le pertenecen al jugador
+            edificios.remove(edificio); // y si está lo elimino
+        } else { // si no está, mensaje de error
+            System.err.println("El edificio " + edificio.getId() + " no pertenece a " + this.nombre);
+        }
+    }
+
 }
