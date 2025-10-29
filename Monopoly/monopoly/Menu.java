@@ -23,6 +23,10 @@ public class Menu {
     private boolean tirado; //Booleano para comprobar si el jugador que tiene el turno ha tirado o no.
     private boolean solvente; //Booleano para comprobar si el jugador que tiene el turno es solvente, es decir, si ha pagado sus deudas.
     private boolean enCurso;   // indica si la partida está activa
+    private ArrayList<Carta> cartasSuerte = new ArrayList<>();
+    private ArrayList<Carta> cartasCaja = new ArrayList<>();
+    private int indiceSuerte = 0;
+    private int indiceCaja = 0;
 
     public Menu() {
         this.jugadores = new ArrayList<>();
@@ -30,14 +34,34 @@ public class Menu {
         this.enCurso = false; //para elegir en el main si se inicializa o no con la funcion iniciarpartida
     }
 
+    private void inicializarCartas() {
+        // cartas de suerte
+        cartasSuerte.add(new Carta("suerte", 1, "Decides hacer un viaje de placer. Avanza hasta Solar19. Si pasas por la casilla de Salida, cobra 2.000.000€.", "mover Solar19"));
+        cartasSuerte.add(new Carta("suerte", 2, "Los acreedores te persiguen por impago. Ve a la Cárcel. Ve directamente sin pasar por la casilla de Salida y sin cobrar los 2.000.000€.", "carcel"));
+        cartasSuerte.add(new Carta("suerte", 3, "¡Has ganado el bote de la lotería! Recibe 1.000.000€.", "cobrar 1000000"));
+        cartasSuerte.add(new Carta("suerte", 4, "Has sido elegido presidente de la junta directiva. Paga a cada jugador 250.000€.", "pagarJugadores 250000"));
+        cartasSuerte.add(new Carta("suerte", 5, "¡Hora punta de tráfico! Retrocede tres casillas.", "retroceder 3"));
+        cartasSuerte.add(new Carta("suerte", 6, "Te multan por usar el móvil mientras conduces. Paga 150.000€", "pagar 150000"));
+        cartasSuerte.add(new Carta("suerte", 7, "Avanza hasta la casilla de transporte más cercana. Si no tiene dueño, puedes comprarla. Si tiene dueño, paga al dueño el doble de la operación indicada.", "mover TransporteMasCercano"));
+
+        // cartas de caja de comunidad
+        cartasCaja.add(new Carta("caja", 1, "Paga 500.000€ por un fin de semana en un balneario de 5 estrellas.", "pagar 500000"));
+        cartasCaja.add(new Carta("caja", 2, "Te investigan por fraude de identidad. Ve a la Cárcel. Ve directamente sin pasar por la casilla de Salida y sin cobrar los 2.000.000€.", "carcel"));
+        cartasCaja.add(new Carta("caja", 3, "Colócate en la casilla de Salida. Cobra 2.000.000€.", "mover Salida"));
+        cartasCaja.add(new Carta("caja", 4, "Devolución de Hacienda. Cobra 500.000€.", "cobrar 500000"));
+        cartasCaja.add(new Carta("caja", 5, "Retrocede hasta Solar1 para comprar antiguedades exóticas.", "mover Solar1"));
+        cartasCaja.add(new Carta("caja", 6, "Ve a Solar20 para disfrutar del San Fermín. Si pasas por la casilla de Salida, cobra 2.000.000€.", "mover Solar20"));
+    }
+
     // Método para inciar una partida: crea los jugadores y avatares.
     public void iniciarPartida() {
         Scanner sc = new Scanner(System.in);
 
-        // 1. Crear banca y tablero
+        // 1. Crear banca y tablero, inicializar cartas
         Jugador banca = new Jugador();
         banca.sumarFortuna(Valor.FORTUNA_BANCA);
         Tablero tablero = new Tablero(banca);
+        inicializarCartas();
 
         // 2. Obtener la casilla "Salida" donde se colocan los avatares
         Casilla salida = tablero.getPosiciones().get(0).get(0);
@@ -1057,6 +1081,135 @@ public class Menu {
                     System.err.println(actual.getNombre() + " no puede edificar en " + casilla.getNombre() + " porque es propietario del grupo " + casilla.getGrupo().getNombreColorGrupo());
                 }
             }
+        }
+    }
+
+    // funcion para manejar todas las cartas
+    private void ejecutarCartas(String tipo, Jugador jugador, Jugador banca, Casilla casillaActual) {
+        ArrayList<Carta> cartas = tipo.equals("suerte") ? this.cartasSuerte : this.cartasCaja;
+        int indice = tipo.equals("suerte") ? this.indiceSuerte : indiceCaja;
+        
+        Carta carta = cartas.get(indice);
+        System.out.println(jugador.getNombre() + ", elige una carta: " + carta.getId());
+        System.out.println("Acción: " + carta.getDescripcion());
+
+        if (tipo.equals("suerte")) {
+            this.indiceSuerte = (indice + 1) % cartas.size();
+        } else {
+            this.indiceCaja = (indice + 1) % cartas.size();
+        }
+
+        // ejecutamos la acción de la carta
+        String accion = carta.getAccion();
+        String[] partes = accion.split(" ");
+        String tipoAccion = partes[0];
+
+        switch (tipoAccion) {
+            case "mover":
+                String destino = partes[1];
+
+                if (destino.equalsIgnoreCase("TransporteMasCercano")) {
+                    // moverTransporteMasCercano, esto aun lo tengo q hacer
+                    break;
+                } 
+                
+                // busca la casilla destino por nombre 
+                Casilla casilla = this.tablero.encontrar_casilla(destino);
+
+                if (casilla == null) {
+                    System.out.println("No se ha encontrado la casilla destino: " + destino);
+                    break;
+                }
+
+                if (casilla.getPosicion() > casillaActual.getPosicion()) {
+                    jugador.getAvatar().setLugar(casilla);
+                    System.out.println(jugador.getNombre() + " avanza hasta " + c.getNombre() + ".");
+                    // cobrar si pasa por la salida (solo si la carta lo indica)
+                    if (destino.equalsIgnoreCase("Solar19") || destino.equalsIgnoreCase("Salida") || destino.equalsIgnoreCase("Solar20")) {
+                        jugador.sumarFortuna(2000000);
+                        System.out.println(jugador.getNombre() + " cobra 2.000.000€ por pasar por la casilla de Salida.");
+                    }
+                } else {
+                    jugador.getAvatar().setLugar(casilla);
+                    System.out.println(jugador.getNombre() + " retrocede hasta " + casilla.getNombre());
+                }
+
+                // evaluar la casilla de destino
+                casilla.evaluarCasilla(jugador, banca, 0);
+                break;
+
+            case "carcel":
+                jugador.encarcelar(this.tablero.getPosiciones());
+                break;
+
+            case "cobrar":
+                float cantidadCobrar = Float.parseFloat(partes[1]);
+                jugador.sumarFortuna(cantidadCobrar);
+                System.out.println(jugador.getNombre() + " cobra " + (int) cantidadCobrar + "€.");
+                break;
+
+            case "pagar": // pagar a la banca
+                float cantidadPagar = Float.parseFloat(partes[1]);
+
+                if (jugador.getFortuna() < cantidadPagar) {
+                    // comprobamos si puede hipotecar alguna propiedad
+                    boolean puedeHipotecar = jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty() && jugador.getHipotecas().size() < jugador.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar " + (int) cantidadPagar + "€. Debe hipotecar alguna propiedad o se declarará en bancarrota.");
+                    }
+                } else {
+                    jugador.sumarFortuna(-cantidadPagar);
+                    jugador.sumarGastos(cantidadPagar);
+                    banca.sumarFortuna(cantidadPagar);
+                    System.out.println(jugador.getNombre() + " paga " + (int) cantidadPagar + "€ a la banca.");
+                }
+                break;
+
+            case "pagarJugadores":
+                float cantidad = Float.parseFloat(partes[1]);
+                int numJugadores = this.jugadores.size() - 1; // sin contar al propio jugador
+                float total = cantidad * numJugadores;
+
+                // comprobamos  si puede pagar a todos los jugadores
+                if (jugador.getFortuna() < total) {
+                    boolean puedeHipotecar = jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty() && jugador.getHipotecas().size() < jugador.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar " + (int) cantidad + "€ a todos los jugadores. Debe hipotecar alguna propiedad o se declarará en bancarrota.");
+                    } else {
+                        System.out.println(jugador.getNombre() + " no puede pagar ni hipotecar propiedades. Se declara en bancarrota.");
+                        for (Casilla c : jugador.getPropiedades()) {
+                            c.setDuenho(banca);
+                        }
+                        jugador.getPropiedades().clear();
+                        this.solvente = false;
+                    } 
+                } else {
+                    // paga a todos los jugadores
+                    for (Jugador j : this.jugadores) {
+                        if (J != jugador) {
+                            jugador.sumarFortuna(-cantidad);
+                            jugador.sumarGastos(cantidad);
+                            j.sumarFortuna(cantidad);
+                        }
+                    }
+                    System.out.println(jugador.getNombre() + " paga " + (int) cantidad + "€ a cada jugador");
+                }
+                break;
+
+            case "retroceder":
+                int n = Integer.parseInt(partes[i]);
+                int posActual = casillaActual.getPosicion();
+                int nuevaPos = posActual - n;
+                if (nuevaPos < 1) nuevaPos += 40; // por si cruza el inicio del tablero
+
+                Casilla retroceso = null;
+                for (ArrayList<Casilla> lado : this.tablero.getPosiciones()) {
+                    for (Casilla c2 : lado) {
+                        if (c2.getPosicion() )
+                    }
+                }
         }
     }
 }
