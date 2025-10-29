@@ -94,6 +94,18 @@ public class Jugador {
         this.edificios = edificios;
     }
 
+    public ArrayList<Casilla> getHipotecas() {
+        ArrayList<Casilla> solaresHipotecados = new ArrayList<>();
+        if (this.propiedades != null) {
+            for (Casilla c : this.propiedades) {
+                if (c.getTipo().equalsIgnoreCase("solar") && c.isHipotecada()) {
+                    solaresHipotecados.add(c);
+                }
+            }
+        }
+        return solaresHipotecados;
+    }
+
     //Otros métodos:
     //Método para añadir una propiedad al jugador (cuando la compra). Como parámetro, la casilla a añadir.
     public void anhadirPropiedad(Casilla casilla) {

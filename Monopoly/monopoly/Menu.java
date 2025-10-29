@@ -422,6 +422,10 @@ public class Menu {
             System.out.println("Hipotecas: " + j.getHipotecas);
         }
          **/
+        ArrayList<Casilla> solaresHipotecados = j.getHipotecas();
+        if (solaresHipotecados != null && !solaresHipotecados.isEmpty()) {
+            System.out.println("Propiedades hipotecadas: " + solaresHipotecados.toString());
+        }
 
         if (j.getEdificios() != null) {
             System.out.println("Edificios: " + j.getEdificios().toString());

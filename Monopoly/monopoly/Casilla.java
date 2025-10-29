@@ -320,14 +320,9 @@ public class Casilla {
                 if (actual.getFortuna() < alquilerGrupo) {
                     System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
                     // comprobar si tiene algún solar sin hipotecar
-                    boolean solaresHipotecables = false;
-                    for (Casilla c : actual.getPropiedades()) {
-                        if (c.getTipo().equalsIgnoreCase("solar") && !c.isHipotecada()) {
-                            solaresHipotecables = true;
-                            break;
-                        }
-                    }
-                    if (solaresHipotecables) {
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+        
+                    if (puedeHipotecar) {
                         System.out.println("Debe hipotecar alguna propiedad para poder pagar o se declarará en bancarrota.");
                         return true;
                     } else {
