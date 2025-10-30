@@ -1125,19 +1125,26 @@ public class Menu {
                 if (casilla == null) {
                     System.out.println("No se ha encontrado la casilla destino: " + destino);
                     break;
+                } else {
+                    jugador.getAvatar().getLugar().eliminarAvatar(jugador.getAvatar());
                 }
 
-                if (casilla.getPosicion() > casillaActual.getPosicion()) {
-                    jugador.getAvatar().setLugar(casilla);
+                int posInicial = casillaActual.getPosicion();
+                int posDestino = casilla.getPosicion();
+
+                // mover el avatar
+                casilla.anhadirAvatar(jugador.getAvatar());
+                jugador.getAvatar().setLugar(casilla);
+                
+                if (destino.equalsIgnoreCase("Solar19") || destino.equalsIgnoreCase("Solar20") || destino.equalsIgnoreCase("Salida")) {
                     System.out.println(jugador.getNombre() + " avanza hasta " + casilla.getNombre() + ".");
-                    // cobrar si pasa por la salida (solo si la carta lo indica)
-                    if (destino.equalsIgnoreCase("Solar19") || destino.equalsIgnoreCase("Salida") || destino.equalsIgnoreCase("Solar20")) {
-                        jugador.sumarFortuna(2000000);
-                        System.out.println(jugador.getNombre() + " cobra 2.000.000€ por pasar por la casilla de Salida.");
-                    }
                 } else {
-                    jugador.getAvatar().setLugar(casilla);
-                    System.out.println(jugador.getNombre() + " retrocede hasta " + casilla.getNombre());
+                     System.out.println(jugador.getNombre() + " retrocede hasta " + casilla.getNombre() + ".");                   
+                }
+
+                if ((destino.equalsIgnoreCase("Salida") || destino.equalsIgnoreCase("Solar19") || destino.equalsIgnoreCase("Solar20")) && posDestino < posInicial) {
+                    jugador.sumarFortuna(Valor.SUMA_VUELTA);
+                    System.out.println(jugador.getNombre() + " cobra 2.000.000€ por pasar por la casilla de Salida.");
                 }
 
                 // evaluar la casilla de destino
@@ -1194,7 +1201,7 @@ public class Menu {
                 } else {
                     // paga a todos los jugadores
                     for (Jugador j : this.jugadores) {
-                        if (J != jugador) {
+                        if (j != jugador) {
                             jugador.sumarFortuna(-cantidad);
                             jugador.sumarGastos(cantidad);
                             j.sumarFortuna(cantidad);
