@@ -1115,7 +1115,7 @@ public class Menu {
                 String destino = partes[1];
 
                 if (destino.equalsIgnoreCase("TransporteMasCercano")) {
-                    // moverTransporteMasCercano, esto aun lo tengo q hacer
+                    moverTransporteMasCercano(jugador, banca);
                     break;
                 } 
                 
@@ -1227,6 +1227,81 @@ public class Menu {
                     retroceso.evaluarCasilla(jugador, banca, 0);
                 }
                 break;
+        }
+    }
+
+    public void moverTransporteMasCercano(Jugador jugador, Jugador banca) {
+        if (jugador == null || this.tablero == null)  return;
+
+        // casilla actual del jugador
+        Casilla origen = jugador.getAvatar().getLugar();
+        if (origen == null) return;
+
+        // buscar el transporte más cercano hacia delante
+        ArrayList<ArrayList<Casilla>> lados = this.tablero.getPosiciones();
+        Casilla destino = null;
+        int posActual = origen.getPosicion();
+        int minDistancia = 41; // suponemos que la distancia minima  sera como máximo una vuelta al tablero
+
+        for (ArrayList<Casilla> lado : lados) {
+            for (Casilla c : lado) {
+                if (c.getTipo().equalsIgnoreCase("transporte")) {
+                    int distancia = (c.getPosicion() - posActual + 40) % 40;
+                    if (distancia > 0 && distancia < minDistancia) {
+                        minDistancia = distancia;
+                        destino = c;
+                    }
+                }
+            }
+        }
+
+        if (destino == null) {
+            System.out.println("No se encontró ninguna casilla de transporte en el tablero.");
+            return;
+        }
+
+        // mover el avatar hasta la casilla de transporte
+        jugador.getAvatar().moverAvatar(this.tablero.getPosiciones(), minDistancia);
+        System.out.println(jugador.getNombre() + " avanza hasta la casilla " + destino.getNombre() + ".");
+
+        // si pasa por la salida, cobra 2.000.000€
+        if (destino.getPosicion() < posActual) {
+            jugador.sumarFortuna(Valor.SUMA_VUELTA);
+            System.out.println(jugador.getNombre() + " pasa por la Salida y cobra " + Valor.SUMA_VUELTA + "€.");
+        }
+
+        // evaluar la casilla del destino, como es un caso diferente a caer de fomra normal en una casilla de transporte, hay que hacerlo aquí
+        if (destino.getDuenho() == banca || destino.getDuenho() == null) {
+            System.out.println("[" + destino.getNombre() + "] Propiedad libre por " + destino.getValor() + "€. Usa el comando 'comprar' para adquirirla.");
+        } else if (destino.getDuenho() == jugador) {
+            System.out.println("[" + destino.getNombre() + "] Ya posees esta propiedad.");
+        } else {
+            // si pertenece a otro juugador, paga el doble de alquiler
+            float alquiler = destino.getImpuesto() * 2;
+            System.out.println("La casilla pertenece a " + destino.getDuenho().getNombre() + ". Debes pagar el doble de alquiler (" + (int) alquiler + "€).");
+
+            // si no puede pagar, comprobar si puede hipotecar o sino bancarrota
+            if (jugador.getFortuna() < alquiler) {
+                boolean puedeHipotecar = jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty() && jugador.getHipotecas().size() < jugador.getPropiedades().size();
+
+                if (puedeHipotecar) {
+                    System.out.println(jugador.getNombre() + " no tiene suficiente dinero y debe hipotecar alguna propiedad para pagar.");
+                } else {
+                    System.out.println(jugador.getNombre() + " no puede pagar y se declara en bancarrota.");
+                    for (Casilla c : jugador.getPropiedades()) {
+                        c.setDuenho(destino.getDuenho());
+                        destino.getDuenho().anhadirPropiedad(c);
+                    }
+                    jugador.getPropiedades().clear();
+                    this.solvente = false;
+                    return;
+                }
+            } else {
+                jugador.sumarFortuna(-alquiler);
+                jugador.sumarGastos(alquiler);
+                destino.getDuenho().sumarFortuna(alquiler);
+                System.out.println(jugador.getNombre() + " paga " + (int) alquiler + "€ a " + destino.getDuenho().getNombre() + ".");
+            }
         }
     }
 
