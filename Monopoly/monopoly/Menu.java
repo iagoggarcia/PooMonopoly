@@ -27,11 +27,17 @@ public class Menu {
     private ArrayList<Carta> cartasCaja = new ArrayList<>();
     private int indiceSuerte = 0;
     private int indiceCaja = 0;
+    private static Menu instancia;
 
     public Menu() {
+        instancia = this;
         this.jugadores = new ArrayList<>();
         this.edificios = new ArrayList<>();
         this.enCurso = false; //para elegir en el main si se inicializa o no con la funcion iniciarpartida
+    }
+
+    public static Menu getInstancia(){
+        return instancia;
     }
 
     private void inicializarCartas() {
@@ -254,7 +260,7 @@ public class Menu {
                     analizarComando("hipotecar " + nombre);
                 }
                 else if (l.startsWith("deshipotecar ")) {
-                    String nombre = linea.substring("deshipotecar".lenght()).trim();
+                    String nombre = linea.substring("deshipotecar".length()).trim();
                     analizarComando("deshipotecar " + nombre);
                 }
                 else if (l.startsWith("edificar ")) {
@@ -1085,7 +1091,7 @@ public class Menu {
     }
 
     // funcion para manejar todas las cartas
-    private void ejecutarCartas(String tipo, Jugador jugador, Jugador banca, Casilla casillaActual) {
+    public void ejecutarCartas(String tipo, Jugador jugador, Jugador banca, Casilla casillaActual) {
         ArrayList<Carta> cartas = tipo.equals("suerte") ? this.cartasSuerte : this.cartasCaja;
         int indice = tipo.equals("suerte") ? this.indiceSuerte : indiceCaja;
         
@@ -1123,7 +1129,7 @@ public class Menu {
 
                 if (casilla.getPosicion() > casillaActual.getPosicion()) {
                     jugador.getAvatar().setLugar(casilla);
-                    System.out.println(jugador.getNombre() + " avanza hasta " + c.getNombre() + ".");
+                    System.out.println(jugador.getNombre() + " avanza hasta " + casilla.getNombre() + ".");
                     // cobrar si pasa por la salida (solo si la carta lo indica)
                     if (destino.equalsIgnoreCase("Solar19") || destino.equalsIgnoreCase("Salida") || destino.equalsIgnoreCase("Solar20")) {
                         jugador.sumarFortuna(2000000);
@@ -1199,7 +1205,7 @@ public class Menu {
                 break;
 
             case "retroceder":
-                int n = Integer.parseInt(partes[i]);
+                int n = Integer.parseInt(partes[1]);
                 int posActual = casillaActual.getPosicion();
                 int nuevaPos = posActual - n;
                 if (nuevaPos < 1) nuevaPos += 40; // por si cruza el inicio del tablero
@@ -1207,10 +1213,29 @@ public class Menu {
                 Casilla retroceso = null;
                 for (ArrayList<Casilla> lado : this.tablero.getPosiciones()) {
                     for (Casilla c2 : lado) {
-                        if (c2.getPosicion() )
+                        if (c2.getPosicion() == nuevaPos) {
+                            retroceso = c2;
+                            break;
+                        }
                     }
+                    if (retroceso != null) break;
                 }
+
+                if (retroceso != null) {
+                    jugador.getAvatar().setLugar(retroceso);
+                    System.out.println(jugador.getNombre() + " retrocede " + n + " casillas hasta " + retroceso.getNombre() + ".");
+                    retroceso.evaluarCasilla(jugador, banca, 0);
+                }
+                break;
         }
+    }
+
+    public boolean isSolvente() {
+        return this.solvente;
+    }
+
+    public void setSolvente(boolean valor) {
+        this.solvente = valor;
     }
 }
 

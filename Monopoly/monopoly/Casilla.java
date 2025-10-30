@@ -2,7 +2,7 @@ package monopoly;
 
 import java.util.ArrayList;
 import partida.*;
-
+import monopoly.Menu;
 
 public class Casilla {
 
@@ -26,7 +26,6 @@ public class Casilla {
     private int numHoteles; // Para controlar que haya un ÚNICO hotel si ya se han construido 4 casas, y las casas se sustituyen por el hotel
     private int numPiscinas; // Para construir una ÚNICA piscina si ya hay un hotel
     private int numPistas; // Para construir una ÚNICA pista de deporte si ya hay un hotel y una piscina
-
 
     //Constructores:
     public Casilla() {
@@ -442,7 +441,14 @@ public class Casilla {
             // suerte / caja de comunidad
             case "suerte":
             case "caja de comunidad":
-                System.out.println(actual.getNombre() + " ha caído en una casilla de " + this.tipo + ". (Aún no implementado).");
+                System.out.println(actual.getNombre() + " ha caído en una casilla de " + this.tipo + ".");
+                
+                // ejecutamos la carta correspondiente
+                Menu.getInstancia().ejecutarCartas(this.tipo, actual, banca, this);
+                if (!Menu.getInstancia().isSolvente()) {
+                    System.out.println(actual.getNombre() + " ha quedado insolvente tras ejecutar la carta y se declara en bancarrota.");
+                    return false;
+                }
                 return true;
             // especiales
             case "especial":
