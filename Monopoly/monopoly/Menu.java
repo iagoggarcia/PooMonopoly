@@ -150,6 +150,7 @@ public class Menu {
                 //System.out.println(" - Listar avatares");
                 System.out.println(" - listar enventa");
                 System.out.println(" - listar edificios");
+                System.out.println(" - listar edificios <nombreGrupo>");
                 System.out.println(" - comprar <nombreCasilla>");
                 System.out.println(" - edificar <tipoEdificio>");
                 System.out.println(" - salir cárcel");
@@ -235,6 +236,10 @@ public class Menu {
                 else if (l.equals("listar edificios")) {
                     analizarComando("listar edificios");
                 }
+                else if (l.startsWith("listar edificios ")) {
+                    String nombreGrupo = linea.substring("listar edificios".length()).trim();
+                    analizarComando("listar edificios " + nombreGrupo);
+                }
                 else if (l.equals("acabar turno")) {
                     analizarComando("acabar turno");
                 }
@@ -246,6 +251,10 @@ public class Menu {
                 else if (l.startsWith("comprar ")) {
                     String prop = linea.substring("comprar".length()).trim();
                     analizarComando("comprar " + prop);
+                }
+                else if (linea.startsWith("vender ")) {
+                    String datos = linea.substring("vender".length()).trim();
+                    analizarComando("vender " + datos);
                 }
                 else if (l.startsWith("describir avatar ")) {
                     String id = linea.substring("describir avatar".length()).trim();
@@ -347,6 +356,24 @@ public class Menu {
         }
         else if (comando.equalsIgnoreCase("listar edificios")) {
             listarEdificios();
+        }
+        else if (comando.startsWith("listar edificios")) {
+            String grupo = comando.substring("listar edificios".length()).trim();
+            listarEdificiosGrupo(grupo);
+        }
+        else if (comando.startsWith("vender")) {
+            String datos = comando.substring("vender".length()).trim();
+            String[] partes = datos.isEmpty() ? new String[0] : datos.split("\\s+");
+            if (partes.length >= 2) {
+                String tipoEdificio = partes[0];
+                String casilla = partes[1];
+                int numEdificios;
+                numEdificios = Integer.parseInt(partes[2]); // paso el número de edificios a vender de string a int
+                venderEdificios(tipoEdificio, casilla, numEdificios);
+            }
+            else {
+                System.err.println("Formato inválido para 'vender'. Uso: vender <tipoEdificio> <numEdificios>");
+            }
         }
         else if (comando.equalsIgnoreCase("acabar turno")) {
             acabarTurno();
@@ -872,14 +899,33 @@ public class Menu {
     }
 
     private void listarEdificios() {
-        for (Edificio edifcio : this.edificios) {
+        for (Edificio edificio : this.edificios) {
             System.out.println("{");
-            System.out.println("id: " + edifcio.getId());
-            System.out.println("propietario: " +  edifcio.getPropietario().getNombre());
-            System.out.println("casilla: " +  edifcio.getLugar().toString());
-            System.out.println("grupo: " +  edifcio.getLugar().getGrupo().getNombreColorGrupo());
-            System.out.println("coste: " +  edifcio.getPrecio());
+            System.out.println("id: " + edificio.getId());
+            System.out.println("propietario: " +  edificio.getPropietario().getNombre());
+            System.out.println("casilla: " +  edificio.getLugar().toString());
+            System.out.println("grupo: " +  edificio.getLugar().getGrupo().getNombreColorGrupo());
+            System.out.println("coste: " +  edificio.getPrecio());
             System.out.println("}");
+        }
+    }
+
+    private void listarEdificiosGrupo(String grupo) {
+        int i = 0; // si al salir del bucle sigue a 0 es porque no hay edificios en ese grupo
+        for (Edificio edificio : this.edificios) {
+            if (edificio.getLugar().getGrupo().getNombreColorGrupo().equals(grupo)) {
+                System.out.println("{");
+                System.out.println("id: " + edificio.getId());
+                System.out.println("propietario: " +  edificio.getPropietario().getNombre());
+                System.out.println("casilla: " +  edificio.getLugar().toString());
+                System.out.println("grupo: " +  edificio.getLugar().getGrupo().getNombreColorGrupo());
+                System.out.println("coste: " +  edificio.getPrecio());
+                System.out.println("}");
+                i++;
+            }
+        }
+        if (i == 0) {
+            System.out.println("Todavía no hay edificios construidos en el grupo " + grupo);
         }
     }
 
@@ -1019,7 +1065,7 @@ public class Menu {
                     }
                     break;
                 case "pista":
-                    if (casilla.getNumPiscinas() == 1 && casilla.getNumHoteles() == 1) { // si hay 1 piscina y 1 hotel se puede construir
+                    if (casilla.getNumPiscinas() == 1 && casilla.getNumHoteles() == 1 && casilla.getNumPistas() < 1) { // si hay 1 piscina y 1 hotel se puede construir
                         precio = casilla.getValorPistaDeporte();
                         intentarConstruir(actual, casilla, tipoEdificio, precio); // si el jugador tiene dinero suficiente y es dueño de la casilla
                     }
@@ -1086,6 +1132,30 @@ public class Menu {
         }
     }
 
+    // Función para vender x cantidad de un edificio concreto en una casilla específica
+    private void venderEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) {
+        Casilla casilla = tablero.encontrar_casilla(nombreCasilla);
+        if (casilla != null) {
+            if (casilla.getTipo().equals("solar")) {
+                Casilla c = this.tablero.encontrar_casilla(nombreCasilla);
+                requisitosVenta(tipoEdificio, c, numEdificios);
+            }
+            else {
+                System.err.println("No se pueden vender edificios en casillas de tipo " + casilla.getTipo() + " , porque no se puede edificar en ellas");
+            }
+        }
+    }
+
+    private void requisitosVenta(String tipoEdificio, Casilla casilla, int numEdificios) {
+        if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
+            switch (tipoEdificio) {
+                case "casas":
+                    Jugador actual = this.jugadores.get(this.turno); // guardo el jugador que ejecuta el comando
+                    casilla.venderCasas(numEdificios, actual); // y esta función ya comprueba si es el dueño
+                    break;
+            }
+        }
+    }
 
     // funcion para manejar todas las cartas
     public void ejecutarCartas(String tipo, Jugador jugador, Jugador banca, Casilla casillaActual) {
@@ -1317,5 +1387,3 @@ public class Menu {
         this.solvente = valor;
     }
 }
-
-

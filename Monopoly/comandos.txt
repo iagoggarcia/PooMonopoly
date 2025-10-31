@@ -23,3 +23,6 @@ edificar pista
 listar edificios
 edificar pista
 edificar piscina
+listar edificios negro
+listar edificios rosa
+vender casas Solar3 3
