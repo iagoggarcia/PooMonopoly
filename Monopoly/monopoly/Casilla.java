@@ -553,14 +553,16 @@ public class Casilla {
 
         StringBuilder informacion = new StringBuilder(); // aquí guardamos la info de la casilla
 
+        informacion.append("{");
         switch (tipo.toLowerCase()) {
-            case "solar":
-                informacion.append("\nTipo: ").append(tipo).append("\nGrupo: ").append(grupo).append("\nPropietario: ").append(duenho).append("\nValor: ").append(valor);
+            case "solar": // falta por printear el valor de los alquileres
+                informacion.append("\nTipo: ").append(tipo).append("\nGrupo: ").append(grupo.getNombreColorGrupo()).append("\nPropietario: ").append(duenho.getNombre())
+                        .append("\nValor: ").append(valor).append("\nValor hotel: ").append(valorCasayHotel).append("\nValor casa: ").append(valorCasayHotel)
+                        .append("\nValor piscina: ").append(valorPiscina).append("\nValor pista de deporte: ").append(valorPistaDeporte)
+                        .append(infoJugadoresEnEstaCasilla());
                 break;
             case "impuesto":
-                informacion.append("\nTipo: ").append(tipo)
-                        .append("\nA pagar: ").append(impuesto);
-
+                informacion.append("\nTipo: ").append(tipo).append("\nA pagar: ").append(impuesto);
                 informacion.append(infoJugadoresEnEstaCasilla());
                 break;
             case "transporte":
@@ -571,7 +573,7 @@ public class Casilla {
                 informacion.append("\nValor: ").append(valor);
                 informacion.append(infoJugadoresEnEstaCasilla());
                 break;
-            case "especiales":
+            case "especial":
                 if (this.getNombre() != null && this.getNombre().equalsIgnoreCase("parking")) {
                     informacion.append("\nBote: ").append(valor);
                 } else if (this.getNombre() != null && this.getNombre().equalsIgnoreCase("cárcel")) {
@@ -585,6 +587,7 @@ public class Casilla {
 
                 break;
         }
+        informacion.append("\n}");
         return informacion.toString(); // si no existe una casilla con ese nombre devuelve null*/
     }
 
@@ -681,6 +684,11 @@ public class Casilla {
 
             if (e.getPropietario() != null) {
                 e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos las casas de los edificios del jugador
+            }
+
+            Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+            if (m != null) {
+                m.eliminarEdificioGlobal(e);
             }
         }
     }
