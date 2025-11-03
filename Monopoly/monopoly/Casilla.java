@@ -693,32 +693,44 @@ public class Casilla {
         }
     }
 
+    /* Función que uso en venderEdificios para vender única y específicamente casas
+     * Los mensajes son personalizados para las casas y los otros tipos de edificio
+     * también tienen su correspondiente función
+     */
     public void venderCasas(int nCasas, Jugador j) {
+        int vendidas = 0;
         if (this.getDuenho() != null && this.getDuenho().equals(j)) {
             if (nCasas <= getNumCasas()) {
-                for (int i = 0; i < nCasas; i++) {
+                // Recorremos la lista real y paramos al vender nCasas
+                for (int i = 0; i < edificios.size() && vendidas < nCasas; ) {
                     Edificio e = edificios.get(i);
                     if (e != null && "casa".equalsIgnoreCase(e.getTipo())) {
                         edificios.remove(i);
-                        numCasas--;
-                        i--;
-                    }
+                        if (numCasas > 0) numCasas--;
 
-                    if (e.getPropietario() != null) {
-                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos las casas de los edificios del jugador
-                    }
+                        if (e.getPropietario() != null) {
+                            e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos las casas de los edificios del jugador
+                        }
 
-                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
-                    if (m != null) {
-                        m.eliminarEdificioGlobal(e);
-                    }
+                        Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                        if (m != null) {
+                            m.eliminarEdificioGlobal(e);
+                        }
 
-                    int ganancia = this.getValorCasayHotel();
-                    e.getPropietario().sumarFortuna(ganancia);
+                        int ganancia = this.getValorCasayHotel();
+                        e.getPropietario().sumarFortuna(ganancia);
+
+                        vendidas++;
+                        // ¡Ojo! No incrementamos i aquí porque la lista se ha corrido tras remove(i)
+                    } else {
+                        // Solo avanzamos i cuando no eliminamos nada
+                        i++;
+                    }
                 }
-                if (getNumCasas() > 1) {
-                    System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casas en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad queda " + this.getNumCasas() + " casas.");
-                } else if (getNumCasas() == 1) {
+
+                if (vendidas >= 1 && getNumCasas() != 1) {
+                    System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casas en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumCasas() + " casas.");
+                } else if (vendidas >= 1 && getNumCasas() == 1) {
                     System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casa en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad queda " + this.getNumCasas() + " casa.");
                 }
             } else {
@@ -726,16 +738,16 @@ public class Casilla {
                     System.err.println("No se pueden vender casas en " + getNombre() + ", no hay casas construidas");
                 }
                 if (getNumCasas() == 1) {
-                    System.err.println("Solamente se puede vender 1 casa, recibiendo " + getValorCasayHotel());
+                    System.err.println("Solamente se puede vender 1 casa, recibiendo " + getValorCasayHotel() + "€");
                 } else if (getNumCasas() > 1) {
-                    System.err.println("Solamente se pueden vender " + getNumCasas() + " casas, recibiendo " + getNumCasas() * getValorCasayHotel());
+                    System.err.println("Solamente se pueden vender " + getNumCasas() + " casas, recibiendo " + getNumCasas() * getValorCasayHotel() + "€");
                 }
             }
-        }
-        else {
+        } else {
             System.err.println("No se pueden vender casas en " + getNombre() + ". Esta propiedadd no pertenece a " + j.getNombre() + ".");
         }
     }
+
 
     /** Se puede tener un toString por clase, así que hice este
     * para que salgan los nombres de las casillas bien printeados
