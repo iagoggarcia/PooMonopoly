@@ -23,5 +23,11 @@ vender piscinas Solar2 1
 vender pista Solar3 2
 edificar piscina
 edificar pista
+vender piscinas Solar2 2
+vender pista Solar2 2
+describir jugador Pedro
+vender piscinas Solar2 1
+vender pista Solar2 1
+describir jugador Pedro
 listar edificios
 acabar turno

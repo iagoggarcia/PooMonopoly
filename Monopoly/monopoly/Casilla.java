@@ -820,7 +820,7 @@ public class Casilla {
             }
 
             if (vendidas == 1 && getNumPiscinas() == 0) {
-                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPiscinas + " piscina en " + getNombre() + ", recibiendo " + nPiscinas * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumHoteles() + " piscinas.");
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPiscinas + " piscina en " + getNombre() + ", recibiendo " + nPiscinas * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumPiscinas() + " piscinas.");
             }
         } else {
             if (getNumPiscinas() == 0) {
@@ -838,11 +838,11 @@ public class Casilla {
      */
     public void venderPistas (int nPistas, Jugador j) {
         int vendidas = 0;
-        if (nPistas <= getNumHoteles()) {
+        if (nPistas <= getNumPistas()) {
             // Recorremos la lista y paramos al vender nHoteles
             for (int i = 0; i < edificios.size() && vendidas < nPistas; ) {
                 Edificio e = edificios.get(i);
-                if (e != null && "piscina".equalsIgnoreCase(e.getTipo())) {
+                if (e != null && "pista".equalsIgnoreCase(e.getTipo())) {
                     edificios.remove(i);
                     if (numPistas > 0) numPistas--;
 
@@ -865,7 +865,7 @@ public class Casilla {
             }
 
             if (vendidas == 1 && getNumPistas() == 0) {
-                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPistas + " pista de deporte en " + getNombre() + ", recibiendo " + nPistas * getValorPistaDeporte() + "€. En la propiedad quedan " + this.getNumHoteles() + " pistas de deporte.");
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPistas + " pista de deporte en " + getNombre() + ", recibiendo " + nPistas * getValorPistaDeporte() + "€. En la propiedad quedan " + this.getNumPistas() + " pistas de deporte.");
             }
         } else {
             if (getNumPistas() == 0) {
