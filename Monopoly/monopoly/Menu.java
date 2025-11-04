@@ -370,7 +370,7 @@ public class Menu {
                 String casilla = partes[1];
                 int numEdificios;
                 numEdificios = Integer.parseInt(partes[2]); // paso el número de edificios a vender de string a int
-                venderEdificios(tipoEdificio, casilla, numEdificios);
+                gestionarVentaEdificios(tipoEdificio, casilla, numEdificios);
             }
             else {
                 System.err.println("Formato inválido para 'vender'. Uso: vender <tipoEdificio> <numEdificios>");
@@ -1139,7 +1139,7 @@ public class Menu {
     }
 
     // Función para vender x cantidad de un edificio concreto en una casilla específica
-    private void venderEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) {
+    private void gestionarVentaEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) {
         Casilla casilla = tablero.encontrar_casilla(nombreCasilla);
         if (casilla != null) {
             if (casilla.getTipo().equals("solar")) {
@@ -1155,16 +1155,44 @@ public class Menu {
     }
 
     private void requisitosVenta(String tipoEdificio, Casilla casilla, int numEdificios) {
-        if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
-            switch (tipoEdificio) {
-                case "casas":
-                    Jugador actual = this.jugadores.get(this.turno); // guardo el jugador que ejecuta el comando
-                    casilla.venderCasas(numEdificios, actual); // y esta función ya comprueba si es el dueño
-                    break;
-            }
-        }
-        else {
-            System.err.println("No se pueden vender " + tipoEdificio + " en la casilla " + casilla.getNombre() + " porque no hay");
+        Jugador actual = this.jugadores.get(this.turno); // guardo el jugador que ejecuta el comando
+        switch (tipoEdificio) {
+            case "casas":
+                if (casilla.getDuenho() != null && casilla.getDuenho().equals(actual)) {
+                    if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
+                        casilla.venderCasas(numEdificios, actual); // y esta función ya comprueba si es el dueño
+                    }
+                } else {
+                    System.err.println("No se pueden vender casas en " + casilla.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
+                }
+                break;
+            case "hoteles":
+                if (casilla.getDuenho() != null && casilla.getDuenho().equals(actual)) {
+                    if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
+                        casilla.venderHoteles(numEdificios, actual); // y esta función ya comprueba si es el dueño
+                    }
+                } else {
+                    System.err.println("No se pueden vender hoteles en " + casilla.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
+                }
+                break;
+            case "piscinas":
+                if (casilla.getDuenho() != null && casilla.getDuenho().equals(actual)) {
+                    if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
+                        casilla.venderPiscinas(numEdificios, actual); // y esta función ya comprueba si es el dueño
+                    }
+                } else {
+                    System.err.println("No se pueden vender piscinas en " + casilla.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
+                }
+                break;
+            case "pista":
+                if (casilla.getDuenho() != null && casilla.getDuenho().equals(actual)) {
+                    if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
+                        casilla.venderPistas(numEdificios, actual); // y esta función ya comprueba si es el dueño
+                    }
+                } else {
+                    System.err.println("No se pueden vender pistas de deporte en " + casilla.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
+                }
+                break;
         }
     }
 

@@ -693,61 +693,189 @@ public class Casilla {
         }
     }
 
-    /* Función que uso en venderEdificios para vender única y específicamente casas
-     * Los mensajes son personalizados para las casas y los otros tipos de edificio
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente casas
+     * Los mensajes son personalizados para las casas, los otros tipos de edificio
      * también tienen su correspondiente función
      */
     public void venderCasas(int nCasas, Jugador j) {
         int vendidas = 0;
-        if (this.getDuenho() != null && this.getDuenho().equals(j)) {
-            if (nCasas <= getNumCasas()) {
-                // Recorremos la lista real y paramos al vender nCasas
-                for (int i = 0; i < edificios.size() && vendidas < nCasas; ) {
-                    Edificio e = edificios.get(i);
-                    if (e != null && "casa".equalsIgnoreCase(e.getTipo())) {
-                        edificios.remove(i);
-                        if (numCasas > 0) numCasas--;
+        if (nCasas <= getNumCasas()) {
+            // Recorremos la lista y paramos al vender nCasas
+            for (int i = 0; i < edificios.size() && vendidas < nCasas; ) {
+                Edificio e = edificios.get(i);
+                if (e != null && "casa".equalsIgnoreCase(e.getTipo())) {
+                    edificios.remove(i);
+                    if (numCasas > 0) numCasas--;
 
-                        if (e.getPropietario() != null) {
-                            e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos las casas de los edificios del jugador
-                        }
-
-                        Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
-                        if (m != null) {
-                            m.eliminarEdificioGlobal(e);
-                        }
-
-                        int ganancia = this.getValorCasayHotel();
-                        e.getPropietario().sumarFortuna(ganancia);
-
-                        vendidas++;
-                        // ¡Ojo! No incrementamos i aquí porque la lista se ha corrido tras remove(i)
-                    } else {
-                        // Solo avanzamos i cuando no eliminamos nada
-                        i++;
+                    if (e.getPropietario() != null) {
+                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos las casas de los edificios del jugador
                     }
-                }
 
-                if (vendidas >= 1 && getNumCasas() != 1) {
-                    System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casas en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumCasas() + " casas.");
-                } else if (vendidas >= 1 && getNumCasas() == 1) {
-                    System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casa en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad queda " + this.getNumCasas() + " casa.");
-                }
-            } else {
-                if (getNumCasas() == 0) {
-                    System.err.println("No se pueden vender casas en " + getNombre() + ", no hay casas construidas");
-                }
-                if (getNumCasas() == 1) {
-                    System.err.println("Solamente se puede vender 1 casa, recibiendo " + getValorCasayHotel() + "€");
-                } else if (getNumCasas() > 1) {
-                    System.err.println("Solamente se pueden vender " + getNumCasas() + " casas, recibiendo " + getNumCasas() * getValorCasayHotel() + "€");
+                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                    if (m != null) {
+                        m.eliminarEdificioGlobal(e);
+                    }
+
+                    int ganancia = this.getValorCasayHotel();
+                    e.getPropietario().sumarFortuna(ganancia);
+
+                    vendidas++;
+                } else {
+                    i++; // solo avanzo cuando no elimino nada
                 }
             }
+
+            if (vendidas >= 1 && getNumCasas() != 1) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casas en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumCasas() + " casas.");
+            } else if (vendidas >= 1 && getNumCasas() == 1) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casa en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad queda " + this.getNumCasas() + " casa.");
+            }
         } else {
-            System.err.println("No se pueden vender casas en " + getNombre() + ". Esta propiedadd no pertenece a " + j.getNombre() + ".");
+            if (getNumCasas() == 0) {
+                System.err.println("No se pueden vender casas en " + getNombre() + ", no hay casas construidas");
+            }
+            if (getNumCasas() == 1) {
+                System.err.println("Solamente se puede vender 1 casa, recibiendo " + getValorCasayHotel() + "€");
+            } else if (getNumCasas() > 1) {
+                System.err.println("Solamente se pueden vender " + getNumCasas() + " casas, recibiendo " + getNumCasas() * getValorCasayHotel() + "€");
+            }
         }
     }
 
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente hoteles
+     * Los mensajes son personalizados para los hoteles, los otros tipos de edificio
+     * también tienen su correspondiente función
+     */
+    public void venderHoteles (int nHoteles, Jugador j) {
+        int vendidas = 0;
+        if (nHoteles <= getNumHoteles()) {
+            // Recorremos la lista y paramos al vender nHoteles
+            for (int i = 0; i < edificios.size() && vendidas < nHoteles; ) {
+                Edificio e = edificios.get(i);
+                if (e != null && "hotel".equalsIgnoreCase(e.getTipo())) {
+                    edificios.remove(i);
+                    if (numHoteles > 0) numHoteles--;
+
+                    if (e.getPropietario() != null) {
+                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos el hotel de los edificios del jugador
+                    }
+
+                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                    if (m != null) {
+                        m.eliminarEdificioGlobal(e);
+                    }
+
+                    int ganancia = this.getValorCasayHotel();
+                    e.getPropietario().sumarFortuna(ganancia);
+
+                    vendidas++;
+                } else {
+                    i++; // solo avanzo cuando no elimino nada
+                }
+            }
+
+            if (vendidas == 1 && getNumHoteles() == 0) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nHoteles + " hotel en " + getNombre() + ", recibiendo " + nHoteles * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumHoteles() + " hoteles.");
+            }
+        } else {
+            if (getNumHoteles() == 0) {
+                System.err.println("No se pueden vender hoteles en " + getNombre() + ", no hay ninguno construido");
+            }
+            else if (getNumHoteles() == 1) {
+                System.err.println("Solamente se puede vender 1 hotel, recibiendo " + getValorCasayHotel() + "€");
+            }
+        }
+    }
+
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente hoteles
+     * Los mensajes son personalizados para los hoteles, los otros tipos de edificio
+     * también tienen su correspondiente función
+     */
+    public void venderPiscinas (int nPiscinas, Jugador j) {
+        int vendidas = 0;
+        if (nPiscinas <= getNumPiscinas()) {
+            // Recorremos la lista y paramos al vender nHoteles
+            for (int i = 0; i < edificios.size() && vendidas < nPiscinas; ) {
+                Edificio e = edificios.get(i);
+                if (e != null && "piscina".equalsIgnoreCase(e.getTipo())) {
+                    edificios.remove(i);
+                    if (numPiscinas > 0) numPiscinas--;
+
+                    if (e.getPropietario() != null) {
+                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos el hotel de los edificios del jugador
+                    }
+
+                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                    if (m != null) {
+                        m.eliminarEdificioGlobal(e);
+                    }
+
+                    int ganancia = this.getValorCasayHotel();
+                    e.getPropietario().sumarFortuna(ganancia);
+
+                    vendidas++;
+                } else {
+                    i++; // solo avanzo cuando no elimino nada
+                }
+            }
+
+            if (vendidas == 1 && getNumPiscinas() == 0) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPiscinas + " piscina en " + getNombre() + ", recibiendo " + nPiscinas * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumHoteles() + " piscinas.");
+            }
+        } else {
+            if (getNumPiscinas() == 0) {
+                System.err.println("No se pueden vender piscinas en " + getNombre() + ", no hay ninguno construido");
+            }
+            else if (getNumPiscinas() == 1) {
+                System.err.println("Solamente se puede vender 1 piscina, recibiendo " + getValorPiscina() + "€");
+            }
+        }
+    }
+
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente hoteles
+     * Los mensajes son personalizados para los hoteles, los otros tipos de edificio
+     * también tienen su correspondiente función
+     */
+    public void venderPistas (int nPistas, Jugador j) {
+        int vendidas = 0;
+        if (nPistas <= getNumHoteles()) {
+            // Recorremos la lista y paramos al vender nHoteles
+            for (int i = 0; i < edificios.size() && vendidas < nPistas; ) {
+                Edificio e = edificios.get(i);
+                if (e != null && "piscina".equalsIgnoreCase(e.getTipo())) {
+                    edificios.remove(i);
+                    if (numPistas > 0) numPistas--;
+
+                    if (e.getPropietario() != null) {
+                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos el hotel de los edificios del jugador
+                    }
+
+                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                    if (m != null) {
+                        m.eliminarEdificioGlobal(e);
+                    }
+
+                    int ganancia = this.getValorCasayHotel();
+                    e.getPropietario().sumarFortuna(ganancia);
+
+                    vendidas++;
+                } else {
+                    i++; // solo avanzo cuando no elimino nada
+                }
+            }
+
+            if (vendidas == 1 && getNumPistas() == 0) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPistas + " pista de deporte en " + getNombre() + ", recibiendo " + nPistas * getValorPistaDeporte() + "€. En la propiedad quedan " + this.getNumHoteles() + " pistas de deporte.");
+            }
+        } else {
+            if (getNumPistas() == 0) {
+                System.err.println("No se pueden vender pistas de deporte en " + getNombre() + ", no hay ninguno construido");
+            }
+            else if (getNumPistas() == 1) {
+                System.err.println("Solamente se puede vender 1 hotel, recibiendo " + getValorPistaDeporte() + "€");
+            }
+        }
+    }
 
     /** Se puede tener un toString por clase, así que hice este
     * para que salgan los nombres de las casillas bien printeados

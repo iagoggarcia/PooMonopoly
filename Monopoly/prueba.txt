@@ -1,6 +1,5 @@
 crear jugador Pedro pelota
 crear jugador Maria coche
-listar edificios
 lanzar dados 1+0
 comprar Solar1
 edificar casa
@@ -10,12 +9,19 @@ lanzar dados 1+1
 comprar Solar2
 edificar casa
 vender casas Solar2 2
-listar edificios
-describir jugador Pedro
 vender casas Solar2 1
-listar edificios
 edificar casa
 edificar casa
-describir jugador Pedro
 vender casas Solar2 2
-describir jugador Pedro
+edificar casa
+edificar casa
+edificar casa
+edificar casa
+edificar hotel
+listar edificios negro
+vender piscinas Solar2 1
+vender pista Solar3 2
+edificar piscina
+edificar pista
+listar edificios
+acabar turno
