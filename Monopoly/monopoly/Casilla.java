@@ -387,8 +387,10 @@ public class Casilla {
                 //float alquilerGrupo = this.impuesto; // alquiler base, definido en el tablero
                 int alquilerGrupo = this.calcularAlquiler(actual); // usamos la función que calcula el alquiler para los solares
 
-                // comprobamos si el dueño tiene todo el grupo
-                if (this.grupo != null && this.grupo.esDuenhoGrupo(this.duenho)) {
+                // comprobamos si el dueño tiene todo el grupo y que no hay edificios para doblar el alquiler
+                boolean sinEdificios = (getNumCasas() + getNumHoteles() + getNumPiscinas() + getNumPistas()) == 0;
+
+                if (sinEdificios && this.grupo != null && this.grupo.esDuenhoGrupo(this.duenho)) {
                     // si tiene todo el grupo
                     alquilerGrupo *= 2;
                     System.out.println(this.duenho.getNombre() + " posee todo el grupo de " + this.grupo.getColorGrupo() + ". Se cobra el doble del alquiler.");
@@ -872,8 +874,8 @@ public class Casilla {
         }
     }
 
-    /* Función que uso en gestionarVentaEdificios para vender única y específicamente hoteles
-     * Los mensajes son personalizados para los hoteles, los otros tipos de edificio
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente piscinas
+     * Los mensajes son personalizados para las piscinas, los otros tipos de edificio
      * también tienen su correspondiente función
      */
     public void venderPiscinas(int nPiscinas, Jugador j) {
@@ -895,7 +897,7 @@ public class Casilla {
                         m.eliminarEdificioGlobal(e);
                     }
 
-                    int ganancia = this.getValorCasayHotel();
+                    int ganancia = this.getValorPiscina();
                     e.getPropietario().sumarFortuna(ganancia);
 
                     vendidas++;
@@ -905,19 +907,19 @@ public class Casilla {
             }
 
             if (vendidas == 1 && getNumPiscinas() == 0) {
-                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPiscinas + " piscina en " + getNombre() + ", recibiendo " + nPiscinas * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumPiscinas() + " piscinas.");
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPiscinas + " piscina en " + getNombre() + ", recibiendo " + nPiscinas * getValorPiscina() + "€. En la propiedad quedan " + this.getNumPiscinas() + " piscinas.");
             }
         } else {
             if (getNumPiscinas() == 0) {
-                System.err.println("No se pueden vender piscinas en " + getNombre() + ", no hay ninguno construido");
+                System.err.println("No se pueden vender piscinas en " + getNombre() + ", no hay ninguna construida");
             } else if (getNumPiscinas() == 1) {
                 System.err.println("Solamente se puede vender 1 piscina, recibiendo " + getValorPiscina() + "€");
             }
         }
     }
 
-    /* Función que uso en gestionarVentaEdificios para vender única y específicamente hoteles
-     * Los mensajes son personalizados para los hoteles, los otros tipos de edificio
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente pistas de deporte
+     * Los mensajes son personalizados para las pistas de deporte, los otros tipos de edificio
      * también tienen su correspondiente función
      */
     public void venderPistas(int nPistas, Jugador j) {
@@ -939,7 +941,7 @@ public class Casilla {
                         m.eliminarEdificioGlobal(e);
                     }
 
-                    int ganancia = this.getValorCasayHotel();
+                    int ganancia = this.getValorPistaDeporte();
                     e.getPropietario().sumarFortuna(ganancia);
 
                     vendidas++;
@@ -953,9 +955,9 @@ public class Casilla {
             }
         } else {
             if (getNumPistas() == 0) {
-                System.err.println("No se pueden vender pistas de deporte en " + getNombre() + ", no hay ninguno construido");
+                System.err.println("No se pueden vender pistas de deporte en " + getNombre() + ", no hay ninguna construida");
             } else if (getNumPistas() == 1) {
-                System.err.println("Solamente se puede vender 1 hotel, recibiendo " + getValorPistaDeporte() + "€");
+                System.err.println("Solamente se puede vender 1 pista de deporte, recibiendo " + getValorPistaDeporte() + "€");
             }
         }
     }
@@ -1001,15 +1003,21 @@ public class Casilla {
         int base = getAlquilerCasilla();
 
         // Sumamos el valor del alquiler de los edificios
-        int edificios = 0;
-        edificios += getNumCasas()   * getAlquilerCasa();
-        edificios += getNumHoteles() * getAlquilerHotel();
-        edificios += (getNumPiscinas() + getNumPistas()) * getAlquilerPiscinaYPista();
+        int numEdificios = getNumCasas() + getNumHoteles() + getNumPiscinas() + getNumPistas();
 
-        int alquiler = base + edificios; // sumamos lo anterior al alquiler de la casilla sin nada
+        int alquiler = 0;
+        if (numEdificios != 0) {
+            alquiler += getNumCasas() * getAlquilerCasa();
+            alquiler += getNumHoteles() * getAlquilerHotel();
+            alquiler += (getNumPiscinas() + getNumPistas()) * getAlquilerPiscinaYPista();
+        }
+        else {
+            alquiler = base;
+        }
 
-        if (getGrupo() != null && getDuenho() != null && getDuenho().getNombre() != null && getGrupo().esDuenhoGrupo(getDuenho())) { // y si todas las casillas del grupo tienen el mismo dueño
-            alquiler *= 2; // el alquiler se multiplica por 2
+        // Ahora si todas las casillas del grupo tienen el mismo dueño, este no es la banca, y además no hay edificios, entonces el alquiler se multiplica por 2
+        if (getGrupo() != null && getDuenho() != null && getDuenho().getNombre() != null && getGrupo().esDuenhoGrupo(getDuenho()) && numEdificios == 0) {
+            alquiler *= 2;
         }
 
         return alquiler;
