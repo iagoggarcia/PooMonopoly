@@ -418,7 +418,9 @@ public class Casilla {
                 // realizamos el pago
                 actual.sumarFortuna(-alquilerGrupo);
                 actual.sumarGastos(alquilerGrupo);
+                actual.setAlquilerpagadojugador(actual.getAlquilerpagadojugador() + alquilerGrupo); //aumentamos sus pagos de alquileres
                 this.duenho.sumarFortuna(alquilerGrupo);
+                this.duenho.setAlquilercobradojugador(this.duenho.getAlquilercobradojugador() + alquilerTotal); //aumentamos cobro de alquileres
                 actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquilerGrupo);
                 System.out.println(actual.getNombre() + " paga " + (int) alquilerGrupo + "€ de alquiler a " + this.duenho.getNombre() + " por caer en " + this.nombre + ".");
                 return true;
@@ -461,8 +463,10 @@ public class Casilla {
                 // realizamos el pago
                 actual.sumarFortuna(-alquiler);
                 actual.sumarGastos(alquiler);
+                actual.setAlquilerpagadojugador(actual.getAlquilerpagadojugador() + alquilerTotal); //aumentamos sus pagos de alquileres
                 this.duenho.sumarFortuna(alquiler);
-                actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquiler);
+                this.duenho.setAlquilercobradojugador(this.duenho.getAlquilercobradojugador() + alquilerTotal); //aumentamos cobro de alquileres
+                actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquiler); //esto es para la rentabilidad de la casilla, influye al dueño, no al que paga alquiler
                 System.out.println(actual.getNombre() + " paga " + (int) alquiler + "€ de alquiler a " + this.duenho.getNombre() + " por usar el servicio (" + serviciosPropietario + "servicio/s poseídos, tirada = " + tirada + ").");
                 return true;
             case "transporte":
@@ -497,7 +501,9 @@ public class Casilla {
                 // realizamos el pago
                 actual.sumarFortuna(-alquilerTotal);
                 actual.sumarGastos(alquilerTotal);
+                actual.setAlquilerpagadojugador(actual.getAlquilerpagadojugador() + alquilerTotal); //aumentamos sus pagos de alquileres
                 this.duenho.sumarFortuna(alquilerTotal);
+                this.duenho.setAlquilercobradojugador(this.duenho.getAlquilercobradojugador() + alquilerTotal); //aumentamos cobro de alquileres
                 actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquilerTotal);
                 System.out.println(actual.getNombre() + " paga " + (int) alquilerTotal + "€ de alquiler a " + this.duenho.getNombre() + " por usar el transporte (" + contarTransporte + "transporte/s poseídos).");
                 return true;
@@ -519,6 +525,7 @@ public class Casilla {
                 actual.sumarFortuna(-imp);
                 actual.sumarGastos(imp);
                 banca.sumarFortuna(imp);
+                actual.setImpuestos_tasas(actual.getImpuestos_tasas() + imp); //actualizamos los gastos del jugador
 
                 System.out.println(actual.getNombre() + " paga " + imp + "€ en impuestos.");
                 return true;
@@ -593,6 +600,7 @@ public class Casilla {
 
         solicitante.sumarFortuna(-this.valor);
         solicitante.sumarGastos(this.valor);
+        solicitante.setInversiones(solicitante.getInversiones()+this.valor);
         solicitante.anhadirPropiedad(this);
         this.setDuenho(solicitante);
         banca.sumarFortuna(this.valor);

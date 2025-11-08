@@ -413,10 +413,10 @@ public class Menu {
         else if(comando.equalsIgnoreCase("estadisticas")) {
             estadisticas();
         }
-        /*else if(comando.startsWith("estadisticas ")){
+        else if(comando.startsWith("estadisticas ")){
             String nombreJugador = comando.substring("estadisticas".length()).trim();
             estadisticasjugador(nombreJugador);
-        }*/
+        }
     }
 
     //función para crear jugador desde archivo
@@ -1233,6 +1233,20 @@ public class Menu {
         System.out.println("\n");
     }
 
+    private void estadisticasjugador(String nombrejugador){
+
+        Jugador j = buscarJugadorPorNombre(nombrejugador);
+        if(j == null){
+            System.out.println("Jugador no encontrado.\n");
+            return;
+        }
+        System.out.println("dineroInvertido: " + j.getInversiones() + ",\n"); //aqui hice setter y getter, un atributo, e inclui esta variable en comprar casilla e intentar construir
+        System.out.println("pagoTasasEImpuestos: " + j.getImpuestos_tasas() + ",\n");
+        System.out.println("pagoDeAlquileres: " + j.getAlquilerpagadojugador() + ",\n");
+        System.out.println("cobroDeAlquileres: " + j.getAlquilercobradojugador() + ",\n");
+        System.out.println("pasarPorCasillaDeSalida: " + (j.getVueltas() * this.tablero.encontrar_casilla("Salida").getValor()) + ",\n");
+    }
+
     /* Función que crea el edificio si se cumplen los requisitos necesarios
      *
      */
@@ -1331,6 +1345,7 @@ public class Menu {
                 this.edificios.add(e); // añadimos el edificio al array creado en esta clase Menu.java, sirve para luego hacer el listar edificios
 
                 actual.sumarFortuna(-precio); // restamos lo que se acaba de gastar
+                actual.setInversiones(actual.getInversiones()+precio); //actualizamos sus inversiones
                 System.out.println("Se ha edificado un/a " +  tipoEdificio + " en " +  casilla.getNombre() + ". La fortuna de " + actual.getNombre() + " se reduce en " + precio + "€");
             }
             else { // si no es dueño de la casilla o del grupo
@@ -1465,6 +1480,7 @@ public class Menu {
 
                 if ((destino.equalsIgnoreCase("Salida") || destino.equalsIgnoreCase("Solar19") || destino.equalsIgnoreCase("Solar20")) && posDestino < posInicial) {
                     jugador.sumarFortuna(Valor.SUMA_VUELTA);
+                    jugador.setVueltas(jugador.getVueltas() + 1); //hay que sumar una vuelta tambien
                     System.out.println(jugador.getNombre() + " cobra 2.000.000€ por pasar por la casilla de Salida.");
                 }
 

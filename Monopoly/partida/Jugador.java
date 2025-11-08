@@ -16,7 +16,12 @@ public class Jugador {
     private int vueltas; //Cuenta las vueltas dadas al tablero.
     private ArrayList<Casilla> propiedades; // Propiedades que posee el jugador (casillas).
     private ArrayList<Edificio> edificios; // ArrayList donde se guardan los edificios que le pertenecen al jugador
-    private float patrimonio;
+    private float patrimonio; //valor total de las posesiones del jugador
+    private float inversiones; //dinero que invierte en casillas/edificaciones
+    private float impuestos_tasas; //dinero que paga el jugador al caer en las casillas con penalizacion economica
+    private float alquilercobradojugador; //variables para la funcion de estadisticas
+    private float alquilerpagadojugador;
+    private float premiosinversiones; //todo lo recibido por cartas, casillas de suerte, bote del parking...
 
     //Constructor vacío. Se usará para crear la banca.
     // estaba mal, como pone en el esqueleto es VACÍO, no hay que completar nada
@@ -40,11 +45,19 @@ public class Jugador {
         this.propiedades = new ArrayList<>(); // solo hay que inicializar propiedades como  una lista vaćía
         this.edificios = new ArrayList<>(); // aquí guardamos los edificios que creó el jugador
         this.patrimonio = this.fortuna;
+        this.inversiones = 0;
+        this.impuestos_tasas = 0;
+        this.alquilercobradojugador = 0;
+        this.alquilerpagadojugador = 0;
     }
 
     public Jugador(float valor){
         this.fortuna = valor;
         this.patrimonio = this.fortuna;
+        this.inversiones = 0;
+        this.impuestos_tasas = 0;
+        this.alquilercobradojugador = 0;
+        this.alquilerpagadojugador = 0;
     }
 
     // ----- Getters mínimos que necesita el menú ----- //los añado porque me hacen falta en menu
@@ -129,6 +142,51 @@ public class Jugador {
     public void setPatrimonio(float patrimonio) {
         this.patrimonio = patrimonio;
     }
+
+    public float getInversiones() {
+        return this.inversiones;
+    }
+
+    public void setInversiones(float inversiones) {
+        this.inversiones = inversiones;
+    }
+
+    public float getGastos() {
+        return this.gastos;
+    } //realmente el setter de esta variable es la funcion sumargastos
+
+    public float getImpuestos_tasas() {
+        return this.impuestos_tasas;
+    }
+
+    public void setImpuestos_tasas(float impuestos_tasas) {
+        this.impuestos_tasas = impuestos_tasas;
+    }
+    public float getAlquilercobradojugador() {
+        return alquilercobradojugador;
+    }
+
+    public void setAlquilercobradojugador(float alquilercobradojugador) {
+        this.alquilercobradojugador = alquilercobradojugador;
+    }
+
+    public float getAlquilerpagadojugador() {
+        return alquilerpagadojugador;
+    }
+
+    public void setAlquilerpagadojugador(float alquilerpagadojugador) {
+        this.alquilerpagadojugador = alquilerpagadojugador;
+    }
+
+    public float getPremiosinversiones() {
+        return premiosinversiones;
+    }
+
+    public void setPremiosinversiones(float premiosinversiones) {
+        this.premiosinversiones = premiosinversiones;
+    }
+
+
 
     //Otros métodos:
     //Método para añadir una propiedad al jugador (cuando la compra). Como parámetro, la casilla a añadir.
@@ -254,5 +312,4 @@ public class Jugador {
             System.err.println("El edificio " + edificio.getId() + " no pertenece a " + this.nombre);
         }
     }
-
 }
