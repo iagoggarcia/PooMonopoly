@@ -14,8 +14,10 @@ public class Casilla {
     private Jugador duenho; //Dueño de la casilla (por defecto sería la banca).
     private Grupo grupo; //Grupo al que pertenece la casilla (si es solar).
     private float impuesto; //Cantidad a pagar por caer en la casilla: el alquiler en solares/servicios/transportes o impuestos.
+    private float impuestos_cobrados; //la cantidad total recaudada mediante impuestos
     private float hipoteca; //Valor otorgado por hipotecar una casilla
     private ArrayList<Avatar> avatares; //Avatares que están situados en la casilla.
+    private float rentabilidad; //diferencia entre lo cobrado y su coste
     private boolean hipotecada; // indica si la casilla está hipotecada
     private int contador; // indica cuantas veces ha caido un jugador en esa casilla
     private int valorCasayHotel; // Indica el coste de edificar una casa o un hotel en una casilla específica (es la misma variable porque cuestan lo mismo)
@@ -63,6 +65,8 @@ public class Casilla {
         this.numHoteles = 0;
         this.numPiscinas = 0;
         this.numPistas = 0;
+        this.impuestos_cobrados = 0;
+        this.rentabilidad = 0;
     }
 
     /*Constructor para casillas Servicios o Transporte:
@@ -76,6 +80,8 @@ public class Casilla {
         this.duenho = duenho; // aquí puse dueño pero al crear la casilla por primera vez hay que poner banca, que es el dueño por defecto
         this.impuesto = impuesto;
         this.hipoteca = 0;
+        this.rentabilidad = 0;
+        this.impuestos_cobrados = 0;
         this.grupo = new Grupo();
         this.avatares = new ArrayList<>();
     }
@@ -91,6 +97,8 @@ public class Casilla {
         this.duenho = duenho;
         this.impuesto = impuesto;
         this.hipoteca = 0;
+        this.impuestos_cobrados = 0;
+        this.rentabilidad = 0;
         this.grupo = new Grupo();
         this.avatares = new ArrayList<>();
     }
@@ -106,6 +114,8 @@ public class Casilla {
         this.duenho = duenho;
         this.impuesto = 0;
         this.hipoteca = 0;
+        this.rentabilidad = 0;
+        this.impuestos_cobrados = 0;
         this.grupo = new Grupo();
         this.avatares = new ArrayList<>();
     }
@@ -208,7 +218,7 @@ public class Casilla {
         return valorCasayHotel;
     }
 
-    public void setValorCasayHotel(int valorCasa) {
+    public void setValorCasayHotel(int valorCasayHotel) {
         this.valorCasayHotel = valorCasayHotel;
     }
 
@@ -308,6 +318,23 @@ public class Casilla {
         this.alquilerTotal = alquilerTotal;
     }
 
+    public float getImpuestoscobrados(){return this.impuestos_cobrados;}
+
+    public void setImpuestos_cobrados(float impuestos_cobrados) {this.impuestos_cobrados = impuestos_cobrados;}
+
+    public float getRentabilidad() {
+        if (this.duenho != null) {
+            setRentabilidad(this.impuestos_cobrados - this.valor);
+        } else {
+            setRentabilidad(0);
+        }
+        return this.rentabilidad;
+    }
+
+
+    public void setRentabilidad(float rentabilidad) {this.rentabilidad = rentabilidad;}
+
+
     //Método utilizado para añadir un avatar al array de avatares en casilla.
     public void anhadirAvatar(Avatar av) {
         if (av == null) return;
@@ -390,6 +417,7 @@ public class Casilla {
                 actual.sumarFortuna(-alquilerGrupo);
                 actual.sumarGastos(alquilerGrupo);
                 this.duenho.sumarFortuna(alquilerGrupo);
+                actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquilerGrupo);
                 System.out.println(actual.getNombre() + " paga " + (int) alquilerGrupo + "€ de alquiler a " + this.duenho.getNombre() + " por caer en " + this.nombre + ".");
                 return true;
             case "servicios":
@@ -432,6 +460,7 @@ public class Casilla {
                 actual.sumarFortuna(-alquiler);
                 actual.sumarGastos(alquiler);
                 this.duenho.sumarFortuna(alquiler);
+                actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquiler);
                 System.out.println(actual.getNombre() + " paga " + (int) alquiler + "€ de alquiler a " + this.duenho.getNombre() + " por usar el servicio (" + serviciosPropietario + "servicio/s poseídos, tirada = " + tirada + ").");
                 return true;
             case "transporte":
@@ -467,6 +496,7 @@ public class Casilla {
                 actual.sumarFortuna(-alquilerTotal);
                 actual.sumarGastos(alquilerTotal);
                 this.duenho.sumarFortuna(alquilerTotal);
+                actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquilerTotal);
                 System.out.println(actual.getNombre() + " paga " + (int) alquilerTotal + "€ de alquiler a " + this.duenho.getNombre() + " por usar el transporte (" + contarTransporte + "transporte/s poseídos).");
                 return true;
             // casilla de impuestos

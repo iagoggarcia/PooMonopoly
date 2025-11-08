@@ -23,6 +23,7 @@ vender piscinas Solar2 1
 vender pista Solar3 2
 edificar piscina
 edificar pista
+estadisticas
 listar edificios negro
 listar edificios rojo
 describir Solar8

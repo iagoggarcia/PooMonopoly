@@ -8,6 +8,7 @@ class Grupo {
 
     //Atributos
     private ArrayList<Casilla> miembros; //Casillas miembros del grupo.
+    private float rentabilidadgrupo;
     private String colorGrupo; //Color del grupo
     private int numCasillas; //Número de casillas del grupo.
 
@@ -60,6 +61,12 @@ class Grupo {
 
     public void setNumCasillas(int numCasillas) {
         this.numCasillas = numCasillas;
+    }
+
+    public float getRentabilidadgrupo() {return rentabilidadgrupo;}
+
+    public void setRentabilidadgrupo(float rentabilidadgrupo) {
+        this.rentabilidadgrupo = rentabilidadgrupo;
     }
 
     /* Método que añade una casilla al array de casillas miembro de un grupo.

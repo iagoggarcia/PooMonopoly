@@ -16,7 +16,7 @@ public class Jugador {
     private int vueltas; //Cuenta las vueltas dadas al tablero.
     private ArrayList<Casilla> propiedades; // Propiedades que posee el jugador (casillas).
     private ArrayList<Edificio> edificios; // ArrayList donde se guardan los edificios que le pertenecen al jugador
-
+    private float patrimonio;
 
     //Constructor vacío. Se usará para crear la banca.
     // estaba mal, como pone en el esqueleto es VACÍO, no hay que completar nada
@@ -39,10 +39,12 @@ public class Jugador {
         this.vueltas = 0; 
         this.propiedades = new ArrayList<>(); // solo hay que inicializar propiedades como  una lista vaćía
         this.edificios = new ArrayList<>(); // aquí guardamos los edificios que creó el jugador
+        this.patrimonio = this.fortuna;
     }
 
     public Jugador(float valor){
         this.fortuna = valor;
+        this.patrimonio = this.fortuna;
     }
 
     // ----- Getters mínimos que necesita el menú ----- //los añado porque me hacen falta en menu
@@ -104,6 +106,28 @@ public class Jugador {
             }
         }
         return solaresHipotecados;
+    }
+    public float getPatrimonio() {
+        float valorPropiedades = 0;
+        if (this.propiedades != null) {
+            for (Casilla c : this.propiedades) {
+                if (c != null) valorPropiedades += c.getValor();
+            }
+        }
+
+        float valorEdificios = 0;
+        if (this.edificios != null) {
+            for (Edificio e : this.edificios) {
+                if (e != null) valorEdificios += e.getPrecio();
+            }
+        }
+
+        setPatrimonio(valorPropiedades + valorEdificios + this.fortuna);
+        return this.fortuna + valorPropiedades + valorEdificios;
+    }
+
+    public void setPatrimonio(float patrimonio) {
+        this.patrimonio = patrimonio;
     }
 
     //Otros métodos:
