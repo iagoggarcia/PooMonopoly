@@ -604,13 +604,17 @@ public class Casilla {
     public String infoCasilla() {
 
         StringBuilder informacion = new StringBuilder(); // aquí guardamos la info de la casilla
+        String duenho;
+        if (this.getDuenho().getNombre() == null) duenho = "banca";
+        else  duenho = this.getDuenho().getNombre();
 
         informacion.append("{");
         switch (tipo.toLowerCase()) {
             case "solar": // falta por printear el valor de los alquileres
-                informacion.append("\nTipo: ").append(tipo).append("\nGrupo: ").append(grupo.getNombreColorGrupo()).append("\nPropietario: ").append(duenho.getNombre())
-                        .append("\nValor: ").append(valor).append("\nValor hotel: ").append(valorCasayHotel).append("\nValor casa: ").append(valorCasayHotel)
-                        .append("\nValor piscina: ").append(valorPiscina).append("\nValor pista de deporte: ").append(valorPistaDeporte)
+                informacion.append("\nTipo: ").append(tipo).append("\nGrupo: ").append(grupo.getNombreColorGrupo()).append("\nPropietario: ").append(duenho)
+                        .append("\nValor: ").append(valor).append("\nAlquiler: ").append(calcularAlquilerParaMostrar()).append("\nValor hotel: ").append(valorCasayHotel).append("\nValor casa: ").append(valorCasayHotel)
+                        .append("\nValor piscina: ").append(valorPiscina).append("\nValor pista de deporte: ").append(valorPistaDeporte).append("\nAlquiler casa: ").append(alquilerCasa)
+                        .append("\nAlquiler hotel: ").append(alquilerHotel).append("\nAlquiler piscina: ").append(alquilerPiscinaYPista).append("\nAlquiler pista de deporte: ").append(alquilerPiscinaYPista)
                         .append(infoJugadoresEnEstaCasilla());
                 break;
             case "impuesto":
@@ -932,7 +936,7 @@ public class Casilla {
         específico según la casilla en la que se encuentre. Para usarla hay que guardar el valor
         que retorna en una variable y esa variable usarla en el menú, en evaluarCasilla.
      */
-    private int calcularAlquiler(Jugador actual) {
+    public int calcularAlquiler(Jugador actual) {
         // Si no es un solar devuelve 0 porque sería otro case que ya se realiza dentro de evaluarCasilla()
         if (getTipo() == null || !"solar".equalsIgnoreCase(getTipo())) return 0;
 
@@ -952,6 +956,35 @@ public class Casilla {
 
         return alquiler;
     }
+
+    /*
+        Esta otra función es muy similar a la anterior pero en vez de usarse en evaluarCasilla
+        se utiliza en listarEdificiosGrupo. Hacemos una nueva porque con la anterior, si el jugador
+        quería listar edificios de un grupo que le pertenece haciendo "listar edificios grupoDeSuPropiedad",
+        el alquiler le salía a 0, porque si él cae ahí no debe pagar. Esta función devuelve el valor
+        del alquiler sin importar qué jugador realice el comando "listar edificios grupo"
+     */
+    public int calcularAlquilerParaMostrar() {
+        if (getTipo() == null || !"solar".equalsIgnoreCase(getTipo())) return 0;
+        if (isHipotecada()) return 0; // si está hipotecada no se paga
+
+        int base = getAlquilerCasilla();
+
+        // Sumamos el valor del alquiler de los edificios
+        int edificios = 0;
+        edificios += getNumCasas()   * getAlquilerCasa();
+        edificios += getNumHoteles() * getAlquilerHotel();
+        edificios += (getNumPiscinas() + getNumPistas()) * getAlquilerPiscinaYPista();
+
+        int alquiler = base + edificios; // sumamos lo anterior al alquiler de la casilla sin nada
+
+        if (getGrupo() != null && getDuenho() != null && getDuenho().getNombre() != null && getGrupo().esDuenhoGrupo(getDuenho())) { // y si todas las casillas del grupo tienen el mismo dueño
+            alquiler *= 2; // el alquiler se multiplica por 2
+        }
+
+        return alquiler;
+    }
+
 
 
     /** Se puede tener un toString por clase, así que hice este

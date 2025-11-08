@@ -9,7 +9,6 @@ lanzar dados 1+1
 comprar Solar2
 edificar casa
 vender casas Solar2 2
-vender casas Solar2 1
 edificar casa
 edificar casa
 vender casas Solar2 2
@@ -17,17 +16,13 @@ edificar casa
 edificar casa
 edificar casa
 edificar casa
+listar edificios negro
 edificar hotel
 listar edificios negro
 vender piscinas Solar2 1
 vender pista Solar3 2
 edificar piscina
 edificar pista
-vender piscinas Solar2 2
-vender pista Solar2 2
-describir jugador Pedro
-vender piscinas Solar2 1
-vender pista Solar2 1
-describir jugador Pedro
-listar edificios
-acabar turno
+listar edificios negro
+listar edificios rojo
+describir Solar8

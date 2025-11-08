@@ -917,23 +917,64 @@ public class Menu {
     }
 
     private void listarEdificiosGrupo(String grupo) {
-        int i = 0; // si al salir del bucle sigue a 0 es porque no hay edificios en ese grupo
-        for (Edificio edificio : this.edificios) {
-            if (edificio.getLugar().getGrupo().getNombreColorGrupo().equals(grupo)) {
+        if (this.tablero == null || this.tablero.getPosiciones() == null) {
+            System.out.println("No hay tablero inicializado.");
+            return;
+        }
+        if (grupo == null || grupo.isBlank()) {
+            System.out.println("Uso: listar edificios <nombreGrupo>");
+            return;
+        }
+
+        boolean hayAlgo = false;
+
+        for (ArrayList<Casilla> lado : this.tablero.getPosiciones()) { // itero cada lado del tablero
+            for (Casilla c : lado) { // ahora cada casilla de cada lado
+                Grupo g = c.getGrupo();
+                if (!"solar".equalsIgnoreCase(c.getTipo())) continue; // si no es un solar, pasa a la siguiente
+                if (!g.getNombreColorGrupo().equalsIgnoreCase(grupo)) continue; // si el grupo pedido y el grupo de la casilla no coinciden, pasa al siguiente
+
+                // Creamos un array para cada tipo de edificio donde gaurdamos los ids
+                ArrayList<String> casas = new ArrayList<>();
+                ArrayList<String> hoteles = new ArrayList<>();
+                ArrayList<String> piscinas = new ArrayList<>();
+                ArrayList<String> pistas = new ArrayList<>();
+
+                if (c.getEdificios() != null) {
+                    for (Edificio e : c.getEdificios()) { // itero los edificios que hay en la casilla
+                        if (e == null || e.getTipo() == null) continue; // si hay algún error paso al siguiente
+                        switch (e.getTipo().toLowerCase()) { // y voy guardando el id del edificio según su tipo
+                            case "casa":    casas.add(e.getId());    break;
+                            case "hotel":   hoteles.add(e.getId());  break;
+                            case "piscina": piscinas.add(e.getId()); break;
+                            case "pista":   pistas.add(e.getId());   break;
+                        }
+                    }
+                }
+
+                int alquiler = c.calcularAlquilerParaMostrar();
+
                 System.out.println("{");
-                System.out.println("id: " + edificio.getId());
-                System.out.println("propietario: " +  edificio.getPropietario().getNombre());
-                System.out.println("casilla: " +  edificio.getLugar().toString());
-                System.out.println("grupo: " +  edificio.getLugar().getGrupo().getNombreColorGrupo());
-                System.out.println("coste: " +  edificio.getPrecio());
+                System.out.println("propiedad: " + c.getNombre());
+                System.out.println("hoteles: " + hoteles);
+                System.out.println("casas: " + casas);
+                System.out.println("piscinas: " + piscinas);
+                System.out.println("pistas: " + pistas);
+                System.out.println("alquiler: " + alquiler);
                 System.out.println("}");
-                i++;
+
+                if (!casas.isEmpty() || !hoteles.isEmpty() || !piscinas.isEmpty() || !pistas.isEmpty()) {
+                    hayAlgo = true;
+                }
             }
         }
-        if (i == 0) {
-            System.out.println("Todavía no hay edificios construidos en el grupo " + grupo);
+
+        if (!hayAlgo) {
+            System.out.println("Todavía no hay edificaciones construidas en el grupo " + grupo + ".");
         }
     }
+
+
 
     private void acabarTurno() {
         // aquí se podría añadir la comprobación de que hay jugadores en la partida
