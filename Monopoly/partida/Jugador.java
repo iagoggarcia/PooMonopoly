@@ -22,6 +22,7 @@ public class Jugador {
     private float alquilercobradojugador; //variables para la funcion de estadisticas
     private float alquilerpagadojugador;
     private float premiosinversiones; //todo lo recibido por cartas, casillas de suerte, bote del parking...
+    private int vecescarcel; //contador para la carcel
 
     //Constructor vacío. Se usará para crear la banca.
     // estaba mal, como pone en el esqueleto es VACÍO, no hay que completar nada
@@ -49,6 +50,7 @@ public class Jugador {
         this.impuestos_tasas = 0;
         this.alquilercobradojugador = 0;
         this.alquilerpagadojugador = 0;
+        this.vecescarcel = 0;
     }
 
     public Jugador(float valor){
@@ -58,6 +60,7 @@ public class Jugador {
         this.impuestos_tasas = 0;
         this.alquilercobradojugador = 0;
         this.alquilerpagadojugador = 0;
+        this.vecescarcel = 0;
     }
 
     // ----- Getters mínimos que necesita el menú ----- //los añado porque me hacen falta en menu
@@ -186,6 +189,10 @@ public class Jugador {
         this.premiosinversiones = premiosinversiones;
     }
 
+    public int getVecesCarcel(){
+        return this.vecescarcel;
+    }
+
 
 
     //Otros métodos:
@@ -278,6 +285,7 @@ public class Jugador {
         if (actual != null) actual.eliminarAvatar(this.avatar);  // cuando esté implementado en casilla
         carcel.anhadirAvatar(this.avatar);                       
         this.avatar.setLugar(carcel);                            // actualiza el puntero del avatar
+        this.vecescarcel += 1;
 
         this.enCarcel = true;
         this.tiradasCarcel = 0;

@@ -27,3 +27,4 @@ vender pista Solar2 1
 estadisticas
 listar edificios negro
 describir Solar8
+estadisticas Pedro

@@ -1245,6 +1245,8 @@ public class Menu {
         System.out.println("pagoDeAlquileres: " + j.getAlquilerpagadojugador() + ",\n");
         System.out.println("cobroDeAlquileres: " + j.getAlquilercobradojugador() + ",\n");
         System.out.println("pasarPorCasillaDeSalida: " + (j.getVueltas() * this.tablero.encontrar_casilla("Salida").getValor()) + ",\n");
+        System.out.println("premiosIversionesObote: " + j.getPremiosinversiones() + ",\n");
+        System.out.println("vecesEnLaCarcel: " + j.getVecesCarcel() + ",\n");
     }
 
     /* Función que crea el edificio si se cumplen los requisitos necesarios
@@ -1492,10 +1494,11 @@ public class Menu {
                 jugador.encarcelar(this.tablero.getPosiciones());
                 break;
 
-            case "cobrar":
+            case "cobrar": //premio loteria, hacienda,
                 float cantidadCobrar = Float.parseFloat(partes[1]);
                 jugador.sumarFortuna(cantidadCobrar);
                 System.out.println(jugador.getNombre() + " cobra " + (int) cantidadCobrar + "€.");
+                jugador.setPremiosinversiones(jugador.getPremiosinversiones() + cantidadCobrar);
                 break;
 
             case "pagar": // pagar a la banca
@@ -1514,10 +1517,12 @@ public class Menu {
                     banca.sumarFortuna(cantidadPagar);
                     System.out.println(jugador.getNombre() + " paga " + (int) cantidadPagar + "€ a la banca.");
                 }
+                jugador.setImpuestos_tasas(jugador.getImpuestos_tasas() + cantidadPagar);
                 break;
 
-            case "pagarJugadores":
+            case "pagarJugadores": //tasa impuesto
                 float cantidad = Float.parseFloat(partes[1]);
+                float cantidadtotal = 0.0f;
                 int numJugadores = this.jugadores.size() - 1; // sin contar al propio jugador
                 float total = cantidad * numJugadores;
 
@@ -1542,10 +1547,12 @@ public class Menu {
                             jugador.sumarFortuna(-cantidad);
                             jugador.sumarGastos(cantidad);
                             j.sumarFortuna(cantidad);
+                            cantidadtotal += cantidad;
                         }
                     }
                     System.out.println(jugador.getNombre() + " paga " + (int) cantidad + "€ a cada jugador");
                 }
+                jugador.setImpuestos_tasas(jugador.getImpuestos_tasas() + cantidadtotal);
                 break;
 
             case "retroceder":
@@ -1566,6 +1573,8 @@ public class Menu {
                 }
 
                 if (retroceso != null) {
+                    jugador.getAvatar().getLugar().eliminarAvatar(jugador.getAvatar());
+                    retroceso.anhadirAvatar(jugador.getAvatar());
                     jugador.getAvatar().setLugar(retroceso);
                     System.out.println(jugador.getNombre() + " retrocede " + n + " casillas hasta " + retroceso.getNombre() + ".");
                     retroceso.evaluarCasilla(jugador, banca, 0);
