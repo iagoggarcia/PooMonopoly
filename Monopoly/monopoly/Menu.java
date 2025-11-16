@@ -397,7 +397,7 @@ public class Menu {
                 gestionarVentaEdificios(tipoEdificio, casilla, numEdificios);
             }
             else {
-                System.err.println("Formato inválido para 'vender'. Uso: vender <tipoEdificio> <numEdificios>");
+                System.err.println("Formato inválido para 'vender'. Uso: vender <tipoEdificio> <nombreCasilla> <numEdificios>");
             }
         }
         else if (comando.equalsIgnoreCase("acabar turno")) {
@@ -1419,6 +1419,9 @@ public class Menu {
                         else if (casilla.getNumPiscinas() < 1) { // si no hay piscina (pero sí hotel)
                             System.err.println(actual.getNombre() + " no puede edificar una pista en " + casilla.getNombre() + " porque todavía no hay piscina");
                         }
+                        else if (casilla.getNumHoteles() < 1) { // si no hay hotel (pero sí piscina)
+                            System.err.println(actual.getNombre() + " no puede edificar una pista en " + casilla.getNombre() + " porque todavía no hay hotel");
+                        }
                         else if (casilla.getNumPistas() == 1) { // si ya hay pista
                             System.err.println(actual.getNombre() + " no puede edificar una pista en " + casilla.getNombre() + " porque ya hay una");
                         }
@@ -1497,36 +1500,28 @@ public class Menu {
         switch (tipoEdificio) {
             case "casas":
                 if (casilla.getDuenho() != null && casilla.getDuenho().equals(actual)) {
-                    if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
-                        casilla.venderCasas(numEdificios, actual); // y esta función ya comprueba si es el dueño
-                    }
+                    casilla.venderCasas(numEdificios, actual); // y esta función ya comprueba si es el dueño
                 } else {
                     System.err.println("No se pueden vender casas en " + casilla.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
                 }
                 break;
             case "hoteles":
                 if (casilla.getDuenho() != null && casilla.getDuenho().equals(actual)) {
-                    if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
-                        casilla.venderHoteles(numEdificios, actual); // y esta función ya comprueba si es el dueño
-                    }
+                    casilla.venderHoteles(numEdificios, actual); // y esta función ya comprueba si es el dueño
                 } else {
                     System.err.println("No se pueden vender hoteles en " + casilla.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
                 }
                 break;
-            case "piscinas":
+            case "piscina":
                 if (casilla.getDuenho() != null && casilla.getDuenho().equals(actual)) {
-                    if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
-                        casilla.venderPiscinas(numEdificios, actual); // y esta función ya comprueba si es el dueño
-                    }
+                    casilla.venderPiscinas(numEdificios, actual); // y esta función ya comprueba si es el dueño
                 } else {
                     System.err.println("No se pueden vender piscinas en " + casilla.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
                 }
                 break;
             case "pista":
                 if (casilla.getDuenho() != null && casilla.getDuenho().equals(actual)) {
-                    if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
-                        casilla.venderPistas(numEdificios, actual); // y esta función ya comprueba si es el dueño
-                    }
+                    casilla.venderPistas(numEdificios, actual); // y esta función ya comprueba si es el dueño
                 } else {
                     System.err.println("No se pueden vender pistas de deporte en " + casilla.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
                 }
