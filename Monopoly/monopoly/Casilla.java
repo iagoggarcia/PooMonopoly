@@ -2,7 +2,6 @@ package monopoly;
 
 import java.util.ArrayList;
 import partida.*;
-import monopoly.Menu;
 
 public class Casilla {
 
@@ -403,15 +402,12 @@ public class Casilla {
                     boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
 
                     if (puedeHipotecar) {
-                        System.out.println("Debe hipotecar alguna propiedad para poder pagar o se declarará en bancarrota.");
+                        Menu m = Menu.getInstancia();
+                        m.activarSubmenuBancarrota(actual, alquilerGrupo, this.duenho);
                         return true;
                     } else {
-                        System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
-                        for (Casilla c : actual.getPropiedades()) {
-                            c.setDuenho(this.duenho); // las pasa al propietario de la deuda
-                            this.duenho.anhadirPropiedad(c);
-                        }
-                        actual.getPropiedades().clear();
+                        Menu m = Menu.getInstancia();
+                        m.declararBancarrota(actual);
                         return false;
                     }
                 }
@@ -452,13 +448,19 @@ public class Casilla {
                 }
                 // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
                 if (actual.getFortuna() < alquiler) {
-                    System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
-                    for (Casilla c : actual.getPropiedades()) {
-                        c.setDuenho(this.duenho); // las pasa al propietario de la deuda
-                        this.duenho.anhadirPropiedad(c);
+                    System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        Menu m = Menu.getInstancia();
+                        m.activarSubmenuBancarrota(actual, alquiler, this.duenho);
+                        return true;
+                    } else {
+                        Menu m = Menu.getInstancia();
+                        m.declararBancarrota(actual);
+                        return false;
                     }
-                    actual.getPropiedades().clear();
-                    return false;
                 }
                 // realizamos el pago
                 actual.sumarFortuna(-alquiler);
@@ -490,13 +492,19 @@ public class Casilla {
                 }
                 // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
                 if (actual.getFortuna() < alquilerTotal) {
-                    System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
-                    for (Casilla c : actual.getPropiedades()) {
-                        c.setDuenho(this.duenho); // las pasa al propietario de la deuda
-                        this.duenho.anhadirPropiedad(c);
+                    System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        Menu m = Menu.getInstancia();
+                        m.activarSubmenuBancarrota(actual, alquilerTotal, this.duenho);
+                        return true;
+                    } else {
+                        Menu m = Menu.getInstancia();
+                        m.declararBancarrota(actual);
+                        return false;
                     }
-                    actual.getPropiedades().clear();
-                    return false;
                 }
                 // realizamos el pago
                 actual.sumarFortuna(-alquilerTotal);
@@ -513,13 +521,19 @@ public class Casilla {
 
                 // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
                 if (actual.getFortuna() < imp) {
-                    System.out.println(actual.getNombre() + " no puede pagar y se declara en bancarrota.");
-                    for (Casilla c : actual.getPropiedades()) {
-                        c.setDuenho(banca); // las pasa al propietario de la deuda
-                        banca.anhadirPropiedad(c);
+                    System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        Menu m = Menu.getInstancia();
+                        m.activarSubmenuBancarrota(actual, imp, this.duenho);
+                        return true;
+                    } else {
+                        Menu m = Menu.getInstancia();
+                        m.declararBancarrota(actual);
+                        return false;
                     }
-                    actual.getPropiedades().clear();
-                    return false;
                 }
                 // el jugador paga a la banca
                 actual.sumarFortuna(-imp);

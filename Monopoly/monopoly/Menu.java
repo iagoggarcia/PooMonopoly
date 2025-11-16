@@ -29,6 +29,10 @@ public class Menu {
     private int indiceSuerte = 0;
     private int indiceCaja = 0;
     private static Menu instancia;
+    private boolean enSubmenuBancarrota = false;
+    private Jugador jugadorDeudor = null;
+    private Jugador jugadorAcreedor = null;
+    private float deudaPendiente = 0;
 
     public Menu() {
         instancia = this;
@@ -299,6 +303,16 @@ public class Menu {
     }
 
     private void analizarComando(String comando) {
+        if (this.enSubmenuBancarrota) {
+            if (!comando.startsWith("hipotecar") && !comando.equalsIgnoreCase("bancarrota")) {
+                System.out.println("Debe hipotecar alguna propiedad para pagar o declararse en bancarrota.");
+                System.out.println(" - hipotecar <casilla>");
+                System.out.println(" - bancarrota");
+                return;
+            }
+        }
+        
+        
         if(comando.equals("jugador")){
             Jugador actual = jugadores.get(turno);//dependiendo de que turno sea (cada jugador tiene un turno asociado) nos devuelve a uno u otro
             System.out.println("{\n" + "Nombre: " + actual.getNombre() + "\n" + "Avatar: " + actual.getAvatar().getId() + "\n}");
@@ -417,6 +431,10 @@ public class Menu {
             String nombreJugador = comando.substring("estadisticas".length()).trim();
             estadisticasjugador(nombreJugador);
         }
+        else if (comando.equalsIgnoreCase("bancarrota")) {
+            declararBancarrota(jugadorDeudor);
+        }
+
     }
 
     //función para crear jugador desde archivo
@@ -804,6 +822,50 @@ public class Menu {
         String colorGrupo = (casilla.getGrupo() != null && casilla.getGrupo().getNombreColorGrupo() != null ) ? casilla.getGrupo().getNombreColorGrupo() : "sin grupo";
         System.out.println(actual.getNombre() + " paga " + valorHipoteca + "€ por deshipotecar " + casilla.getNombre() + ". Ahora puede recibir alquileres y edificar en el grupo " + colorGrupo + ".");
 
+        // si hay deudas, tras hipotecar, comprobar si ya puede pagar
+        if (jugadorDeudor != null && jugadorDeudor.getFortuna() >= deudaPendiente) {  
+            salirDeSubmenuBancarrota();
+        }
+    }
+
+    public void declararBancarrota(Jugador deudor) {
+        System.out.println(deudor.getNombre() + " no puede pagar y se declara en bancarrota.");
+
+        // si no hay acreedor, el acreedor es la bamca
+        Jugador receptor = (this.jugadorAcreedor != null) ? this.jugadorAcreedor : this.banca;
+
+        for (Casilla c : deudor.getPropiedades()) {
+            c.setDuenho(receptor); // las pasa al propietario de la deuda
+            receptor.anhadirPropiedad(c);
+        }
+        deudor.getPropiedades().clear();
+
+        this.enSubmenuBancarrota = false;
+        this.jugadorDeudor = null;
+        this.deudaPendiente = 0;
+        this.jugadorAcreedor = null;
+    }
+
+    public void activarSubmenuBancarrota(Jugador deudor, float deuda, Jugador acreedor) {
+        this.enSubmenuBancarrota = true;
+        this.jugadorDeudor = deudor;
+        this.jugadorAcreedor = acreedor;
+        this.deudaPendiente = deuda;
+
+        System.out.println("\nEl jugador " + deudor.getNombre() + " no puede pagar.");
+        System.out.println("Debe hipotecar alguna propiedad para pagar o declararse en bancarrota.");
+        System.out.println("Opciones:");
+        System.out.println(" - hipotecar <casilla>");
+        System.out.println(" - bancarrota\n");
+    }
+
+    public void salirDeSubmenuBancarrota() {
+        this.enSubmenuBancarrota = false;
+        this.jugadorDeudor = null;
+        this.jugadorAcreedor = null;
+        this.deudaPendiente = 0;
+
+        System.out.println("\nLa deuda ha sido saldada. Continúa el turno normalmente.\n");
     }
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'salir carcel'.
@@ -817,6 +879,12 @@ public class Menu {
         Jugador actual = this.jugadores.get(this.turno); 
         if(!actual.isEnCarcel()){
             System.out.println("El jugador no está encarcelado.");
+        }
+        // Si está en el submenú de bancarrota, NO puede usar este comando
+        else if (this.enSubmenuBancarrota && this.jugadorDeudor == actual) {
+            System.out.println("No puedes intentar salir de la cárcel mientras tienes deudas pendientes.");
+            System.out.println("Debes hipotecar propiedades o declararte en bancarrota.");
+            return;
         }
         else {
 
@@ -854,8 +922,16 @@ public class Menu {
                     System.out.println("Tras tres turnos sin sacar dobles, " + actual.getNombre() + " debe pagar 500.000€ para salir de la cárcel.");
                     realizarTirada(valor1, valor2);
                 } else {
-                    System.out.println(actual.getNombre() + " no puede pagar la fianza y se declara en bancarrota.");
-                    // lo de bancarrota no se como implementarlo
+                    System.out.println(actual.getNombre() + " no puede pagar la fianza.");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        activarSubmenuBancarrota(actual, 500000, null);
+                    } else {
+                        declararBancarrota(actual);
+                        this.solvente = false;
+                    }
                 }
             } else { // si aun no llego al tercer intento, sigue preso
                 System.out.println(actual.getNombre() + " permanece en la cárcel.");
@@ -1505,11 +1581,15 @@ public class Menu {
                 float cantidadPagar = Float.parseFloat(partes[1]);
 
                 if (jugador.getFortuna() < cantidadPagar) {
-                    // comprobamos si puede hipotecar alguna propiedad
+                    System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar " + (int) cantidadPagar + "€. Debe hipotecar alguna propiedad o se declarará en bancarrota.");
+                    // comprobar si tiene algún solar sin hipotecar
                     boolean puedeHipotecar = jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty() && jugador.getHipotecas().size() < jugador.getPropiedades().size();
 
                     if (puedeHipotecar) {
-                        System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar " + (int) cantidadPagar + "€. Debe hipotecar alguna propiedad o se declarará en bancarrota.");
+                        activarSubmenuBancarrota(jugador, 500000, null);
+                    } else {
+                        declararBancarrota(jugador);
+                        this.solvente = false;
                     }
                 } else {
                     jugador.sumarFortuna(-cantidadPagar);
@@ -1528,18 +1608,16 @@ public class Menu {
 
                 // comprobamos  si puede pagar a todos los jugadores
                 if (jugador.getFortuna() < total) {
+                    System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar a todos los jugadores. ");
+                    // comprobar si tiene algún solar sin hipotecar
                     boolean puedeHipotecar = jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty() && jugador.getHipotecas().size() < jugador.getPropiedades().size();
 
                     if (puedeHipotecar) {
-                        System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar " + (int) cantidad + "€ a todos los jugadores. Debe hipotecar alguna propiedad o se declarará en bancarrota.");
+                        activarSubmenuBancarrota(jugador, 500000, null);
                     } else {
-                        System.out.println(jugador.getNombre() + " no puede pagar ni hipotecar propiedades. Se declara en bancarrota.");
-                        for (Casilla c : jugador.getPropiedades()) {
-                            c.setDuenho(banca);
-                        }
-                        jugador.getPropiedades().clear();
+                        declararBancarrota(jugador);
                         this.solvente = false;
-                    } 
+                    }
                 } else {
                     // paga a todos los jugadores
                     for (Jugador j : this.jugadores) {
@@ -1635,19 +1713,15 @@ public class Menu {
 
             // si no puede pagar, comprobar si puede hipotecar o sino bancarrota
             if (jugador.getFortuna() < alquiler) {
+                System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar. ");
+                // comprobar si tiene algún solar sin hipotecar
                 boolean puedeHipotecar = jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty() && jugador.getHipotecas().size() < jugador.getPropiedades().size();
 
                 if (puedeHipotecar) {
-                    System.out.println(jugador.getNombre() + " no tiene suficiente dinero y debe hipotecar alguna propiedad para pagar.");
+                    activarSubmenuBancarrota(jugador, 500000, null);
                 } else {
-                    System.out.println(jugador.getNombre() + " no puede pagar y se declara en bancarrota.");
-                    for (Casilla c : jugador.getPropiedades()) {
-                        c.setDuenho(destino.getDuenho());
-                        destino.getDuenho().anhadirPropiedad(c);
-                    }
-                    jugador.getPropiedades().clear();
+                    declararBancarrota(jugador);
                     this.solvente = false;
-                    return;
                 }
             } else {
                 jugador.sumarFortuna(-alquiler);
