@@ -771,7 +771,25 @@ public class Menu {
 
         // añadir después: si tiene edificios, pedir que los venda y demás
         if (casilla.getEdificios() != null && !casilla.getEdificios().isEmpty()) {
-            System.out.println("No puedes hipotecar " + casilla.getNombre() + " porque tiene edificios. Véndelos antes.");
+            System.out.println("La casilla " + casilla.getNombre() + " tiene edificios. Se venderán automáticamente antes de hipotecar la casilla.");
+
+            int nCasas = casilla.getNumCasas();
+            int nHoteles = casilla.getNumHoteles();
+            int nPiscinas = casilla.getNumPiscinas();
+            int nPistas = casilla.getNumPistas();
+
+            if (nCasas > 0) {
+                casilla.venderCasas(nCasas, actual);
+            }
+            if (nHoteles > 0) {
+                casilla.venderHoteles(nHoteles, actual);
+            }
+            if (nPiscinas > 0) {
+                casilla.venderPiscinas(nPiscinas, actual);
+            }
+            if (nPistas > 0) {
+                casilla.venderPistas(nPistas, actual);
+            }
             return;
         }
 
@@ -831,14 +849,24 @@ public class Menu {
     public void declararBancarrota(Jugador deudor) {
         System.out.println(deudor.getNombre() + " no puede pagar y se declara en bancarrota.");
 
-        // si no hay acreedor, el acreedor es la bamca
+        // si no hay acreedor, el acreedor es la banca
         Jugador receptor = (this.jugadorAcreedor != null) ? this.jugadorAcreedor : this.banca;
 
-        for (Casilla c : deudor.getPropiedades()) {
-            c.setDuenho(receptor); // las pasa al propietario de la deuda
-            receptor.anhadirPropiedad(c);
+        if (deudor.getPropiedades() != null && !deudor.getPropiedades().isEmpty()) {
+            for (Casilla c : deudor.getPropiedades()) {
+                c.setDuenho(receptor); // las pasa al propietario de la deuda
+                receptor.anhadirPropiedad(c);
+            }
+            deudor.getPropiedades().clear();
         }
-        deudor.getPropiedades().clear();
+
+        if (deudor.getEdificios() != null && !deudor.getEdificios().isEmpty()) {
+            for (Edificio e : deudor.getEdificios()) {
+                e.setPropietario(receptor);
+                receptor.anhadirEdificioAJugador(e);
+            }
+            deudor.getEdificios().clear();
+        }
 
         this.enSubmenuBancarrota = false;
         this.jugadorDeudor = null;
@@ -1188,7 +1216,7 @@ public class Menu {
                     maspatrimonio = j;
                 }
             }
-            System.out.println("jugadorEnCabeza: " + maspatrimonio.getNombre() + ",");
+            System.out.println("jugadorEnCabeza: " + maspatrimonio.getNombre());
         }
     }
 
@@ -1213,7 +1241,7 @@ public class Menu {
                 }
             }
             if (rentables.isEmpty()) {
-                System.out.println("Ningun jugador tiene casillas en propiedad\n");
+                System.out.println("Ningún jugador tiene casillas en propiedad\n");
                 return;
             } else {
                 for (Casilla c : rentables) {
@@ -1300,13 +1328,13 @@ public class Menu {
 
     //imprime las estadisticas de la partida
     private void estadisticas(){
-        System.out.println("\nEstadisticas de la partida\n");
+        System.out.println("{");
         casillarentable();
         gruporentable();
         casillasfrecuentadas();
         masvueltas();
         encabeza();
-        System.out.println("\n");
+        System.out.println("}");
     }
 
     private void estadisticasjugador(String nombrejugador){
@@ -1316,13 +1344,15 @@ public class Menu {
             System.out.println("Jugador no encontrado.\n");
             return;
         }
-        System.out.println("dineroInvertido: " + j.getInversiones() + ",\n"); //aqui hice setter y getter, un atributo, e inclui esta variable en comprar casilla e intentar construir
-        System.out.println("pagoTasasEImpuestos: " + j.getImpuestos_tasas() + ",\n");
-        System.out.println("pagoDeAlquileres: " + j.getAlquilerpagadojugador() + ",\n");
-        System.out.println("cobroDeAlquileres: " + j.getAlquilercobradojugador() + ",\n");
-        System.out.println("pasarPorCasillaDeSalida: " + (j.getVueltas() * this.tablero.encontrar_casilla("Salida").getValor()) + ",\n");
-        System.out.println("premiosIversionesObote: " + j.getPremiosinversiones() + ",\n");
-        System.out.println("vecesEnLaCarcel: " + j.getVecesCarcel() + ",\n");
+        System.out.println("{");
+        System.out.println("dineroInvertido: " + j.getInversiones() + ","); //aqui hice setter y getter, un atributo, e inclui esta variable en comprar casilla e intentar construir
+        System.out.println("pagoTasasEImpuestos: " + j.getImpuestos_tasas() + ",");
+        System.out.println("pagoDeAlquileres: " + j.getAlquilerpagadojugador() + ",");
+        System.out.println("cobroDeAlquileres: " + j.getAlquilercobradojugador() + ",");
+        System.out.println("pasarPorCasillaDeSalida: " + (j.getVueltas() * this.tablero.encontrar_casilla("Salida").getValor()) + ",");
+        System.out.println("premiosIversionesObote: " + j.getPremiosinversiones() + ",");
+        System.out.println("vecesEnLaCarcel: " + j.getVecesCarcel());
+        System.out.println("}");
     }
 
     /* Función que crea el edificio si se cumplen los requisitos necesarios
