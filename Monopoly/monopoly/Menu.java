@@ -127,11 +127,19 @@ public class Menu {
         this.enCurso = true;
 
         System.out.println("\nPartida inicializada correctamente con " + numJugadores + " jugadores.\n");
+        bucleComandos();
+    }
 
+    /*
+    * Función que saca el bucle que teníamos antes en iniciarPartida() de los comandos para seguir jugando que usamos
+    * tanto en esa función, como ahora en ejecutarArchivoComandos. Así al acabar de leer el archivo, en vez de terminar
+    * permite seguir jugando como nos pedían.
+    */
+    private void bucleComandos() {
         java.util.Scanner in = new java.util.Scanner(System.in);
+
         while (this.enCurso) {
 
-            // Defensa: que haya jugadores y turno válido
             if (this.jugadores == null || this.jugadores.isEmpty()) {
                 System.out.println("No hay jugadores en la partida. Terminando...");
                 this.enCurso = false;
@@ -150,9 +158,7 @@ public class Menu {
                 System.out.println(" - lanzar dados X+Y");
                 System.out.println(" - describir jugador <nombreJugador>");
                 System.out.println(" - describir <nombreCasilla>");
-                //System.out.println(" - Describir avatar <id>");
                 System.out.println(" - listar jugadores");
-                //System.out.println(" - Listar avatares");
                 System.out.println(" - listar enventa");
                 System.out.println(" - listar edificios");
                 System.out.println(" - listar edificios <nombreGrupo>");
@@ -169,9 +175,9 @@ public class Menu {
                 cmd = in.nextLine().trim();
                 analizarComando(cmd);
 
-            }while (!(cmd.equalsIgnoreCase("salir") || cmd.equalsIgnoreCase("acabar turno")));
+            } while (!(cmd.equalsIgnoreCase("salir") || cmd.equalsIgnoreCase("acabar turno")));
 
-            if(cmd.equalsIgnoreCase("salir")){
+            if (cmd.equalsIgnoreCase("salir")) {
                 System.out.println("Fin de la partida");
                 this.enCurso = false;
                 return;
@@ -299,6 +305,14 @@ public class Menu {
             }
         } catch (IOException e) {
             System.err.println("Error leyendo " + ruta + ": " + e.getMessage());
+        }
+
+        // Si hay una partida creada después de leer los comandos del archivo, en vez de que el programa
+        // termine, llamamos a la nueva función bucleComandos() para que permita seguir jugando a partir
+        // del estado de la partida
+        if (this.jugadores != null && this.jugadores.size() >= 2) {
+            this.enCurso = true;
+            bucleComandos();
         }
     }
 
@@ -802,7 +816,7 @@ public class Menu {
     }
 
     private void deshipotecar(String nombre) {
-        Casilla casilla = this.tablero.encontrar_casilla(nombre.toLowerCase());
+        Casilla casilla = this.tablero.encontrar_casilla(nombre);
 
         if (casilla == null) {
             System.out.println("No existe una casilla con el nombre '" + nombre + "'.");
