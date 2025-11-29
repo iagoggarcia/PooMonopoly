@@ -416,7 +416,7 @@ public class Casilla {
                 actual.sumarGastos(alquilerGrupo);
                 actual.setAlquilerpagadojugador(actual.getAlquilerpagadojugador() + alquilerGrupo); //aumentamos sus pagos de alquileres
                 this.duenho.sumarFortuna(alquilerGrupo);
-                this.duenho.setAlquilercobradojugador(this.duenho.getAlquilercobradojugador() + alquilerTotal); //aumentamos cobro de alquileres
+                this.duenho.setAlquilercobradojugador(this.duenho.getAlquilercobradojugador() + alquilerGrupo); //aumentamos cobro de alquileres
                 actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquilerGrupo);
                 System.out.println(actual.getNombre() + " paga " + (int) alquilerGrupo + "€ de alquiler a " + this.duenho.getNombre() + " por caer en " + this.nombre + ".");
                 return true;

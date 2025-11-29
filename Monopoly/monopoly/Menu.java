@@ -317,6 +317,8 @@ public class Menu {
     }
 
     private void analizarComando(String comando) {
+        System.out.println("\n> " + comando); // para ver qué comando se va a ejecutar (para cuando leemos del archivo es más claro)
+
         if (this.enSubmenuBancarrota) {
             if (!comando.startsWith("hipotecar") && !comando.equalsIgnoreCase("bancarrota")) {
                 System.out.println("Debe hipotecar alguna propiedad para pagar o declararse en bancarrota.");
@@ -910,6 +912,101 @@ public class Menu {
         System.out.println("\nLa deuda ha sido saldada. Continúa el turno normalmente.\n");
     }
 
+    // La puse aquí para no repetir código en las funciones del submenú de la cárcel
+    private void intentarSalirTirandoDados(Jugador actual) {
+        System.out.println(actual.getNombre() + " está en la cárcel e intenta salir tirando los dados...");
+
+        if (this.dado1 == null) this.dado1 = new Dado();
+        if (this.dado2 == null) this.dado2 = new Dado();
+
+        int valor1 = this.dado1.hacerTirada();
+        int valor2 = this.dado2.hacerTirada();
+        System.out.println("Dados: " + valor1 + " y " + valor2 + " (suma = " + (valor1 + valor2) + ")");
+
+        // si saca dobles sale sin pagar
+        if (valor1 == valor2) {
+            System.out.println("¡" + actual.getNombre() + " ha sacado dobles y sale de la cárcel!");
+            actual.setEnCarcel(false);
+            actual.setTiradasCarcel(0);
+            realizarTirada(valor1, valor2);
+            return;
+        }
+
+        // no saca dobles, pierde un intento
+        actual.setTiradasCarcel(actual.getTiradasCarcel() + 1);
+        System.out.println("No ha sacado dobles (" + actual.getTiradasCarcel() + " intento/s).");
+
+        // si pierde los tres turnos sin sacar dobles, tiene que pagar
+        if (actual.getTiradasCarcel() >= 3) {
+            if (actual.getFortuna() >= 500000) {
+                actual.sumarFortuna(-500000);
+                actual.sumarGastos(500000);
+                this.banca.sumarFortuna(500000);
+                actual.setEnCarcel(false);
+                actual.setTiradasCarcel(0);
+                System.out.println("Tras tres turnos sin sacar dobles, " + actual.getNombre() + " debe pagar 500.000€ para salir de la cárcel.");
+                realizarTirada(valor1, valor2);
+            } else {
+                System.out.println(actual.getNombre() + " no puede pagar la fianza.");
+                // comprobar si tiene algún solar sin hipotecar
+                boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                if (puedeHipotecar) {
+                    activarSubmenuBancarrota(actual, 500000, null);
+                } else {
+                    declararBancarrota(actual);
+                    this.solvente = false;
+                }
+            }
+        } else { // si aun no llego al tercer intento, sigue preso
+            System.out.println(actual.getNombre() + " permanece en la cárcel.");
+        }
+    }
+
+    /*
+    * Función que se usa en salirCarcel para saber si el jugador quiere salir pagando (1), utilizar una carta de suerte (2)
+    * o tirar los dados (3).
+     */
+    private void submenuCarcel(Jugador actual) {
+        System.out.println(actual.getNombre() + ", ¿quieres salir pagando (1), utilizar una carta de suerte (2) o tirar los dados (3)?");
+        int opcion = new Scanner(System.in).nextInt();
+        switch (opcion) {
+            case 1:
+                if (actual.getFortuna() < 500000) {
+                    System.out.println(actual.getNombre() + " no puede salir pagando, no tiene dinero suficiente. Se intentará salir tirando los dados");
+                    intentarSalirTirandoDados(actual);
+                }
+                else {
+                    actual.setEnCarcel(false); // sale de la cárcel
+                    actual.setTiradasCarcel(0);
+                    actual.sumarFortuna(-500000); // se le resta lo que paga a la fortuna
+                    actual.sumarGastos(500000); // para las estadísticas del jugador
+                    this.banca.sumarFortuna(500000); // se le paga a la banca
+
+                    System.out.println(actual.getNombre() + " ha pagado 500.000€ y sale de la cárcel. Ahora tira los dados para moverse.");
+
+                    if (this.dado1 == null) this.dado1 = new Dado();
+                    if (this.dado2 == null) this.dado2 = new Dado();
+
+                    int valor1 = this.dado1.hacerTirada();
+                    int valor2 = this.dado2.hacerTirada();
+                    System.out.println("Dados: " + valor1 + " y " + valor2 + " (suma = " + (valor1 + valor2) + ")");
+
+                    realizarTirada(valor1, valor2);
+                }
+                break;
+            case 2:
+                // ni idea de a qué se referían con esto en el guion
+                break;
+            case 3:
+                intentarSalirTirandoDados(actual);
+                break;
+            default:
+                System.out.println("Opción no válida. Debes elegir 1, 2 o 3.");
+                break;
+        }
+    }
+
     //Método que ejecuta todas las acciones relacionadas con el comando 'salir carcel'.
     // Solo puede ejecutarlo el jugador cuyo índice coincide con 'turno' (o si en el comando se especificó ese jugador).
     private void salirCarcel() {
@@ -921,65 +1018,16 @@ public class Menu {
         Jugador actual = this.jugadores.get(this.turno); 
         if(!actual.isEnCarcel()){
             System.out.println("El jugador no está encarcelado.");
+            return;
         }
         // Si está en el submenú de bancarrota, NO puede usar este comando
-        else if (this.enSubmenuBancarrota && this.jugadorDeudor == actual) {
+        if (this.enSubmenuBancarrota && this.jugadorDeudor == actual) {
             System.out.println("No puedes intentar salir de la cárcel mientras tienes deudas pendientes.");
             System.out.println("Debes hipotecar propiedades o declararte en bancarrota.");
             return;
         }
-        else {
 
-            System.out.println(actual.getNombre() + " está en la cárcel e intenta salir tirando los dados...");
-
-            if (this.dado1 == null) this.dado1 = new Dado();
-            if (this.dado2 == null) this.dado2 = new Dado();
-
-            int valor1 = this.dado1.hacerTirada();
-            int valor2 = this.dado2.hacerTirada();
-            System.out.println("Dados: " + valor1 + " y " + valor2 + " (suma = " + (valor1 + valor2) + ")");
-
-            //ESTA PARTE HAY QUE REPASARLA, LA LOGICA ESTA MAL
-            // si saca dobles sale sin pagar
-            if (valor1 == valor2) {
-                System.out.println("¡" + actual.getNombre() + " ha sacado dobles y sale de la cárcel!");
-                actual.setEnCarcel(false);
-                actual.setTiradasCarcel(0);
-                realizarTirada(valor1, valor2);
-                return;
-            }
-
-            // no saca dobles, pierde un intento
-            actual.setTiradasCarcel(actual.getTiradasCarcel() + 1);
-            System.out.println("No ha sacado dobles (" + actual.getTiradasCarcel() + " intento/s).");
-
-            // si pierde los tres turnos sin sacar dobles, tiene que pagar
-            if (actual.getTiradasCarcel() >= 3) {
-                if (actual.getFortuna() >= 500000) {
-                    actual.sumarFortuna(-500000);
-                    actual.sumarGastos(500000);
-                    this.banca.sumarFortuna(500000);
-                    actual.setEnCarcel(false);
-                    actual.setTiradasCarcel(0);
-                    System.out.println("Tras tres turnos sin sacar dobles, " + actual.getNombre() + " debe pagar 500.000€ para salir de la cárcel.");
-                    realizarTirada(valor1, valor2);
-                } else {
-                    System.out.println(actual.getNombre() + " no puede pagar la fianza.");
-                    // comprobar si tiene algún solar sin hipotecar
-                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
-
-                    if (puedeHipotecar) {
-                        activarSubmenuBancarrota(actual, 500000, null);
-                    } else {
-                        declararBancarrota(actual);
-                        this.solvente = false;
-                    }
-                }
-            } else { // si aun no llego al tercer intento, sigue preso
-                System.out.println(actual.getNombre() + " permanece en la cárcel.");
-            }
-        }
-
+        submenuCarcel(actual);
     }
 
     private void listarVenta() {
