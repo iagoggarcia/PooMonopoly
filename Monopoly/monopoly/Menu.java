@@ -1424,69 +1424,72 @@ public class Menu {
         Jugador actual = this.jugadores.get(this.turno); // cojo el jugador que tiene el turno
         Casilla casilla = actual.getAvatar().getLugar(); // y la casilla en la que está
         if (casilla.getTipo().equalsIgnoreCase("solar")) {
-            int precio;
             switch (tipoEdificio.toLowerCase()) {
                 case "casa":
-                    if (casilla.getNumCasas() < 4 && casilla.getNumHoteles() < 1) { // requisito (no puede haber 4 casas ni un hotel para construir otra casa)
-                        precio = casilla.getValorCasayHotel();
-                        intentarConstruir(actual, casilla, tipoEdificio, precio); // esta función también comprueba si el jugador es dueño de la casilla y si tiene el dinero suficiente
-                    }
-                    else { // Mensajes de error
-                        if (casilla.getNumCasas() == 4) { // si ya hay 4 casas
+                    int edificableCasa = Casa.puedeEdificarCasa(casilla);
+                    switch (edificableCasa) {
+                        case 0:
+                            Edificio casa = new Casa(actual, casilla);
+                            intentarConstruir(actual, casilla, casa); // esta función también comprueba si el jugador es dueño de la casilla y si tiene el dinero suficiente
+                            break;
+                        case 1:
                             System.err.println(actual.getNombre() + " ya ha construido el máximo de casas permitido en " + casilla.getNombre());
-                        }
-                        else if (casilla.getNumHoteles() == 1) { // si ya hay un hotel
+                            break;
+                        case 2:
                             System.err.println(actual.getNombre() + " no puede construir más casas en " + casilla.getNombre() + ", ya ha construido un hotel");
-                        }
+                            break;
                     }
                     break;
                 case "hotel":
-                    if (casilla.getNumCasas() == 4 && casilla.getNumHoteles() < 1) { // requisito (si hay 4 casas y ningún hotel)
-                        casilla.quitarCuatroCasas();
-                        precio = casilla.getValorCasayHotel();
-                        intentarConstruir(actual, casilla, tipoEdificio, precio); // lo construye si es dueño de la casilla y si tiene el dinero suficiente
-                    }
-                    else { // Mensajes de error
-                        if (casilla.getNumHoteles() == 1) { // si ya hay un hotel
-                            System.err.println(actual.getNombre() + " ya ha construido un hotel en " + casilla.getNombre());
-                        }
-                        else if (casilla.getNumCasas() < 4) { // si no hay 4 casas todavía
+                    int edificableHotel = Hotel.puedeEdificarHotel(casilla);
+                    switch (edificableHotel) {
+                        case 0:
+                            casilla.quitarCuatroCasas();
+                            Edificio hotel = new Hotel(actual, casilla);
+                            intentarConstruir(actual, casilla, hotel); // lo construye si es dueño de la casilla y si tiene el dinero suficiente
+                            break;
+                        case 1:
                             System.err.println(actual.getNombre() + " no ha construido todavía el número de casas necesarias en " + casilla.getNombre());
-                        }
+                            break;
+                        case 2:
+                            System.err.println(actual.getNombre() + " ya ha construido un hotel en " + casilla.getNombre());
+                            break;
                     }
                     break;
                 case "piscina":
-                    if (casilla.getNumPiscinas() == 0 && casilla.getNumHoteles() == 1) { // si hay 1 hotel pero no piscina se puede construir
-                        precio = casilla.getValorPiscina();
-                        intentarConstruir(actual, casilla, tipoEdificio, precio); // si hay dinero y el jugador es dueño de la casilla
-                    }
-                    else { // Mensajes de error
-                        if (casilla.getNumPiscinas() == 1) { // si ya hay piscina
-                            System.err.println(actual.getNombre() + " no puede edificar una piscina en " +  casilla.getNombre() + " porque ya ha edificado una");
-                        }
-                        else if (casilla.getNumHoteles() < 1) { // si no hay hotel
+                    int edificablePiscina = Piscina.puedeEdificarPiscina(casilla);
+                    switch (edificablePiscina) {
+                        case 0:
+                            Edificio piscina = new Piscina(actual, casilla);
+                            intentarConstruir(actual, casilla, piscina); // si hay dinero y el jugador es dueño de la casilla
+                            break;
+                        case 1:
                             System.err.println(actual.getNombre() + " no puede edificar una piscina en " + casilla.getNombre() + " porque todavía no hay hotel");
-                        }
+                            break;
+                        case 2:
+                            System.err.println(actual.getNombre() + " no puede edificar una piscina en " +  casilla.getNombre() + " porque ya ha edificado una");
+                            break;
                     }
                     break;
                 case "pista":
-                    if (casilla.getNumPiscinas() == 1 && casilla.getNumHoteles() == 1 && casilla.getNumPistas() < 1) { // si hay 1 piscina y 1 hotel se puede construir
-                        precio = casilla.getValorPistaDeporte();
-                        intentarConstruir(actual, casilla, tipoEdificio, precio); // si el jugador tiene dinero suficiente y es dueño de la casilla
-                    }
-                    else { // Mensajes de error
-                        if (casilla.getNumPiscinas() < 1 &&  casilla.getNumHoteles() < 1) { // si no hay ni hotel ni piscina
+                    int edificablePista = PistaDeporte.puedeEdificarPista(casilla);
+                    switch (edificablePista) {
+                        case 0:
+                            Edificio pista = new PistaDeporte(actual, casilla);
+                            intentarConstruir(actual, casilla, pista); // si el jugador tiene dinero suficiente y es dueño de la casilla
+                            break;
+                        case 1:
                             System.err.println(actual.getNombre() + " no puede edificar una pista en " +  casilla.getNombre() + " porque todavía no hay hotel ni piscina");
-                        }
-                        else if (casilla.getNumPiscinas() < 1) { // si no hay piscina (pero sí hotel)
-                            System.err.println(actual.getNombre() + " no puede edificar una pista en " + casilla.getNombre() + " porque todavía no hay piscina");
-                        }
-                        else if (casilla.getNumHoteles() < 1) { // si no hay hotel (pero sí piscina)
+                            break;
+                        case 2:
                             System.err.println(actual.getNombre() + " no puede edificar una pista en " + casilla.getNombre() + " porque todavía no hay hotel");
-                        }
-                        else if (casilla.getNumPistas() == 1) { // si ya hay pista
+                            break;
+                        case 3:
+                            System.err.println(actual.getNombre() + " no puede edificar una pista en " + casilla.getNombre() + " porque todavía no hay piscina");
+                            break;
+                        case 4:
                             System.err.println(actual.getNombre() + " no puede edificar una pista en " + casilla.getNombre() + " porque ya hay una");
-                        }
+                            break;
                     }
                     break;
                 default:
@@ -1503,13 +1506,13 @@ public class Menu {
     * Se le llama en cada case del switch, por eso hice una función específica, para no repetir
     * este fragmento tantas veces
      */
-    public void intentarConstruir(Jugador actual, Casilla casilla, String tipoEdificio, int precio) {
+    public void intentarConstruir(Jugador actual, Casilla casilla, Edificio e) {
+        int precio = e.getPrecio();
         if (actual.getFortuna() < precio ) { // de primeras compruebo si el jugador tiene el dinero suficiente
-            System.err.println("La fortuna de " + actual.getNombre() + " no es suficiente para edificar un/a " + tipoEdificio + " en la casilla " + casilla.getNombre());
+            System.err.println("La fortuna de " + actual.getNombre() + " no es suficiente para edificar un/a " + e.getTipo() + " en la casilla " + casilla.getNombre());
         }
         else { // si lo tiene
             if (casilla.getDuenho() == actual && casilla.getGrupo().esDuenhoGrupo(actual)) { // miro si es dueño de la casilla en la que está y del grupo completo
-                Edificio e = new Edificio(tipoEdificio, actual, casilla); // creo el edificio
                 casilla.anhadirEdificioACasilla(e); // añadimos el nuevo edificio a la casilla
                 actual.anhadirEdificioAJugador(e); // añadimos el edificio también al jugador
                 if (this.edificios == null) { // para crear el array edificios del menú la primera vez
@@ -1519,7 +1522,7 @@ public class Menu {
 
                 actual.sumarFortuna(-precio); // restamos lo que se acaba de gastar
                 actual.setInversiones(actual.getInversiones()+precio); //actualizamos sus inversiones
-                System.out.println("Se ha edificado un/a " +  tipoEdificio + " en " +  casilla.getNombre() + ". La fortuna de " + actual.getNombre() + " se reduce en " + precio + "€");
+                System.out.println("Se ha edificado un/a " +  e.getTipo() + " en " +  casilla.getNombre() + ". La fortuna de " + actual.getNombre() + " se reduce en " + precio + "€");
             }
             else { // si no es dueño de la casilla o del grupo
                 if (casilla.getDuenho() != actual) {

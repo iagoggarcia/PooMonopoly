@@ -3,7 +3,7 @@ package monopoly;
 import partida.*;
 import java.util.ArrayList;
 
-public class Edificio {
+public abstract class Edificio {
 
     // Atributos
     private String tipo;
@@ -11,14 +11,6 @@ public class Edificio {
     private Jugador propietario;
     private Casilla lugar;
     private int precio;
-
-    // Contadores que uso para generar el id del edificio, con formato -> "tipo-contadorTipo"
-    // Son static para que sean comunes a todos los edificios, si no una vez creado un edificio,
-    // el siguiente volvía a empezar con id "tipo-1" en vez de "tipo-2"
-    private static int contadorCasas = 0;
-    private static int contadorHoteles = 0;
-    private static int contadorPiscinas = 0;
-    private static int contadorPistasDeporte = 0;
 
     /* Constructor para el edificio
     * Parámetros: tipo de edificio (casa, hotel, piscina, pista de deporte), propietario del edificio, lugar en el que se ubica
@@ -82,39 +74,9 @@ public class Edificio {
         this.precio = precio;
     }
 
-
-    /* Función que crea un id para cada edificio utilizando su tipo de edificio
-     * y el número de edificio
-     */
-    public String generarId() {
-        int numId = 0;
-        String id = ""; // la inicializo vacía
-
-        switch (tipo) {
-            case "casa":
-                contadorCasas += 1;
-                numId = contadorCasas;
-                break;
-            case "hotel":
-                contadorHoteles += 1;
-                numId = contadorHoteles;
-                break;
-            case "piscina":
-                contadorPiscinas += 1;
-                numId = contadorPiscinas;
-                break;
-            case "pista":
-                contadorPistasDeporte += 1;
-                numId = contadorPistasDeporte;
-                break;
-            default:
-                throw new IllegalArgumentException("Tipo desconocido: " + tipo); // mensaje de error
-        }
-
-        id = tipo + '-' + numId;
-
-        return id;
-    }
+    // se escribe aquí como abstract para que las subclases (casa, hotel, piscina, pista) tengan que implementarlo sí o sí.
+    // Se implementa con @Override porque tienen el mismo nombre
+    protected abstract String generarId();
 
     /** Se puede tener un toString por clase, así que hice este
      * para que salgan los nombres de las casillas bien printeados
