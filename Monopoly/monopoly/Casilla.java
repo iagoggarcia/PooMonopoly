@@ -1,8 +1,7 @@
 package monopoly;
 
-import partida.*;
 import java.util.ArrayList;
-
+import partida.*;
 
 public class Casilla {
 
@@ -14,24 +13,74 @@ public class Casilla {
     private Jugador duenho; //Dueño de la casilla (por defecto sería la banca).
     private Grupo grupo; //Grupo al que pertenece la casilla (si es solar).
     private float impuesto; //Cantidad a pagar por caer en la casilla: el alquiler en solares/servicios/transportes o impuestos.
+    private float impuestos_cobrados; //la cantidad total recaudada mediante impuestos
     private float hipoteca; //Valor otorgado por hipotecar una casilla
     private ArrayList<Avatar> avatares; //Avatares que están situados en la casilla.
+    private float rentabilidad; //diferencia entre lo cobrado y su coste
+    private boolean hipotecada; // indica si la casilla está hipotecada
+    private int contador; // indica cuantas veces ha caido un jugador en esa casilla
+    private int valorCasayHotel; // Indica el coste de edificar una casa o un hotel en una casilla específica (es la misma variable porque cuestan lo mismo)
+    private int valorPiscina; // Indica el coste de edificar una piscina en una casilla específica
+    private int valorPistaDeporte; // Indica el coste de edificar una pista de deporte en una casilla específica
+    private ArrayList<Edificio> edificios; // ArrayList donde guardaré los edificios de cada casilla
+    private int numCasas; // Para controlar que se puedan construir 4 casas en una casilla COMO MÁXIMO
+    private int numHoteles; // Para controlar que haya un ÚNICO hotel si ya se han construido 4 casas, y las casas se sustituyen por el hotel
+    private int numPiscinas; // Para construir una ÚNICA piscina si ya hay un hotel
+    private int numPistas; // Para construir una ÚNICA pista de deporte si ya hay un hotel y una piscina
+    private int alquilerCasilla; // Valor del alquiler básico de la casilla
+    private int alquilerCasa; // Valor del alquiler de una casa de la casilla
+    private int alquilerHotel; // Valor del alquiler de un hotel de la casilla
+    private int alquilerPiscinaYPista; // Valor del alquiler de una piscina o una pista de la casilla (pistas y piscinas tienen el mismo alquiler)
+    private int alquilerTotal; // Será la suma de los alquileres de los edificios de la casilla y es lo que se le cobra a un jugador cuando cae en una propiedad que no es la suya
 
     //Constructores:
     public Casilla() {
     }//Parámetros vacíos
 
-    /*Constructor para casillas tipo Solar, Servicios o Transporte:
+
+    /*Constructor para casillas de tipo Solar:
+     * Parámetros: nombre casilla, tipo (solar), posición en el tablero, valor, dueño, hipoteca, y el coste de edificar cada tipo en esta casilla.
+     */
+    public Casilla(String nombre, String tipo, int posicion, float valor, Jugador duenho, float impuesto, float hipoteca, int valorCasayHotel, int valorPiscina, int valorPistaDeporte, int alquilerCasilla, int alquilerCasa, int alquilerHotel, int alquilerPiscinaYPista) {
+        this.nombre = nombre;
+        this.tipo = "solar";
+        this.posicion = posicion;
+        this.valor = valor;
+        this.duenho = duenho; // aquí puse dueño pero al crear la casilla por primera vez hay que poner banca, que es el dueño por defecto
+        this.impuesto = impuesto;
+        this.grupo = new Grupo();
+        this.avatares = new ArrayList<>();
+        this.hipoteca = hipoteca;
+        this.valorCasayHotel = valorCasayHotel;
+        this.valorPiscina = valorPiscina;
+        this.valorPistaDeporte = valorPistaDeporte;
+        this.alquilerCasilla = alquilerCasilla;
+        this.alquilerCasa = alquilerCasa;
+        this.alquilerHotel = alquilerHotel;
+        this.alquilerPiscinaYPista = alquilerPiscinaYPista;
+        this.alquilerTotal = 0;
+        this.edificios = new ArrayList<>();
+        this.numCasas = 0;
+        this.numHoteles = 0;
+        this.numPiscinas = 0;
+        this.numPistas = 0;
+        this.impuestos_cobrados = 0;
+        this.rentabilidad = 0;
+    }
+
+    /*Constructor para casillas Servicios o Transporte:
      * Parámetros: nombre casilla, tipo (debe ser solar, serv. o transporte), posición en el tablero, valor y dueño.
      */
-    public Casilla(String nombre, String tipo, int posicion, float valor, Jugador duenho) {
+    public Casilla(String nombre, String tipo, int posicion, float valor, Jugador duenho, float impuesto) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.posicion = posicion;
         this.valor = valor;
         this.duenho = duenho; // aquí puse dueño pero al crear la casilla por primera vez hay que poner banca, que es el dueño por defecto
-        this.impuesto = 0;
+        this.impuesto = impuesto;
         this.hipoteca = 0;
+        this.rentabilidad = 0;
+        this.impuestos_cobrados = 0;
         this.grupo = new Grupo();
         this.avatares = new ArrayList<>();
     }
@@ -41,12 +90,14 @@ public class Casilla {
      */
     public Casilla(String nombre, int posicion, float impuesto, Jugador duenho) {
         this.nombre = nombre;
-        this.tipo = "Impuesto";
+        this.tipo = "impuesto";
         this.posicion = posicion;
         this.valor = 0;
         this.duenho = duenho;
-        this.impuesto = 2000000;
+        this.impuesto = impuesto;
         this.hipoteca = 0;
+        this.impuestos_cobrados = 0;
+        this.rentabilidad = 0;
         this.grupo = new Grupo();
         this.avatares = new ArrayList<>();
     }
@@ -62,6 +113,8 @@ public class Casilla {
         this.duenho = duenho;
         this.impuesto = 0;
         this.hipoteca = 0;
+        this.rentabilidad = 0;
+        this.impuestos_cobrados = 0;
         this.grupo = new Grupo();
         this.avatares = new ArrayList<>();
     }
@@ -72,6 +125,14 @@ public class Casilla {
 
     Los puse aquí porque se supone que se ponen después de los constructores y antes de las demás funciones.
     */
+    public int getContador() {
+        return contador;
+    }
+
+    public void setContador(int contador) {
+        this.contador = contador;
+    }
+
     public String getNombre() {
         return nombre;
     }
@@ -144,13 +205,152 @@ public class Casilla {
         this.avatares = avatares;
     }
 
+    public boolean isHipotecada() {
+        return hipotecada;
+    }
+
+    public void setHipotecada(boolean hipotecada) {
+        this.hipotecada = hipotecada;
+    }
+
+    public int getValorCasayHotel() {
+        return valorCasayHotel;
+    }
+
+    public void setValorCasayHotel(int valorCasayHotel) {
+        this.valorCasayHotel = valorCasayHotel;
+    }
+
+    public int getValorPiscina() {
+        return valorPiscina;
+    }
+
+    public void setValorPiscina(int valorPiscina) {
+        this.valorPiscina = valorPiscina;
+    }
+
+    public int getValorPistaDeporte() {
+        return valorPistaDeporte;
+    }
+
+    public void setValorPistaDeporte(int valorPistaDeporte) {
+        this.valorPistaDeporte = valorPistaDeporte;
+    }
+
+    public ArrayList<Edificio> getEdificios() {
+        return edificios;
+    }
+
+    public void setEdificios(ArrayList<Edificio> edificios) {
+        this.edificios = edificios;
+    }
+
+    public int getNumCasas() {
+        return numCasas;
+    }
+
+    public void setNumCasas(int numCasas) {
+        this.numCasas = numCasas;
+    }
+
+    public int getNumHoteles() {
+        return numHoteles;
+    }
+
+    public void setNumHoteles(int numHoteles) {
+        this.numHoteles = numHoteles;
+    }
+
+    public int getNumPiscinas() {
+        return numPiscinas;
+    }
+
+    public void setNumPiscinas(int numPiscinas) {
+        this.numPiscinas = numPiscinas;
+    }
+
+    public int getNumPistas() {
+        return numPistas;
+    }
+
+    public void setNumPistas(int numPistas) {
+        this.numPistas = numPistas;
+    }
+
+    public int getAlquilerCasilla() {
+        return alquilerCasilla;
+    }
+
+    public void setAlquilerCasilla(int alquilerCasilla) {
+        this.alquilerCasilla = alquilerCasilla;
+    }
+
+    public int getAlquilerCasa() {
+        return alquilerCasa;
+    }
+
+    public void setAlquilerCasa(int alquilerCasa) {
+        this.alquilerCasa = alquilerCasa;
+    }
+
+    public int getAlquilerHotel() {
+        return alquilerHotel;
+    }
+
+    public void setAlquilerHotel(int alquilerHotel) {
+        this.alquilerHotel = alquilerHotel;
+    }
+
+    public int getAlquilerPiscinaYPista() {
+        return alquilerPiscinaYPista;
+    }
+
+    public void setAlquilerPiscinaYPista(int alquilerPiscinaYPista) {
+        this.alquilerPiscinaYPista = alquilerPiscinaYPista;
+    }
+
+    public int getAlquilerTotal() {
+        return alquilerTotal;
+    }
+
+    public void setAlquilerTotal(int alquilerTotal) {
+        this.alquilerTotal = alquilerTotal;
+    }
+
+    public float getImpuestoscobrados(){return this.impuestos_cobrados;}
+
+    public void setImpuestos_cobrados(float impuestos_cobrados) {this.impuestos_cobrados = impuestos_cobrados;}
+
+    public float getRentabilidad() {
+        if (this.duenho != null) {
+            setRentabilidad(this.impuestos_cobrados - this.valor);
+        } else {
+            setRentabilidad(0);
+        }
+        return this.rentabilidad;
+    }
+
+
+    public void setRentabilidad(float rentabilidad) {this.rentabilidad = rentabilidad;}
+
+
     //Método utilizado para añadir un avatar al array de avatares en casilla.
-    /*public void anhadirAvatar(Avatar av) {
-    }*/
+    public void anhadirAvatar(Avatar av) {
+        if (av == null) return;
+        // si la lista interna de avatares aún no existe se crea
+        if (this.avatares == null) this.avatares = new ArrayList<>();
+
+        if (!this.avatares.contains(av)) { // comprobamos que el avatar no esté ya en la lista
+            this.avatares.add(av); // si no está, se añade
+        }
+        // aquí no se modifica el lugar, eso se hace en Avatar o Jugador
+    }
 
     //Método utilizado para eliminar un avatar del array de avatares en casilla.
-    /*public void eliminarAvatar(Avatar av) {
-    }*/
+    public void eliminarAvatar(Avatar av) {
+        if (av == null || this.avatares == null) return;
+        this.avatares.remove(av);
+    }
 
     /*Método para evaluar qué hacer en una casilla concreta. Parámetros:
      * - Jugador cuyo avatar está en esa casilla.
@@ -158,31 +358,701 @@ public class Casilla {
      * - El valor de la tirada: para determinar impuesto a pagar en casillas de servicios.
      * Valor devuelto: true en caso de ser solvente (es decir, de cumplir las deudas), y false
      * en caso de no cumplirlas.*/
-    /*public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
-    }*/
+    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
+        if (actual == null || banca == null)
+            throw new IllegalArgumentException("Los jugadores (actual o banca) no pueden ser nulos.");
+
+        String tipoCasilla = (this.tipo == null) ? " " : this.tipo.toLowerCase();
+        String n = (this.nombre == null) ? " " : this.nombre.toLowerCase();
+
+        switch (tipoCasilla) {
+            // casillas de tipo solar, servicios o transporte
+            case "solar":
+                // si la casilla es de la banca (o sin dueño), está en venta
+                if (this.duenho == null || this.duenho == banca) {
+                    System.out.println("[" + this.nombre + "] Propiedad libre por " + this.valor + "€. Usa el comando 'comprar' para adquirirla.");
+                    return true;
+                }
+                if (this.duenho == actual) {
+                    System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");
+                    return true;
+                }
+                //  si la casilla está hipotecada, no se cobra el alquiler
+                if (this.isHipotecada()) {
+                    System.out.println("[" + this.nombre + "] está hipotecada. No se cobra alquiler.");
+                    return true;
+                }
+                // si pertenece a otro jugador, calculamos el alquiler
+                //float alquilerGrupo = this.impuesto; // alquiler base, definido en el tablero
+                int alquilerGrupo = this.calcularAlquiler(actual); // usamos la función que calcula el alquiler para los solares
+
+                // comprobamos si el dueño tiene todo el grupo y que no hay edificios para doblar el alquiler
+                boolean sinEdificios = (getNumCasas() + getNumHoteles() + getNumPiscinas() + getNumPistas()) == 0;
+
+                if (sinEdificios && this.grupo != null && this.grupo.esDuenhoGrupo(this.duenho)) {
+                    // si tiene todo el grupo
+                    alquilerGrupo *= 2;
+                    System.out.println(this.duenho.getNombre() + " posee todo el grupo de " + this.grupo.getColorGrupo() + ". Se cobra el doble del alquiler.");
+                }
+
+                // Si no se puede pagar, se le da la opción a hipotecar 
+                if (actual.getFortuna() < alquilerGrupo) {
+                    System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        Menu m = Menu.getInstancia();
+                        m.activarSubmenuBancarrota(actual, alquilerGrupo, this.duenho);
+                        return true;
+                    } else {
+                        Menu m = Menu.getInstancia();
+                        m.declararBancarrota(actual);
+                        return false;
+                    }
+                }
+                // realizamos el pago
+                actual.sumarFortuna(-alquilerGrupo);
+                actual.sumarGastos(alquilerGrupo);
+                actual.setAlquilerpagadojugador(actual.getAlquilerpagadojugador() + alquilerGrupo); //aumentamos sus pagos de alquileres
+                this.duenho.sumarFortuna(alquilerGrupo);
+                this.duenho.setAlquilercobradojugador(this.duenho.getAlquilercobradojugador() + alquilerGrupo); //aumentamos cobro de alquileres
+                actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquilerGrupo);
+                System.out.println(actual.getNombre() + " paga " + (int) alquilerGrupo + "€ de alquiler a " + this.duenho.getNombre() + " por caer en " + this.nombre + ".");
+                return true;
+            case "servicios":
+                // si la casilla es de la banca (o sin dueño), está en venta
+                if (this.duenho == null || this.duenho == banca) {
+                    System.out.println("[" + this.nombre + "] Propiedad libre por " + this.valor + "€. Usa el comando 'comprar' para adquirirla.");
+                    return true;
+                }
+                if (this.duenho == actual) {
+                    System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");
+                    return true;
+                }
+
+                int serviciosPropietario = 0;
+                for (Casilla c : this.duenho.getPropiedades()) {
+                    if (c.getTipo().equalsIgnoreCase("servicios")) {
+                        serviciosPropietario++;
+                    }
+                }
+                // factor base (impuesto) viene del constructor
+                float factor = this.impuesto;
+                float alquiler;
+
+                if (serviciosPropietario == 2) {
+                    alquiler = 10 * tirada * factor;
+                } else {
+                    alquiler = 4 * tirada * factor;
+                }
+                // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
+                if (actual.getFortuna() < alquiler) {
+                    System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        Menu m = Menu.getInstancia();
+                        m.activarSubmenuBancarrota(actual, alquiler, this.duenho);
+                        return true;
+                    } else {
+                        Menu m = Menu.getInstancia();
+                        m.declararBancarrota(actual);
+                        return false;
+                    }
+                }
+                // realizamos el pago
+                actual.sumarFortuna(-alquiler);
+                actual.sumarGastos(alquiler);
+                actual.setAlquilerpagadojugador(actual.getAlquilerpagadojugador() + alquilerTotal); //aumentamos sus pagos de alquileres
+                this.duenho.sumarFortuna(alquiler);
+                this.duenho.setAlquilercobradojugador(this.duenho.getAlquilercobradojugador() + alquilerTotal); //aumentamos cobro de alquileres
+                actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquiler); //esto es para la rentabilidad de la casilla, influye al dueño, no al que paga alquiler
+                System.out.println(actual.getNombre() + " paga " + (int) alquiler + "€ de alquiler a " + this.duenho.getNombre() + " por usar el servicio (" + serviciosPropietario + "servicio/s poseídos, tirada = " + tirada + ").");
+                return true;
+            case "transporte":
+                // si la casilla es de la banca (o sin dueño), está en venta
+                if (this.duenho == null || this.duenho == banca) {
+                    System.out.println("[" + this.nombre + "] Propiedad libre por " + this.valor + "€. Usa el comando 'comprar' para adquirirla.");
+                    return true;
+                }
+                if (this.duenho == actual) {
+                    System.out.println("[" + this.nombre + "] Ya posees esta propiedad.");
+                    return true;
+                }
+                // si pertenece a otro jugador, calcular el alquiler total
+                float alquilerTotal = 0;
+                int contarTransporte = 0;
+                for (Casilla c : this.duenho.getPropiedades()) {
+                    if (c.getTipo().equalsIgnoreCase("transporte")) {
+                        alquilerTotal += c.getImpuesto(); // suma los alquileres de todos sus transportes
+                        contarTransporte++;
+                    }
+                }
+                // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
+                if (actual.getFortuna() < alquilerTotal) {
+                    System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        Menu m = Menu.getInstancia();
+                        m.activarSubmenuBancarrota(actual, alquilerTotal, this.duenho);
+                        return true;
+                    } else {
+                        Menu m = Menu.getInstancia();
+                        m.declararBancarrota(actual);
+                        return false;
+                    }
+                }
+                // realizamos el pago
+                actual.sumarFortuna(-alquilerTotal);
+                actual.sumarGastos(alquilerTotal);
+                actual.setAlquilerpagadojugador(actual.getAlquilerpagadojugador() + alquilerTotal); //aumentamos sus pagos de alquileres
+                this.duenho.sumarFortuna(alquilerTotal);
+                this.duenho.setAlquilercobradojugador(this.duenho.getAlquilercobradojugador() + alquilerTotal); //aumentamos cobro de alquileres
+                actual.getAvatar().getLugar().setImpuestos_cobrados(getImpuestoscobrados()+alquilerTotal);
+                System.out.println(actual.getNombre() + " paga " + (int) alquilerTotal + "€ de alquiler a " + this.duenho.getNombre() + " por usar el transporte (" + contarTransporte + "transporte/s poseídos).");
+                return true;
+            // casilla de impuestos
+            case "impuestos":
+                float imp = this.impuesto;
+
+                // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
+                if (actual.getFortuna() < imp) {
+                    System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el alquiler de " + this.nombre + ".");
+                    // comprobar si tiene algún solar sin hipotecar
+                    boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
+
+                    if (puedeHipotecar) {
+                        Menu m = Menu.getInstancia();
+                        m.activarSubmenuBancarrota(actual, imp, this.duenho);
+                        return true;
+                    } else {
+                        Menu m = Menu.getInstancia();
+                        m.declararBancarrota(actual);
+                        return false;
+                    }
+                }
+                // el jugador paga a la banca
+                actual.sumarFortuna(-imp);
+                actual.sumarGastos(imp);
+                banca.sumarFortuna(imp);
+                actual.setImpuestos_tasas(actual.getImpuestos_tasas() + imp); //actualizamos los gastos del jugador
+
+                System.out.println(actual.getNombre() + " paga " + imp + "€ en impuestos.");
+                return true;
+            // suerte / caja de comunidad
+            case "suerte":
+            case "caja de comunidad":
+                System.out.println(actual.getNombre() + " ha caído en una casilla de " + this.tipo + ".");
+
+                // ejecutamos la carta correspondiente
+                Menu.getInstancia().ejecutarCartas(this.tipo, actual, banca, this);
+                if (!Menu.getInstancia().isSolvente()) {
+                    System.out.println(actual.getNombre() + " ha quedado insolvente tras ejecutar la carta y se declara en bancarrota.");
+                    return false;
+                }
+                return true;
+            // especiales
+            case "especial":
+                if (n.equals("parking")) {
+                    // cobre del bote (valor) y reseteo
+                    if (this.valor > 0) {
+                        actual.sumarFortuna(this.valor);
+                        System.out.println(actual.getNombre() + " cobra el bote del Parking: " + this.valor + "€.");
+                        this.valor = 0;
+                    } else {
+                        System.out.println(actual.getNombre() + " descansa en el Parking. No hay bote acumulado.");
+                    }
+                    return true;
+                }
+                if (n.equals("salida")) {
+                    System.out.println(actual.getNombre() + " está en la casilla de Salida. ¡Buen viaje!");
+                    return true;
+                }
+                if (n.equals("ircarcel") || n.equals("ir a la carcel") || n.equals("ir a la cárcel")) {
+                    // el menu es el que tiene que mover a la carcel al jugador
+                    // si caes aquí tienes que moverte a la carcel como preso inmediatamente
+                    System.out.println(actual.getNombre() + " ha caído en 'Ir a la Cárcel'. Será trasladado al finalizar la tirada.");
+                    return true;
+                }
+                if (n.equals("cárcel") || n.equals("carcel")) {
+                    // de visita o preso lo gestiona el menu
+                    // caes por movimiento "normal", o ya estabas en la cárcel preso
+                    System.out.println(actual.getNombre() + " está visitando la Cárcel. No está arrestado.");
+                    System.out.println(actual.getNombre() + " está en la Cárcel (visita o preso).");
+                    return true;
+                }
+                System.out.println("[" + this.nombre + "] Casilla especial (sin acción en parte 1)");
+                return true;
+            // desconocido
+            default:
+                System.out.println("Casilla no reconocida o sin comportamiento definido.");
+                return true;
+        }
+    }
 
     /*Método usado para comprar una casilla determinada. Parámetros:
      * - Jugador que solicita la compra de la casilla.
      * - Banca del monopoly (es el dueño de las casillas no compradas aún).*/
-    /*public void comprarCasilla(Jugador solicitante, Jugador banca) {
-    }*/
+    public void comprarCasilla(Jugador solicitante, Jugador banca) {
+        //comprobaciones
+        if (this.duenho == solicitante) {
+            System.out.println("Ya posees la casilla " + this.nombre + ".");
+            return;
+        }
+        if (this.duenho != banca && this.duenho != null) {
+            System.out.println("No puedes comprar " + this.nombre + ": pertenece a " + this.duenho.getNombre() + ".");
+            return;
+        }
+        if (solicitante.getFortuna() < this.valor) {
+            System.out.println("No tienes suficiente dinero para comprar " + this.nombre + ".");
+            return;
+        }
 
-    /*Método para añadir valor a una casilla. Utilidad:
-     * - Sumar valor a la casilla de parking.
-     * - Sumar valor a las casillas de solar al no comprarlas tras cuatro vueltas de todos los jugadores.
-     * Este método toma como argumento la cantidad a añadir del valor de la casilla.*/
-    /*public void sumarValor(float suma) {
-    }*/
+        solicitante.sumarFortuna(-this.valor);
+        solicitante.sumarGastos(this.valor);
+        solicitante.setInversiones(solicitante.getInversiones()+this.valor);
+        solicitante.anhadirPropiedad(this);
+        this.setDuenho(solicitante);
+        banca.sumarFortuna(this.valor);
+        System.out.println(solicitante.getNombre() + " ha comprado " + this.nombre + " por " + this.valor + "€. Fortuna restante: " + solicitante.getFortuna() + "€.");
+    }
+
+    /**
+     * Método para añadir valor a una casilla.
+     * Utilidad:
+     * - Sumar valor a la casilla de Parking.
+     * - Sumar valor a las casillas de tipo "Solar" al no comprarlas tras cuatro vueltas.
+     * Este método toma como argumento la cantidad a añadir al valor de la casilla.
+     */
+    public void sumarValor(float suma) {
+        if (suma <= 0) {
+            System.out.println("No se puede añadir un valor negativo o nulo a la casilla " + this.nombre + ".");
+            return;
+        }
+
+        // Si la casilla no admite valor (por ejemplo, cárcel o suerte), avisamos
+        if (this.tipo == null ||
+                this.tipo.equalsIgnoreCase("carcel") ||
+                this.tipo.equalsIgnoreCase("cárcel") ||
+                this.tipo.equalsIgnoreCase("ir a la cárcel") ||
+                this.tipo.equalsIgnoreCase("ircarcel") ||
+                this.tipo.equalsIgnoreCase("suerte") ||
+                this.tipo.equalsIgnoreCase("caja de comunidad")) {
+            System.out.println("No se puede modificar el valor de una casilla de tipo " + this.tipo + ".");
+            return;
+        }
+
+        // Suma el valor
+        this.valor += suma;
+
+        System.out.println("Se han añadido " + suma + "€ al valor de la casilla '" + this.nombre + "'. Nuevo valor: " + this.valor + "€.");
+    }
+
 
     /*Método para mostrar información sobre una casilla.
      * Devuelve una cadena con información específica de cada tipo de casilla.*/
-    /*public String infoCasilla() {
-    }*/
+    public String infoCasilla() {
+
+        StringBuilder informacion = new StringBuilder(); // aquí guardamos la info de la casilla
+        String duenho;
+        if (this.getDuenho().getNombre() == null) duenho = "banca";
+        else  duenho = this.getDuenho().getNombre();
+
+        informacion.append("{");
+        switch (tipo.toLowerCase()) {
+            case "solar": // falta por printear el valor de los alquileres
+                informacion.append("\nTipo: ").append(tipo).append("\nGrupo: ").append(grupo.getNombreColorGrupo()).append("\nPropietario: ").append(duenho)
+                        .append("\nValor: ").append(valor).append("\nAlquiler: ").append(calcularAlquilerParaMostrar()).append("\nValor hotel: ").append(valorCasayHotel).append("\nValor casa: ").append(valorCasayHotel)
+                        .append("\nValor piscina: ").append(valorPiscina).append("\nValor pista de deporte: ").append(valorPistaDeporte).append("\nAlquiler casa: ").append(alquilerCasa)
+                        .append("\nAlquiler hotel: ").append(alquilerHotel).append("\nAlquiler piscina: ").append(alquilerPiscinaYPista).append("\nAlquiler pista de deporte: ").append(alquilerPiscinaYPista)
+                        .append(infoJugadoresEnEstaCasilla());
+                break;
+            case "impuesto":
+                informacion.append("\nTipo: ").append(tipo).append("\nA pagar: ").append(impuesto);
+                informacion.append(infoJugadoresEnEstaCasilla());
+                break;
+            case "transporte":
+                informacion.append("\nValor: ").append(valor);
+                informacion.append(infoJugadoresEnEstaCasilla());
+                break;
+            case "servicios":
+                informacion.append("\nValor: ").append(valor);
+                informacion.append(infoJugadoresEnEstaCasilla());
+                break;
+            case "especial":
+                if (this.getNombre() != null && this.getNombre().equalsIgnoreCase("parking")) {
+                    informacion.append("\nBote: ").append(valor);
+                } else if (this.getNombre() != null && this.getNombre().equalsIgnoreCase("cárcel")) {
+                    informacion.append("\nSalir: 500000");
+                }
+
+                // El siguiente bloque es para cualquier especial menos para el irCarcel:
+                if (!(this.getNombre().equalsIgnoreCase("ircarcel"))) {
+                    informacion.append(infoJugadoresEnEstaCasilla());
+                }
+
+                break;
+        }
+        informacion.append("\n}");
+        return informacion.toString(); // si no existe una casilla con ese nombre devuelve null*/
+    }
 
     /* Método para mostrar información de una casilla en venta.
      * Valor devuelto: texto con esa información.
      */
-    /*public String casEnVenta() {
-    }*/
+    public String casEnVenta() {
+        // Comprobamos si la casilla es comprable
+        if (this.tipo == null)
+            return ""; //en el caso de que no se cumpla alguna condicion necesaria, devolvemos una cadena vacia
+        String tipoLower = this.tipo.toLowerCase();
+        boolean esComprable = tipoLower.equals("solar") || tipoLower.equals("transporte") || tipoLower.equals("servicios"); //solo es comprable si es de alguno de estos tipos
 
+        // Comprobamos si está en venta (sin dueño o con dueño banca)
+        boolean enVenta = esComprable && (this.duenho == null || this.duenho.getNombre() == null || this.duenho.getNombre().equalsIgnoreCase("banca"));
+
+
+        if (!enVenta) return "";
+
+        // Si está en venta, devolvemos la información formateada
+        String nombreColor = (this.grupo != null) ? this.grupo.getNombreColorGrupo() : "";
+
+        String info = "{ tipo: " + this.tipo
+                + ", \nvalor: " + (int) this.valor
+                + ", \ngrupo: " + nombreColor
+                + " }";
+
+        return info; //devolvemos la cadena
+    }
+
+
+    /**
+     * Devuelve un texto con los jugadores (por nombre) que están en esta casilla.
+     * Si no hay ninguno, devuelve una cadena vacía.
+     */
+    private String infoJugadoresEnEstaCasilla() {
+        if (avatares == null || avatares.isEmpty()) {
+            return ""; // no hay jugadores
+        }
+
+        ArrayList<String> nombres = new ArrayList<>();
+        for (Avatar av : avatares) {
+            if (av != null && av.getLugar() == this && av.getJugador() != null) {
+                nombres.add(av.getJugador().getNombre());
+            }
+        }
+
+        if (nombres.isEmpty()) {
+            return "";
+        }
+
+        return "\nJugadores: " + nombres;
+    }
+
+    /* Esta función añade un edificio nuevo al array edificios
+     * de la casilla en la que se encuentra el jugador
+     */
+    public void anhadirEdificioACasilla(Edificio edificio) {
+        if (edificio == null) {
+            System.out.println("No se puede añadir un edificio nulo.");
+            return;
+        }
+        edificios.add(edificio);
+        switch (edificio.getTipo()) {
+            case "casa":
+                numCasas++;
+                break;
+            case "hotel":
+                numHoteles++;
+                break;
+            case "piscina":
+                numPiscinas++;
+                break;
+            case "pista":
+                numPistas++;
+                break;
+        }
+    }
+
+    /* Función que va iterando sobre el array de edificios que son del jugador
+     * y va comprobando si el tipo de cada edificio es casa, si lo es,
+     * se elimina del array
+     */
+    public void quitarCuatroCasas() {
+        int retiradas = 0; // para controlar que solo se eliminen 4
+        for (int i = 0; i < edificios.size() && retiradas < 4; i++) { // mientras no se hayan eliminado 4 casas y no se sobrepase el tamaño del array
+            Edificio e = edificios.get(i); // cogemos el edificio número i del array
+            if (e != null && "casa".equalsIgnoreCase(e.getTipo())) { // comprobamos que no es null y que su tipo es "casa
+                edificios.remove(i);   // quito la casa del array
+                numCasas--;            // actualizo contador
+                i--;                   // retrocedo índice porque la lista ha disminuido, ahora el último elemento es el anterior
+                retiradas++;
+            }
+
+            if (e.getPropietario() != null) {
+                e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos las casas de los edificios del jugador
+            }
+
+            Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+            if (m != null) {
+                m.eliminarEdificioGlobal(e);
+            }
+        }
+    }
+
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente casas
+     * Los mensajes son personalizados para las casas, los otros tipos de edificio
+     * también tienen su correspondiente función
+     */
+    public void venderCasas(int nCasas, Jugador j) {
+        int vendidas = 0;
+        if (nCasas <= getNumCasas()) {
+            // Recorremos la lista y paramos al vender nCasas
+            for (int i = 0; i < edificios.size() && vendidas < nCasas; ) {
+                Edificio e = edificios.get(i);
+                if (e != null && "casa".equalsIgnoreCase(e.getTipo())) {
+                    edificios.remove(i);
+                    if (numCasas > 0) numCasas--;
+
+                    if (e.getPropietario() != null) {
+                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos las casas de los edificios del jugador
+                    }
+
+                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                    if (m != null) {
+                        m.eliminarEdificioGlobal(e);
+                    }
+
+                    int ganancia = this.getValorCasayHotel();
+                    e.getPropietario().sumarFortuna(ganancia);
+
+                    vendidas++;
+                } else {
+                    i++; // solo avanzo cuando no elimino nada
+                }
+            }
+
+            if (vendidas >= 1 && getNumCasas() != 1) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casas en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumCasas() + " casas.");
+            } else if (vendidas >= 1 && getNumCasas() == 1) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nCasas + " casa en " + getNombre() + ", recibiendo " + nCasas * getValorCasayHotel() + "€. En la propiedad queda " + this.getNumCasas() + " casa.");
+            }
+        } else {
+            if (getNumCasas() == 0) {
+                System.err.println("No se pueden vender casas en " + getNombre() + ", no hay casas construidas");
+            }
+            if (getNumCasas() == 1) {
+                System.err.println("Solamente se puede vender 1 casa, recibiendo " + getValorCasayHotel() + "€");
+            } else if (getNumCasas() > 1) {
+                System.err.println("Solamente se pueden vender " + getNumCasas() + " casas, recibiendo " + getNumCasas() * getValorCasayHotel() + "€");
+            }
+        }
+    }
+
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente hoteles
+     * Los mensajes son personalizados para los hoteles, los otros tipos de edificio
+     * también tienen su correspondiente función
+     */
+    public void venderHoteles(int nHoteles, Jugador j) {
+        int vendidas = 0;
+        if (nHoteles <= getNumHoteles()) {
+            // Recorremos la lista y paramos al vender nHoteles
+            for (int i = 0; i < edificios.size() && vendidas < nHoteles; ) {
+                Edificio e = edificios.get(i);
+                if (e != null && "hotel".equalsIgnoreCase(e.getTipo())) {
+                    edificios.remove(i);
+                    if (numHoteles > 0) numHoteles--;
+
+                    if (e.getPropietario() != null) {
+                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos el hotel de los edificios del jugador
+                    }
+
+                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                    if (m != null) {
+                        m.eliminarEdificioGlobal(e);
+                    }
+
+                    int ganancia = this.getValorCasayHotel();
+                    e.getPropietario().sumarFortuna(ganancia);
+
+                    vendidas++;
+                } else {
+                    i++; // solo avanzo cuando no elimino nada
+                }
+            }
+
+            if (vendidas == 1 && getNumHoteles() == 0) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nHoteles + " hotel en " + getNombre() + ", recibiendo " + nHoteles * getValorCasayHotel() + "€. En la propiedad quedan " + this.getNumHoteles() + " hoteles.");
+            }
+        } else {
+            if (getNumHoteles() == 0) {
+                System.err.println("No se pueden vender hoteles en " + getNombre() + ", no hay ninguno construido");
+            } else if (getNumHoteles() == 1) {
+                System.err.println("Solamente se puede vender 1 hotel, recibiendo " + getValorCasayHotel() + "€");
+            }
+        }
+    }
+
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente piscinas
+     * Los mensajes son personalizados para las piscinas, los otros tipos de edificio
+     * también tienen su correspondiente función
+     */
+    public void venderPiscinas(int nPiscinas, Jugador j) {
+        int vendidas = 0;
+        if (nPiscinas <= getNumPiscinas()) {
+            // Recorremos la lista y paramos al vender nHoteles
+            for (int i = 0; i < edificios.size() && vendidas < nPiscinas; ) {
+                Edificio e = edificios.get(i);
+                if (e != null && "piscina".equalsIgnoreCase(e.getTipo())) {
+                    edificios.remove(i);
+                    if (numPiscinas > 0) numPiscinas--;
+
+                    if (e.getPropietario() != null) {
+                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos el hotel de los edificios del jugador
+                    }
+
+                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                    if (m != null) {
+                        m.eliminarEdificioGlobal(e);
+                    }
+
+                    int ganancia = this.getValorPiscina();
+                    e.getPropietario().sumarFortuna(ganancia);
+
+                    vendidas++;
+                } else {
+                    i++; // solo avanzo cuando no elimino nada
+                }
+            }
+
+            if (vendidas == 1 && getNumPiscinas() == 0) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPiscinas + " piscina en " + getNombre() + ", recibiendo " + nPiscinas * getValorPiscina() + "€. En la propiedad quedan " + this.getNumPiscinas() + " piscinas.");
+            }
+        } else {
+            if (getNumPiscinas() == 0) {
+                System.err.println("No se pueden vender piscinas en " + getNombre() + ", no hay ninguna construida");
+            } else if (getNumPiscinas() == 1) {
+                System.err.println("Solamente se puede vender 1 piscina, recibiendo " + getValorPiscina() + "€");
+            }
+        }
+    }
+
+    /* Función que uso en gestionarVentaEdificios para vender única y específicamente pistas de deporte
+     * Los mensajes son personalizados para las pistas de deporte, los otros tipos de edificio
+     * también tienen su correspondiente función
+     */
+    public void venderPistas(int nPistas, Jugador j) {
+        int vendidas = 0;
+        if (nPistas <= getNumPistas()) {
+            // Recorremos la lista y paramos al vender nHoteles
+            for (int i = 0; i < edificios.size() && vendidas < nPistas; ) {
+                Edificio e = edificios.get(i);
+                if (e != null && "pista".equalsIgnoreCase(e.getTipo())) {
+                    edificios.remove(i);
+                    if (numPistas > 0) numPistas--;
+
+                    if (e.getPropietario() != null) {
+                        e.getPropietario().eliminarEdificioDeJugador(e); // también quitamos el hotel de los edificios del jugador
+                    }
+
+                    Menu m = Menu.getInstancia(); // con getInstancia() guardo una referencia al menú real y así puedo modificar la lista de edificios del menú
+                    if (m != null) {
+                        m.eliminarEdificioGlobal(e);
+                    }
+
+                    int ganancia = this.getValorPistaDeporte();
+                    e.getPropietario().sumarFortuna(ganancia);
+
+                    vendidas++;
+                } else {
+                    i++; // solo avanzo cuando no elimino nada
+                }
+            }
+
+            if (vendidas == 1 && getNumPistas() == 0) {
+                System.out.println(this.getDuenho().getNombre() + " ha vendido " + nPistas + " pista de deporte en " + getNombre() + ", recibiendo " + nPistas * getValorPistaDeporte() + "€. En la propiedad quedan " + this.getNumPistas() + " pistas de deporte.");
+            }
+        } else {
+            if (getNumPistas() == 0) {
+                System.err.println("No se pueden vender pistas de deporte en " + getNombre() + ", no hay ninguna construida");
+            } else if (getNumPistas() == 1) {
+                System.err.println("Solamente se puede vender 1 pista de deporte, recibiendo " + getValorPistaDeporte() + "€");
+            }
+        }
+    }
+
+    /*
+        Función que lo único que hace es calcular la cantidad que se le restará a la fortuna de un
+        jugador cuando cae en una casilla que no le pertenece. Cada edificación tiene un alquiler
+        específico según la casilla en la que se encuentre. Para usarla hay que guardar el valor
+        que retorna en una variable y esa variable usarla en el menú, en evaluarCasilla.
+     */
+    public int calcularAlquiler(Jugador actual) {
+        // Si no es un solar devuelve 0 porque sería otro case que ya se realiza dentro de evaluarCasilla()
+        if (getTipo() == null || !"solar".equalsIgnoreCase(getTipo())) return 0;
+
+        if (actual == null) return 0; // si hay un error con el jugador actual
+        if (isHipotecada()) return 0; // si está hipotecada no se paga
+        if (getDuenho() == null) return 0; // si no hay dueño no se paga
+        if (actual == getDuenho()) return 0; // el dueño no paga
+
+        int totalEdificios = getNumCasas() + getNumHoteles() + getNumPiscinas() + getNumPistas();
+        if (totalEdificios == 0) return alquilerCasilla;
+
+        // Ahora calculamos el total:
+        int alquiler = 0;
+        alquiler += getNumCasas()   * getAlquilerCasa();
+        alquiler += getNumHoteles() * getAlquilerHotel();
+        alquiler += (getNumPiscinas() + getNumPistas()) * getAlquilerPiscinaYPista();
+
+        return alquiler;
+    }
+
+    /*
+        Esta otra función es muy similar a la anterior pero en vez de usarse en evaluarCasilla
+        se utiliza en listarEdificiosGrupo. Hacemos una nueva porque con la anterior, si el jugador
+        quería listar edificios de un grupo que le pertenece haciendo "listar edificios grupoDeSuPropiedad",
+        el alquiler le salía a 0, porque si él cae ahí no debe pagar. Esta función devuelve el valor
+        del alquiler sin importar qué jugador realice el comando "listar edificios grupo"
+     */
+    public int calcularAlquilerParaMostrar() {
+        if (getTipo() == null || !"solar".equalsIgnoreCase(getTipo())) return 0;
+        if (isHipotecada()) return 0; // si está hipotecada no se paga
+
+        int base = getAlquilerCasilla();
+
+        // Sumamos el valor del alquiler de los edificios
+        int numEdificios = getNumCasas() + getNumHoteles() + getNumPiscinas() + getNumPistas();
+
+        int alquiler = 0;
+        if (numEdificios != 0) {
+            alquiler += getNumCasas() * getAlquilerCasa();
+            alquiler += getNumHoteles() * getAlquilerHotel();
+            alquiler += (getNumPiscinas() + getNumPistas()) * getAlquilerPiscinaYPista();
+        }
+        else {
+            alquiler = base;
+        }
+
+        // Ahora si todas las casillas del grupo tienen el mismo dueño, este no es la banca, y además no hay edificios, entonces el alquiler se multiplica por 2
+        if (getGrupo() != null && getDuenho() != null && getDuenho().getNombre() != null && getGrupo().esDuenhoGrupo(getDuenho()) && numEdificios == 0) {
+            alquiler *= 2;
+        }
+
+        return alquiler;
+    }
+
+
+
+    /** Se puede tener un toString por clase, así que hice este
+    * para que salgan los nombres de las casillas bien printeados
+    * en el array propiedades del jugador
+    * */
+    @Override
+    public String toString() {
+        return this.nombre;
+    }
 }
