@@ -2,6 +2,7 @@ package partida;
 
 import java.util.ArrayList;
 import monopoly.*;
+import monopoly.casillas.*;
 
 
 public class Avatar {

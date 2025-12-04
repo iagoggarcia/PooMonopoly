@@ -1,10 +1,12 @@
-package monopoly;
+package monopoly.edificios;
+import monopoly.casillas.propiedad.Solar;
 import partida.*;
+import monopoly.casillas.Casilla;
 
 public class PistaDeporte extends Edificio {
     private static int contadorPistasDeporte = 0;
 
-    public PistaDeporte (Jugador propietario, Casilla lugar) {
+    public PistaDeporte (Jugador propietario, Solar lugar) {
         super("pista", propietario, lugar);
     }
 
@@ -14,7 +16,7 @@ public class PistaDeporte extends Edificio {
      * y cada uno de esos errores tiene un código: el primero 1, el segundo 2, el tercero 3 y el último 4. La función retorna 0
      * cuando SÍ se puede construir.
      * */
-    public static int puedeEdificarPista(Casilla lugar) {
+    public static int puedeEdificarPista(Solar lugar) {
         if (lugar.getNumHoteles() < 1 && lugar.getNumPiscinas() < 1) { // si no hay hotel ni piscina
             return 1;
         } // Comprobación de errores

@@ -1,10 +1,11 @@
-package monopoly;
+package monopoly.casillas;
 
 import partida.*;
 import java.util.ArrayList;
+import monopoly.casillas.propiedad.*;
+import monopoly.*;
 
-
-class Grupo {
+public class Grupo {
 
     //Atributos
     private ArrayList<Casilla> miembros; //Casillas miembros del grupo.
@@ -74,11 +75,15 @@ class Grupo {
      */
     public void anhadirCasilla(Casilla miembro) {
         if (miembro == null) return;
+        if (!(miembro instanceof Propiedad p)) {
+            return;
+        }
+
         if (this.miembros == null) this.miembros = new ArrayList<>();
         if (!this.miembros.contains(miembro)) {
             this.miembros.add(miembro);
             this.numCasillas = this.miembros.size();
-            miembro.setGrupo(this);
+            p.setGrupo(this);
         }
     }
 
@@ -90,12 +95,14 @@ class Grupo {
         if (jugador == null || this.miembros == null || this.miembros.isEmpty()) return false;
 
         for (Casilla c : this.miembros) {
-            Jugador d = c.getDuenho();
-            // Si no hay dueño, es banca o el dueño no es el jugador pasado, no controla el grupo
-            if (d == null) return false;
-            String nombreDuenho = d.getNombre();
-            if (nombreDuenho != null && nombreDuenho.equalsIgnoreCase("banca")) return false;
-            if (d != jugador) return false; // comparamos por instancia; en este diseño es lo más seguro
+            if (c instanceof Propiedad p) {
+                Jugador d = p.getDuenho();
+                // Si no hay dueño, es banca o el dueño no es el jugador pasado, no controla el grupo
+                if (d == null) return false;
+                String nombreDuenho = d.getNombre();
+                if (nombreDuenho != null && nombreDuenho.equalsIgnoreCase("banca")) return false;
+                if (d != jugador) return false; // comparamos por instancia; en este diseño es lo más seguro
+            }
         }
         return true;
     }

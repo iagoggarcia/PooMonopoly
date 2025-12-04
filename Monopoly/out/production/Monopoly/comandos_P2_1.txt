@@ -46,8 +46,6 @@ lanzar dados 3+2
 edificar hotel
 acabar turno
 salir cárcel
-salir cárcel
-salir cárcel
 lanzar dados 4+5 
 acabar turno
 lanzar dados 1+3

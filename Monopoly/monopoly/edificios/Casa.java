@@ -1,10 +1,12 @@
-package monopoly;
+package monopoly.edificios;
+import monopoly.casillas.propiedad.Solar;
 import partida.*;
+import monopoly.casillas.Casilla;
 
 public class Casa extends Edificio {
     private static int contadorCasas = 0;
 
-    public Casa (Jugador propietario, Casilla lugar) {
+    public Casa (Jugador propietario, Solar lugar) {
         super("casa", propietario, lugar);
     }
 
@@ -13,7 +15,7 @@ public class Casa extends Edificio {
     * o porque ya hay un hotel (el dinero del jugador se comprueba en otra función), y cada uno de esos errores
     * tiene un código: el primero 1 y el segundo 2. La función retorna 0 cuando SÍ se puede construir.
     * */
-    public static int puedeEdificarCasa(Casilla lugar) {
+    public static int puedeEdificarCasa(Solar lugar) {
         if (lugar.getNumCasas() == 4) { // si ya hay 4 casas
             return 1;
         } // Comprobación de errores

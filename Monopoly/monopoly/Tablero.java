@@ -3,7 +3,8 @@ package monopoly;
 import java.util.ArrayList;
 import java.util.HashMap;
 import partida.*;
-
+import monopoly.casillas.*;
+import monopoly.casillas.propiedad.*;
 
 public class Tablero {
     //Atributos.
@@ -203,8 +204,10 @@ public class Tablero {
 
         java.util.function.Function<Casilla, String> ansiGrupo = c -> {
             String ansi = Valor.WHITE;
-            if (c.getGrupo() != null && c.getGrupo().getColorGrupo() != null) {
-                ansi = c.getGrupo().getColorGrupo();
+            if (c instanceof Propiedad p) {
+                if (p.getGrupo() != null && p.getGrupo().getColorGrupo() != null) {
+                    ansi = p.getGrupo().getColorGrupo();
+                }
             }
             return ansi;
         };

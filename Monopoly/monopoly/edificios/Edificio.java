@@ -1,6 +1,8 @@
-package monopoly;
+package monopoly.edificios;
 
 import partida.*;
+import monopoly.casillas.Casilla;
+import monopoly.casillas.propiedad.*;
 import java.util.ArrayList;
 
 public abstract class Edificio {
@@ -15,7 +17,7 @@ public abstract class Edificio {
     /* Constructor para el edificio
     * Parámetros: tipo de edificio (casa, hotel, piscina, pista de deporte), propietario del edificio, lugar en el que se ubica
     */
-    public Edificio (String tipo, Jugador propietario, Casilla lugar) {
+    public Edificio (String tipo, Jugador propietario, Solar lugar) {
         this.tipo = tipo;
         this.propietario = propietario;
         this.lugar = lugar;
@@ -38,17 +40,10 @@ public abstract class Edificio {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public Jugador getPropietario() {
         return propietario;
@@ -62,17 +57,11 @@ public abstract class Edificio {
         return lugar;
     }
 
-    public void setLugar(Casilla lugar) {
-        this.lugar = lugar;
-    }
 
     public int getPrecio() {
         return precio;
     }
 
-    public void setPrecio(int precio) {
-        this.precio = precio;
-    }
 
     // se escribe aquí como abstract para que las subclases (casa, hotel, piscina, pista) tengan que implementarlo sí o sí.
     // Se implementa con @Override porque tienen el mismo nombre

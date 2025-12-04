@@ -2,6 +2,9 @@ package partida;
 
 import java.util.ArrayList;
 import monopoly.*;
+import monopoly.casillas.*;
+import monopoly.casillas.propiedad.*;
+import monopoly.edificios.*;
 
 
 public class Jugador {
@@ -116,7 +119,7 @@ public class Jugador {
         ArrayList<Casilla> solaresHipotecados = new ArrayList<>();
         if (this.propiedades != null) {
             for (Casilla c : this.propiedades) {
-                if (c.getTipo().equalsIgnoreCase("solar") && c.isHipotecada()) {
+                if (c instanceof Solar s) {
                     solaresHipotecados.add(c);
                 }
             }
@@ -127,7 +130,9 @@ public class Jugador {
         float valorPropiedades = 0;
         if (this.propiedades != null) {
             for (Casilla c : this.propiedades) {
-                if (c != null) valorPropiedades += c.getValor();
+                if (c instanceof Propiedad p) {
+                    if (c != null) valorPropiedades += p.getValor();
+                }
             }
         }
 
