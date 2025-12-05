@@ -7,6 +7,8 @@ import partida.*;
 // Atributos que tienen las propiedades (solares, servicios y transportes):
 public abstract class Propiedad extends Casilla {
 
+    // ATRIBUTOS: ---------------------------------------------------------
+
     protected float valor;
     protected Jugador duenho;
     protected float impuesto;
@@ -15,7 +17,10 @@ public abstract class Propiedad extends Casilla {
     protected float rentabilidad;
     protected float impuestosCobrados;
 
-    // Constructor completo (Solar)
+    // --------------------------------------------------------------------
+
+    // ---------- CONSTRUCTORES -----------
+    // Para solar:
     protected Propiedad(String nombre, int posicion, String tipo,
                         float valor, Jugador duenho,
                         float impuesto, float hipoteca, Grupo grupo) {
@@ -29,11 +34,11 @@ public abstract class Propiedad extends Casilla {
         this.impuestosCobrados = 0;
     }
 
-    // Constructor simple (Servicio/Transporte)
-    protected Propiedad(String nombre, int posicion, String tipo,
-                        float valor, Jugador duenho, float impuesto) {
+    // Para Servicio o Transporte:
+    protected Propiedad(String nombre, int posicion, String tipo, float valor, Jugador duenho, float impuesto) {
         this(nombre, posicion, tipo, valor, duenho, impuesto, 0, null);
     }
+    // ------------------------------------------------------
 
     /* ---------- MÉTODOS DEl ENUNCIADO Y OTROS ---------- */
 
@@ -135,7 +140,6 @@ public abstract class Propiedad extends Casilla {
     public void setGrupo(Grupo grupo) { this.grupo = grupo; }
 
     public float getImpuesto() { return impuesto; }
-    public void setImpuesto(float impuesto) { this.impuesto = impuesto; }
 
     public float getImpuestosCobrados() { return impuestosCobrados; }
     public void setImpuestosCobrados(float v) { this.impuestosCobrados = v; }

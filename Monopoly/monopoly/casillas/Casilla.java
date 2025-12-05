@@ -74,6 +74,27 @@ public abstract class Casilla {
         return "\nJugadores: " + nombres;
     }
 
+    /*Método para evaluar qué hacer en una casilla concreta. Parámetros:
+     * - Jugador cuyo avatar está en esa casilla.
+     * - La banca (para ciertas comprobaciones).
+     * - El valor de la tirada: para determinar impuesto a pagar en casillas de servicios.
+     * Valor devuelto: true en caso de ser solvente (es decir, de cumplir las deudas), y false
+     * en caso de no cumplirlas.*/
+    public abstract boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada);
+
+    /*public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
+        if (actual == null || banca == null)
+            throw new IllegalArgumentException("Los jugadores (actual o banca) no pueden ser nulos.");
+
+        String tipoCasilla = (this.tipo == null) ? " " : this.tipo.toLowerCase();
+        String n = (this.nombre == null) ? " " : this.nombre.toLowerCase();
+
+
+    /*Método para mostrar información sobre una casilla.
+     * Devuelve una cadena con información específica de cada tipo de casilla.
+     * Será implementado por cada subclase (solar, transporte, etc.) */
+    public abstract String infoCasilla();
+
     /* ----------------------------------------------------------- */
 
 
@@ -126,76 +147,4 @@ public abstract class Casilla {
     }
 
     /* --------------------------------------- */
-
-    /*Constructor para casillas Servicios o Transporte:
-     * Parámetros: nombre casilla, tipo (debe ser solar, serv. o transporte), posición en el tablero, valor y dueño.
-     */
-    /*public Casilla(String nombre, String tipo, int posicion, float valor, Jugador duenho, float impuesto) {
-        this.nombre = nombre;
-        this.tipo = tipo;
-        this.posicion = posicion;
-        this.valor = valor;
-        this.duenho = duenho; // aquí puse dueño pero al crear la casilla por primera vez hay que poner banca, que es el dueño por defecto
-        this.impuesto = impuesto;
-        this.hipoteca = 0;
-        this.rentabilidad = 0;
-        this.impuestos_cobrados = 0;
-        this.grupo = new Grupo();
-        this.avatares = new ArrayList<>();
-    }*/
-
-    /*Constructor utilizado para inicializar las casillas de tipo IMPUESTOS.
-     * Parámetros: nombre, posición en el tablero, impuesto establecido y dueño.
-     */
-    /*public Casilla(String nombre, int posicion, float impuesto, Jugador duenho) {
-        this.nombre = nombre;
-        this.tipo = "impuesto";
-        this.posicion = posicion;
-        this.valor = 0;
-        this.duenho = duenho;
-        this.impuesto = impuesto;
-        this.hipoteca = 0;
-        this.impuestos_cobrados = 0;
-        this.rentabilidad = 0;
-        this.grupo = new Grupo();
-        this.avatares = new ArrayList<>();
-    }*/
-
-    /*Constructor utilizado para crear las otras casillas (Suerte, Caja de comunidad y Especiales):
-     * Parámetros: nombre, tipo de la casilla (será uno de los que queda), posición en el tablero y dueño.
-     */
-    /*public Casilla(String nombre, String tipo, int posicion, Jugador duenho) {
-        this.nombre = nombre;
-        this.tipo = tipo;
-        this.posicion = posicion;
-        this.valor = 0;
-        this.duenho = duenho;
-        this.impuesto = 0;
-        this.hipoteca = 0;
-        this.rentabilidad = 0;
-        this.impuestos_cobrados = 0;
-        this.grupo = new Grupo();
-        this.avatares = new ArrayList<>();
-    }*/
-
-    /*Método para evaluar qué hacer en una casilla concreta. Parámetros:
-     * - Jugador cuyo avatar está en esa casilla.
-     * - La banca (para ciertas comprobaciones).
-     * - El valor de la tirada: para determinar impuesto a pagar en casillas de servicios.
-     * Valor devuelto: true en caso de ser solvente (es decir, de cumplir las deudas), y false
-     * en caso de no cumplirlas.*/
-    public abstract boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada);
-
-    /*public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
-        if (actual == null || banca == null)
-            throw new IllegalArgumentException("Los jugadores (actual o banca) no pueden ser nulos.");
-
-        String tipoCasilla = (this.tipo == null) ? " " : this.tipo.toLowerCase();
-        String n = (this.nombre == null) ? " " : this.nombre.toLowerCase();
-
-
-    /*Método para mostrar información sobre una casilla.
-     * Devuelve una cadena con información específica de cada tipo de casilla.
-     * Será implementado por cada subclase (solar, transporte, etc.) */
-    public abstract String infoCasilla();
 }

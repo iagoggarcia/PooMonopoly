@@ -6,9 +6,13 @@ import partida.*;
 
 public class Transporte extends Propiedad {
 
+    // ---------- CONSTRUCTOR ----------
+
     public Transporte(String nombre, int posicion, float valor, Jugador duenho, float impuesto) {
         super(nombre, posicion, "transporte", valor, duenho, impuesto);
     }
+
+    // ---------- MÉTODOS ----------
 
     @Override
     public float valor() {
@@ -106,6 +110,5 @@ public class Transporte extends Propiedad {
         informacion.append("\n}");
         return informacion.toString();
     }
-
 
 }

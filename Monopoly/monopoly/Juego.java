@@ -768,10 +768,9 @@ public class Juego {
         String nombre_casilla_comprador = comprador.getAvatar().getLugar().getNombre();
         System.out.println(jugadores.get(turno).getNombre() + " intenta comprar " + nombre + "...");
 
-        // SALE ERROR PORQUE NO HICE LA SUBCLASE TRANSPORTE AÚN, PERO DEJADLO ASÍ
-        if (casilla instanceof Transporte t) {
+        if (casilla instanceof Propiedad p) {
             if(nombre_casilla_comprador.equalsIgnoreCase(nombre)) {
-                t.comprar(comprador, this.banca);
+                p.comprar(comprador, this.banca);
             }
             else{
                 System.out.println("El jugador intenta comprar una casilla en la que no está posicionado");
