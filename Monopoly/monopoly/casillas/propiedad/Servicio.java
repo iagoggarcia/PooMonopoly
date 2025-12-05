@@ -7,8 +7,8 @@ import monopoly.*;
 
 public class Servicio extends Propiedad {
 
-    public Servicio(String nombre, int posicion, String tipo, float valor, Jugador duenho, float impuesto, float hipoteca, Grupo grupo) {
-        super(nombre, posicion, tipo, valor, duenho, impuesto, hipoteca, grupo);
+    public Servicio(String nombre, int posicion, float valor, Jugador duenho, float impuesto) {
+        super(nombre, posicion, "servicios", valor, duenho, impuesto);
     }
 
     @Override

@@ -9,23 +9,30 @@ public abstract class Propiedad extends Casilla {
 
     protected float valor;
     protected Jugador duenho;
-    protected Grupo grupo;
     protected float impuesto;
-    protected float hipoteca;
-    protected boolean hipotecada;
-    protected float impuestosCobrados;
+    protected float hipoteca;   // útil sobre todo para Solar
+    protected Grupo grupo;      // útil sobre todo para Solar
     protected float rentabilidad;
+    protected float impuestosCobrados;
 
-    protected Propiedad(String nombre, int posicion, String tipo, float valor, Jugador duenho, float impuesto, float hipoteca, Grupo grupo) {
-        super(nombre, posicion, tipo); // llamo al constructor de casilla
+    // Constructor completo (Solar)
+    protected Propiedad(String nombre, int posicion, String tipo,
+                        float valor, Jugador duenho,
+                        float impuesto, float hipoteca, Grupo grupo) {
+        super(nombre, posicion, tipo);
         this.valor = valor;
         this.duenho = duenho;
         this.impuesto = impuesto;
         this.hipoteca = hipoteca;
         this.grupo = grupo;
-        this.hipotecada = false;
-        this.impuestosCobrados = 0;
         this.rentabilidad = 0;
+        this.impuestosCobrados = 0;
+    }
+
+    // Constructor simple (Servicio/Transporte)
+    protected Propiedad(String nombre, int posicion, String tipo,
+                        float valor, Jugador duenho, float impuesto) {
+        this(nombre, posicion, tipo, valor, duenho, impuesto, 0, null);
     }
 
     /* ---------- MÉTODOS DEl ENUNCIADO Y OTROS ---------- */
@@ -129,9 +136,6 @@ public abstract class Propiedad extends Casilla {
 
     public float getImpuesto() { return impuesto; }
     public void setImpuesto(float impuesto) { this.impuesto = impuesto; }
-
-    public boolean isHipotecada() { return hipotecada; }
-    public void setHipotecada(boolean hipotecada) { this.hipotecada = hipotecada; }
 
     public float getImpuestosCobrados() { return impuestosCobrados; }
     public void setImpuestosCobrados(float v) { this.impuestosCobrados = v; }

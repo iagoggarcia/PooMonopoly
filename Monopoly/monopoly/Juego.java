@@ -11,6 +11,7 @@ import partida.*;
 import monopoly.casillas.*;
 import monopoly.casillas.propiedad.*;
 import monopoly.edificios.*;
+import monopoly.casillas.especial.*;
 
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 
@@ -710,10 +711,10 @@ public class Juego {
         }
 
         // si la casilla es de tipo impuestos, añadir el dinero al Parking
-        if (destino.getTipo().equalsIgnoreCase("impuestos")) {
-            Casilla parking = this.tablero.encontrar_casilla("Parking");
-            if (parking != null) {
-                parking.sumarValor(destino.getImpuesto());  // usa tu método sumarValor()
+        if (destino instanceof Impuesto imp) {
+            Casilla cParking = tablero.encontrar_casilla("Parking");
+            if (cParking instanceof Parking parking) {
+                parking.sumarBote(imp.getImpuesto());
             }
         }
 

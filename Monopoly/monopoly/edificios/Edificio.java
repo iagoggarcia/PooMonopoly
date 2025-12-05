@@ -1,9 +1,7 @@
 package monopoly.edificios;
 
 import partida.*;
-import monopoly.casillas.Casilla;
 import monopoly.casillas.propiedad.*;
-import java.util.ArrayList;
 
 public abstract class Edificio {
 
@@ -11,14 +9,14 @@ public abstract class Edificio {
     private String tipo;
     private String id;
     private Jugador propietario;
-    private Casilla lugar;
+    private Solar lugar;
     private int precio;
 
     /* Constructor para el edificio
     * Parámetros: tipo de edificio (casa, hotel, piscina, pista de deporte), propietario del edificio, lugar en el que se ubica
     */
     public Edificio (String tipo, Jugador propietario, Solar lugar) {
-        this.tipo = tipo;
+        this.tipo = tipo.toLowerCase();
         this.propietario = propietario;
         this.lugar = lugar;
         // El switch es para asignarle un valor concreto que tiene ese tipo de edificio en la casilla en la que se quiere construir
@@ -53,7 +51,7 @@ public abstract class Edificio {
         this.propietario = propietario;
     }
 
-    public Casilla getLugar() {
+    public Solar getLugar() {
         return lugar;
     }
 

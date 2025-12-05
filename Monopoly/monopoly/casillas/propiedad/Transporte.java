@@ -6,8 +6,8 @@ import partida.*;
 
 public class Transporte extends Propiedad {
 
-    public Transporte(String nombre, int posicion, String tipo, float valor, Jugador duenho, float impuesto, float hipoteca, Grupo grupo) {
-        super(nombre, posicion, tipo, valor, duenho, impuesto, hipoteca, grupo);
+    public Transporte(String nombre, int posicion, float valor, Jugador duenho, float impuesto) {
+        super(nombre, posicion, "transporte", valor, duenho, impuesto);
     }
 
     @Override

@@ -22,6 +22,7 @@ public class Solar extends Propiedad {
     int alquilerHotel;
     int alquilerPiscinaYPista;
     int alquilerTotal;
+    boolean hipotecada;
 
     public Solar(String nombre, int posicion, float valor, Jugador duenho, float impuesto, float hipoteca, int valorCasayHotel, int  valorPiscina, int valorPistaDeporte, int alquilerCasilla, int alquilerCasa, int alquilerHotel, int alquilerPiscinaYPista) {
         super(nombre, posicion, "solar", valor, duenho, impuesto, hipoteca, null);
@@ -38,6 +39,7 @@ public class Solar extends Propiedad {
         this.numPiscinas = 0;
         this.numPistas = 0;
         this.edificios = new ArrayList<>();
+        this.hipotecada = false;
     }
 
     /* --------- MÉTODOS DEL ENUNCIADO Y OTROS ---------- */
@@ -65,7 +67,7 @@ public class Solar extends Propiedad {
     }
 
     public boolean estaHipotecada () {
-        return this.isHipotecada();
+        return hipotecada;
     }
 
     @Override
@@ -652,6 +654,9 @@ public class Solar extends Propiedad {
     public ArrayList<Edificio> getEdificios() {
         return edificios;
     }
+
+    public boolean isHipotecada() { return hipotecada; }
+    public void setHipotecada(boolean hipotecada) { this.hipotecada = hipotecada; }
 
     /* ------------------------------ */
 

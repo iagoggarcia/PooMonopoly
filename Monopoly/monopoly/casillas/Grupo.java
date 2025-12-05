@@ -32,11 +32,11 @@ public class Grupo {
     * Requiere como parámetros las tres casillas miembro y el color del grupo.
      */
     public Grupo(Casilla cas1, Casilla cas2, Casilla cas3, String colorGrupo) {
-    this();
-    this.colorGrupo = colorGrupo;
-    anhadirCasilla(cas1);
-    anhadirCasilla(cas2);
-    anhadirCasilla(cas3);
+        this();
+        this.colorGrupo = colorGrupo;
+        anhadirCasilla(cas1);
+        anhadirCasilla(cas2);
+        anhadirCasilla(cas3);
     }
 
 
