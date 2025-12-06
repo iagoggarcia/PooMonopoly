@@ -1,8 +1,9 @@
 package monopoly.casillas.accion;
 
+import monopoly.*;
+import monopoly.cartas.*;
 import monopoly.casillas.*;
 import partida.Jugador;
-import monopoly.*;
 
 public abstract class Accion extends Casilla {
 
@@ -12,14 +13,24 @@ public abstract class Accion extends Casilla {
 
     @Override
     public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
-        System.out.println(actual.getNombre() + " ha caído en una casilla de " + this.tipo + ".");
 
-        // ejecutamos la carta correspondiente
-        Juego.getInstancia().ejecutarCartas(this.tipo, actual, banca, this);
-        if (!Juego.getInstancia().isSolvente()) {
-            System.out.println(actual.getNombre() + " ha quedado insolvente tras ejecutar la carta y se declara en bancarrota.");
+        Juego juego = Juego.getInstancia();
+
+        // 1. Obtener la siguiente carta del mazo correspondiente
+        Carta carta = juego.obtenerCarta(this.tipo);
+
+        // 2. Ejecutar la acción de la carta
+        carta.accion(actual, banca, this, juego);
+
+        // 3. Avanzar el índice del mazo
+        juego.avanzarIndice(this.tipo);
+
+        // 4. Comprobar solvencia
+        if (!juego.isSolvente()) {
+            System.out.println(actual.getNombre() + " ha quedado insolvente tras ejecutar la carta.");
             return false;
         }
+
         return true;
     }
 
@@ -34,5 +45,4 @@ public abstract class Accion extends Casilla {
 
         return sb.toString();
     }
-
 }

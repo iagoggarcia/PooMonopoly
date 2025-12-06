@@ -7,13 +7,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
-import partida.*;
+import monopoly.cartas.*;
 import monopoly.casillas.*;
+import monopoly.casillas.especial.*;
 import monopoly.casillas.propiedad.*;
 import monopoly.edificios.*;
-import monopoly.casillas.especial.*;
-
-import javax.xml.crypto.dsig.spec.TransformParameterSpec;
+import partida.*;
 
 
 public class Juego {
@@ -31,15 +30,15 @@ public class Juego {
     private boolean tirado; //Booleano para comprobar si el jugador que tiene el turno ha tirado o no.
     private boolean solvente; //Booleano para comprobar si el jugador que tiene el turno es solvente, es decir, si ha pagado sus deudas.
     private boolean enCurso;   // indica si la partida está activa
-    private ArrayList<Carta> cartasSuerte = new ArrayList<>();
-    private ArrayList<Carta> cartasCaja = new ArrayList<>();
-    private int indiceSuerte = 0;
-    private int indiceCaja = 0;
     private static Juego instancia;
     private boolean enSubmenuBancarrota = false;
     private Jugador jugadorDeudor = null;
     private Jugador jugadorAcreedor = null;
     private float deudaPendiente = 0;
+    private ArrayList<Carta> cartasSuerte;
+    private ArrayList<Carta> cartasComunidad;
+    private int indiceSuerte = 0;
+    private int indiceComunidad = 0;
 
     public Juego() {
         instancia = this;
@@ -53,22 +52,46 @@ public class Juego {
     }
 
     private void inicializarCartas() {
-        // cartas de suerte
-        cartasSuerte.add(new Carta("suerte", 1, "Decides hacer un viaje de placer. Avanza hasta Solar19. Si pasas por la casilla de Salida, cobra 2.000.000€.", "mover Solar19"));
-        cartasSuerte.add(new Carta("suerte", 2, "Los acreedores te persiguen por impago. Ve a la Cárcel. Ve directamente sin pasar por la casilla de Salida y sin cobrar los 2.000.000€.", "carcel"));
-        cartasSuerte.add(new Carta("suerte", 3, "¡Has ganado el bote de la lotería! Recibe 1.000.000€.", "cobrar 1000000"));
-        cartasSuerte.add(new Carta("suerte", 4, "Has sido elegido presidente de la junta directiva. Paga a cada jugador 250.000€.", "pagarJugadores 250000"));
-        cartasSuerte.add(new Carta("suerte", 5, "¡Hora punta de tráfico! Retrocede tres casillas.", "retroceder 3"));
-        cartasSuerte.add(new Carta("suerte", 6, "Te multan por usar el móvil mientras conduces. Paga 150.000€", "pagar 150000"));
-        cartasSuerte.add(new Carta("suerte", 7, "Avanza hasta la casilla de transporte más cercana. Si no tiene dueño, puedes comprarla. Si tiene dueño, paga al dueño el doble de la operación indicada.", "mover TransporteMasCercano"));
 
-        // cartas de caja de comunidad
-        cartasCaja.add(new Carta("caja", 1, "Paga 500.000€ por un fin de semana en un balneario de 5 estrellas.", "pagar 500000"));
-        cartasCaja.add(new Carta("caja", 2, "Te investigan por fraude de identidad. Ve a la Cárcel. Ve directamente sin pasar por la casilla de Salida y sin cobrar los 2.000.000€.", "carcel"));
-        cartasCaja.add(new Carta("caja", 3, "Colócate en la casilla de Salida. Cobra 2.000.000€.", "mover Salida"));
-        cartasCaja.add(new Carta("caja", 4, "Devolución de Hacienda. Cobra 500.000€.", "cobrar 500000"));
-        cartasCaja.add(new Carta("caja", 5, "Retrocede hasta Solar1 para comprar antiguedades exóticas.", "mover Solar1"));
-        cartasCaja.add(new Carta("caja", 6, "Ve a Solar20 para disfrutar del San Fermín. Si pasas por la casilla de Salida, cobra 2.000.000€.", "mover Solar20"));
+    this.cartasSuerte = new ArrayList<>();
+    this.cartasComunidad = new ArrayList<>();
+
+        // ======== CARTAS DE SUERTE ========
+        cartasSuerte.add(new SuerteCarta(1, "Decides hacer un viaje de placer. Avanza hasta Solar19. Si pasas por la casilla de Salida, cobra 2.000.000€."));
+        cartasSuerte.add(new SuerteCarta(2, "Los acreedores te persiguen. Ve a la cárcel."));
+        cartasSuerte.add(new SuerteCarta(3, "¡Has ganado la lotería! Recibe 1.000.000€."));
+        cartasSuerte.add(new SuerteCarta(4, "Paga a cada jugador 250.000€."));
+        cartasSuerte.add(new SuerteCarta(5, "Hora punta: retrocede 3 casillas."));
+        cartasSuerte.add(new SuerteCarta(6, "Te multan por usar el móvil. Paga 150.000€."));
+        cartasSuerte.add(new SuerteCarta(7, "Avanza al transporte más cercano."));
+
+        // ======== CARTAS DE CAJA DE COMUNIDAD ========
+        cartasComunidad.add(new CajaComunidadCarta(1, "Paga 500.000€ por un fin de semana en un balneario de 5 estrellas."));
+        cartasComunidad.add(new CajaComunidadCarta(2, "Te investigan. Ve a la cárcel."));
+        cartasComunidad.add(new CajaComunidadCarta(3, "Colócate en la casilla de Salida."));
+        cartasComunidad.add(new CajaComunidadCarta(4, "Cobra 500.000€ de Hacienda."));
+        cartasComunidad.add(new CajaComunidadCarta(5, "Retrocede hasta Solar1."));
+        cartasComunidad.add(new CajaComunidadCarta(6, "Ve a Solar20 para disfrutar de San Fermín."));
+    }
+
+
+    public Carta sacarCarta(String tipo) {
+
+        Carta carta = null;
+
+        if (tipo.equalsIgnoreCase("suerte")) {
+            carta = cartasSuerte.get(indiceSuerte);
+            indiceSuerte = (indiceSuerte + 1) % cartasSuerte.size();
+        }
+        else if (tipo.equalsIgnoreCase("caja") ||
+                tipo.equalsIgnoreCase("comunidad") ||
+                tipo.equalsIgnoreCase("caja de comunidad")) {
+
+            carta = cartasComunidad.get(indiceComunidad);
+            indiceComunidad = (indiceComunidad + 1) % cartasComunidad.size();
+        }
+
+        return carta;
     }
 
     // Método para inciar una partida: crea los jugadores y avatares.
@@ -1498,163 +1521,6 @@ public class Juego {
         }
     }
 
-    // funcion para manejar todas las cartas
-    public void ejecutarCartas(String tipo, Jugador jugador, Jugador banca, Casilla casillaActual) {
-        ArrayList<Carta> cartas = tipo.equals("suerte") ? this.cartasSuerte : this.cartasCaja;
-        int indice = tipo.equals("suerte") ? this.indiceSuerte : indiceCaja;
-        
-        Carta carta = cartas.get(indice);
-        System.out.println(jugador.getNombre() + ", elige una carta: " + carta.getId());
-        System.out.println("Acción: " + carta.getDescripcion());
-
-        if (tipo.equals("suerte")) {
-            this.indiceSuerte = (indice + 1) % cartas.size();
-        } else {
-            this.indiceCaja = (indice + 1) % cartas.size();
-        }
-
-        // ejecutamos la acción de la carta
-        String accion = carta.getAccion();
-        String[] partes = accion.split(" ");
-        String tipoAccion = partes[0];
-
-        switch (tipoAccion) {
-            case "mover":
-                String destino = partes[1];
-
-                if (destino.equalsIgnoreCase("TransporteMasCercano")) {
-                    moverTransporteMasCercano(jugador, banca);
-                    break;
-                } 
-                
-                // busca la casilla destino por nombre 
-                Casilla casilla = this.tablero.encontrar_casilla(destino);
-
-                if (casilla == null) {
-                    System.out.println("No se ha encontrado la casilla destino: " + destino);
-                    break;
-                } else {
-                    jugador.getAvatar().getLugar().eliminarAvatar(jugador.getAvatar());
-                }
-
-                int posInicial = casillaActual.getPosicion();
-                int posDestino = casilla.getPosicion();
-
-                // mover el avatar
-                casilla.anhadirAvatar(jugador.getAvatar());
-                jugador.getAvatar().setLugar(casilla);
-                
-                if (destino.equalsIgnoreCase("Solar19") || destino.equalsIgnoreCase("Solar20") || destino.equalsIgnoreCase("Salida")) {
-                    System.out.println(jugador.getNombre() + " avanza hasta " + casilla.getNombre() + ".");
-                } else {
-                     System.out.println(jugador.getNombre() + " retrocede hasta " + casilla.getNombre() + ".");                   
-                }
-
-                if ((destino.equalsIgnoreCase("Salida") || destino.equalsIgnoreCase("Solar19") || destino.equalsIgnoreCase("Solar20")) && posDestino < posInicial) {
-                    jugador.sumarFortuna(Valor.SUMA_VUELTA);
-                    jugador.setVueltas(jugador.getVueltas() + 1); //hay que sumar una vuelta tambien
-                    System.out.println(jugador.getNombre() + " cobra 2.000.000€ por pasar por la casilla de Salida.");
-                }
-
-                // evaluar la casilla de destino
-                casilla.evaluarCasilla(jugador, banca, 0);
-                break;
-
-            case "carcel":
-                jugador.encarcelar(this.tablero.getPosiciones());
-                break;
-
-            case "cobrar": //premio loteria, hacienda,
-                float cantidadCobrar = Float.parseFloat(partes[1]);
-                jugador.sumarFortuna(cantidadCobrar);
-                System.out.println(jugador.getNombre() + " cobra " + (int) cantidadCobrar + "€.");
-                jugador.setPremiosinversiones(jugador.getPremiosinversiones() + cantidadCobrar);
-                break;
-
-            case "pagar": // pagar a la banca
-                float cantidadPagar = Float.parseFloat(partes[1]);
-
-                if (jugador.getFortuna() < cantidadPagar) {
-                    System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar " + (int) cantidadPagar + "€. Debe hipotecar alguna propiedad o se declarará en bancarrota.");
-                    // comprobar si tiene algún solar sin hipotecar
-                    boolean puedeHipotecar = jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty() && jugador.getHipotecas().size() < jugador.getPropiedades().size();
-
-                    if (puedeHipotecar) {
-                        activarSubmenuBancarrota(jugador, 500000, null);
-                    } else {
-                        declararBancarrota(jugador);
-                        this.solvente = false;
-                    }
-                } else {
-                    jugador.sumarFortuna(-cantidadPagar);
-                    jugador.sumarGastos(cantidadPagar);
-                    banca.sumarFortuna(cantidadPagar);
-                    System.out.println(jugador.getNombre() + " paga " + (int) cantidadPagar + "€ a la banca.");
-                }
-                jugador.setImpuestos_tasas(jugador.getImpuestos_tasas() + cantidadPagar);
-                break;
-
-            case "pagarJugadores": //tasa impuesto
-                float cantidad = Float.parseFloat(partes[1]);
-                float cantidadtotal = 0.0f;
-                int numJugadores = this.jugadores.size() - 1; // sin contar al propio jugador
-                float total = cantidad * numJugadores;
-
-                // comprobamos  si puede pagar a todos los jugadores
-                if (jugador.getFortuna() < total) {
-                    System.out.println(jugador.getNombre() + " no tiene suficiente dinero para pagar a todos los jugadores. ");
-                    // comprobar si tiene algún solar sin hipotecar
-                    boolean puedeHipotecar = jugador.getPropiedades() != null && !jugador.getPropiedades().isEmpty() && jugador.getHipotecas().size() < jugador.getPropiedades().size();
-
-                    if (puedeHipotecar) {
-                        activarSubmenuBancarrota(jugador, 500000, null);
-                    } else {
-                        declararBancarrota(jugador);
-                        this.solvente = false;
-                    }
-                } else {
-                    // paga a todos los jugadores
-                    for (Jugador j : this.jugadores) {
-                        if (j != jugador) {
-                            jugador.sumarFortuna(-cantidad);
-                            jugador.sumarGastos(cantidad);
-                            j.sumarFortuna(cantidad);
-                            cantidadtotal += cantidad;
-                        }
-                    }
-                    System.out.println(jugador.getNombre() + " paga " + (int) cantidad + "€ a cada jugador");
-                }
-                jugador.setImpuestos_tasas(jugador.getImpuestos_tasas() + cantidadtotal);
-                break;
-
-            case "retroceder":
-                int n = Integer.parseInt(partes[1]);
-                int posActual = casillaActual.getPosicion();
-                int nuevaPos = posActual - n;
-                if (nuevaPos < 1) nuevaPos += 40; // por si cruza el inicio del tablero
-
-                Casilla retroceso = null;
-                for (ArrayList<Casilla> lado : this.tablero.getPosiciones()) {
-                    for (Casilla c2 : lado) {
-                        if (c2.getPosicion() == nuevaPos) {
-                            retroceso = c2;
-                            break;
-                        }
-                    }
-                    if (retroceso != null) break;
-                }
-
-                if (retroceso != null) {
-                    jugador.getAvatar().getLugar().eliminarAvatar(jugador.getAvatar());
-                    retroceso.anhadirAvatar(jugador.getAvatar());
-                    jugador.getAvatar().setLugar(retroceso);
-                    System.out.println(jugador.getNombre() + " retrocede " + n + " casillas hasta " + retroceso.getNombre() + ".");
-                    retroceso.evaluarCasilla(jugador, banca, 0);
-                }
-                break;
-        }
-    }
-
     public void moverTransporteMasCercano(Jugador jugador, Jugador banca) {
         if (jugador == null || this.tablero == null)  return;
 
@@ -1733,4 +1599,29 @@ public class Juego {
     public void setSolvente(boolean valor) {
         this.solvente = valor;
     }
+
+    public Carta obtenerCarta(String tipo) {
+        if (tipo.equalsIgnoreCase("suerte")) {
+            return cartasSuerte.get(indiceSuerte);
+        } else {
+            return cartasComunidad.get(indiceComunidad);
+        }
+    }
+
+    public void avanzarIndice(String tipo) {
+        if (tipo.equalsIgnoreCase("suerte")) {
+            indiceSuerte = (indiceSuerte + 1) % cartasSuerte.size();
+        } else {
+            indiceComunidad = (indiceComunidad + 1) % cartasComunidad.size();
+        }
+    }
+
+    public Tablero getTablero() {
+        return this.tablero;
+    }
+
+    public ArrayList<Jugador> getJugadores() {
+        return this.jugadores;
+    }
+
 }

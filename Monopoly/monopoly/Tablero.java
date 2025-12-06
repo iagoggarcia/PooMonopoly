@@ -2,13 +2,12 @@ package monopoly;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import monopoly.casillas.*;
 import monopoly.casillas.accion.Caja;
 import monopoly.casillas.accion.Suerte;
-import partida.*;
-import monopoly.casillas.*;
-import monopoly.casillas.propiedad.*;
 import monopoly.casillas.especial.*;
+import monopoly.casillas.propiedad.*;
+import partida.*;
 
 public class Tablero {
     //Atributos.
@@ -272,4 +271,16 @@ public class Tablero {
         }
         return null; // si no existe una casilla con ese nombre devuelve null
     }
+
+    public Casilla casillaPorPosicion(int pos) {
+    for (ArrayList<Casilla> lado : this.posiciones) {
+        for (Casilla c : lado) {
+            if (c.getPosicion() == pos) {
+                return c;
+            }
+        }
+    }
+    return null; // por si no existe (no debería pasar)
+}
+
 }
