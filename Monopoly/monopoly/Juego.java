@@ -15,7 +15,7 @@ import monopoly.edificios.*;
 import partida.*;
 
 
-public class Juego {
+public class Juego implements Comando{
 
     //Atributos
     private ArrayList<Jugador> jugadores; //Jugadores de la partida.
@@ -346,7 +346,7 @@ public class Juego {
         }
     }
 
-    private void analizarComando(String comando) {
+    /*private void analizarComando(String comando) {
         System.out.println("\n> " + comando); // para ver qué comando se va a ejecutar (para cuando leemos del archivo es más claro)
 
         if (this.enSubmenuBancarrota) {
@@ -490,41 +490,47 @@ public class Juego {
             declararBancarrota(jugadorDeudor);
         }
 
-    }
+    }*/
 
     //función para crear jugador desde archivo
-    private void crearJugadorArchivo(String[] partes){
-        if (this.jugadores == null) {
-            this.jugadores = new ArrayList<>();
+    @Override
+    public void crearJugadorArchivo(String nombre, String tipo) {
+
+        if (jugadores == null) {
+            jugadores = new ArrayList<>();
         }
 
-        if (this.jugadores.size() >= 4) {
-            System.err.println("Error: ya hay 4 jugadores. No se puede añadir más.");
+        if (jugadores.size() >= 4) {
+            consola.imprimir("Error: ya hay 4 jugadores. No se puede añadir más.");
             return;
         }
 
-        if(this.banca == null){
-            this.banca = new Jugador(Valor.FORTUNA_BANCA);
-        }
-        if(this.tablero == null){
-            this.tablero = new Tablero(banca);
+        if (banca == null) {
+            banca = new Jugador(Valor.FORTUNA_BANCA);
         }
 
-        if(this.avatares == null){
-            this.avatares = new ArrayList<>();
+        if (tablero == null) {
+            tablero = new Tablero(banca);
         }
+
+        if (avatares == null) {
+            avatares = new ArrayList<>();
+        }
+
         Casilla salida = tablero.getPosiciones().get(0).get(0);
-        Jugador jugador = new Jugador(partes[0], partes[1], salida, avatares);
-        this.jugadores.add(jugador);
-        salida.setContador(salida.getContador()+1); //si creo un jugador desde el archivo tambien aumento el contador de salida
 
-        // Faltaba printear esto cuando se crea un jugador nuevo:
-        System.out.println("Jugador creado: ");
-        System.out.println("{");
-        System.out.println("  nombre: " + jugador.getNombre() + ",");
-        System.out.println("  avatar: " + jugador.getAvatar().getId());
-        System.out.println("}\n");
+        Jugador jugador = new Jugador(nombre, tipo, salida, avatares);
+        jugadores.add(jugador);
+
+        salida.setContador(salida.getContador() + 1);
+
+        consola.imprimir("Jugador creado:");
+        consola.imprimir("{");
+        consola.imprimir("  nombre: " + jugador.getNombre());
+        consola.imprimir("  avatar: " + jugador.getAvatar().getId());
+        consola.imprimir("}");
     }
+
 
     //EN LAS FUNCIONES DE DESCRIBIR Y LISTAR SOLAMENTE HAY QUE HACER PRINTS, LAS HAGO DE ÚLTIMO
 
@@ -546,8 +552,8 @@ public class Juego {
         return null;
     }
 
-
-    private void descJugador(String nombreJugador) {
+    @Override
+    public void descJugador(String nombreJugador) {
         if (nombreJugador == null || nombreJugador.isBlank()) {
             System.err.println("Uso correcto: Describir <Nombre>");
             return;
@@ -582,7 +588,8 @@ public class Juego {
         Avatar avatar = actual.getAvatar();
     }*/
 
-    private void descAvatar(String id) {
+    @Override
+    public void descAvatar(String id) {
         if (id == null || id.isBlank()) {
             System.err.println("Uso correcto: Describir avatar <ID>");
             return;
@@ -604,7 +611,8 @@ public class Juego {
         }
     }
 
-    private void descCasilla(String nombreCasilla) {
+    @Override
+    public void descCasilla(String nombreCasilla) {
         if (nombreCasilla == null || nombreCasilla.isBlank()) {
             System.err.println("Uso correcto: describir <Nombre>");
             return;
@@ -628,7 +636,8 @@ public class Juego {
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'lanzar dados'.
 
-    private void lanzarDados() { //funcion para valores random de dados
+    @Override
+    public void lanzarDados() { //funcion para valores random de dados
         //comprobacion para no dejarle tirar normalmente si está en la cárcel
         Jugador actual = this.jugadores.get(this.turno);
         if(actual.isEnCarcel()){
@@ -659,36 +668,29 @@ public class Juego {
         }
     }
 
-    private void lanzarDadosValor(String[] valores) { //funcion para forzar valor de dados
-        //comprobacion para no dejarle tirar normalmente si está en la cárcel
-        Jugador actual = this.jugadores.get(this.turno);
-        if(actual.isEnCarcel()){
-            System.out.println("Actualmente el jugador solo puede lanzar dados para salir de la cárcel desde el comando salir cárcel");
-            //hay que hacerlo así porque puede ser que caiga en la casilla cárcel sin ser encarcelado
+    @Override
+    public void lanzarDadosValor(int d1, int d2) {
+        if (jugadores.get(turno).isEnCarcel()) {
+            ConsolaNormal.imprimir("Actualmente el jugador solo puede lanzar dados para salir de la cárcel desde el comando salir cárcel");
+            return;
         }
 
-        else if((!tirado)||tirado && lanzamientos!=0) {//hacemos la misma comprobación de arriba
-            if (valores.length != 2) {
-                System.err.println("Error: formato inválido. Uso: 'Lanzar dados <dado1>+<dado2>'");
-                return;
-            }
+        if ((!tirado) || (tirado && lanzamientos != 0)) {
 
-            try {
-                int valor1 = Integer.parseInt(valores[0].trim());
-                int valor2 = Integer.parseInt(valores[1].trim());
-                realizarTirada(valor1, valor2);
-            } catch (NumberFormatException e) {
-                System.err.println("Error: los valores de los dados deben ser números enteros.");
-            }
+            // Aquí NO parseamos nada, ya vienen los ints listos
+            realizarTirada(d1, d2);
+
             tirado = true;
-        }
-        else{
-            System.out.println("El jugador ya no tiene el derecho a tirar, escoja otro comando");
+
+        } else {
+            ConsolaNormal.imprimir("El jugador ya no tiene el derecho a tirar, escoja otro comando");
         }
     }
 
+
     // Imprime el tablero tal y como está ahora mismo
-    private void imprimirTablero() {
+    @Override
+    public void imprimirTablero() {
         if (this.tablero != null) {
             System.out.println();
             System.out.println(this.tablero); // usa Tablero.toString()
@@ -779,7 +781,8 @@ public class Juego {
     /*Método que ejecuta todas las acciones realizadas con el comando 'comprar nombre_casilla'.
     * Parámetro: cadena de caracteres con el nombre de la casilla.
     */
-    private void comprar(String nombre) {
+    @Override
+    public void comprar(String nombre) {
         Casilla casilla = this.tablero.encontrar_casilla(nombre);
         
         if (casilla == null) {
@@ -801,7 +804,8 @@ public class Juego {
         }
     }
 
-    private void hipotecar(String nombre) {
+    @Override
+    public void hipotecar(String nombre) {
         Casilla casilla = this.tablero.encontrar_casilla(nombre);
 
         if (casilla == null) {
@@ -821,7 +825,8 @@ public class Juego {
     }
 
 
-    private void deshipotecar(String nombre) {
+    @Override
+    public void deshipotecar(String nombre) {
         Casilla casilla = this.tablero.encontrar_casilla(nombre);
 
         if (casilla == null) {
@@ -992,7 +997,8 @@ public class Juego {
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'salir carcel'.
     // Solo puede ejecutarlo el jugador cuyo índice coincide con 'turno' (o si en el comando se especificó ese jugador).
-    private void salirCarcel() {
+    @Override
+    public void salirCarcel() {
         if (this.jugadores == null || this.jugadores.isEmpty()) {
             System.out.println("No hay jugadores en la partida.");
             return;
@@ -1013,7 +1019,8 @@ public class Juego {
         submenuCarcel(actual);
     }
 
-    private void listarVenta() {
+    @Override
+    public void listarVenta() {
         if (this.tablero == null) {
             System.out.println("No hay tablero inicializado.");
             return;
@@ -1042,7 +1049,8 @@ public class Juego {
 
 
 
-    private void listarJugadores() {
+    @Override
+    public void listarJugadores() {
         for(Jugador jugador : this.jugadores){
             System.out.println("{");
             System.out.println("Nombre: " + jugador.getNombre());
@@ -1059,7 +1067,8 @@ public class Juego {
         }
     }
 
-    private void listarAvatares() {
+    @Override
+    public void listarAvatares() {
         for(Avatar avatar : this.avatares){
             System.out.println(avatar.getJugador().getNombre());
             System.out.println(avatar.getTipo());
@@ -1068,7 +1077,8 @@ public class Juego {
         }
     }
 
-    private void listarEdificios() {
+    @Override
+    public void listarEdificios() {
         if (!this.edificios.isEmpty()) {
             for (Edificio edificio : this.edificios) {
                 System.out.println("{");
@@ -1087,7 +1097,8 @@ public class Juego {
         }
     }
 
-    private void listarEdificiosGrupo(String grupo) {
+    @Override
+    public void listarEdificiosGrupo(String grupo) {
         if (this.tablero == null || this.tablero.getPosiciones() == null) {
             System.out.println("No hay tablero inicializado.");
             return;
@@ -1153,8 +1164,8 @@ public class Juego {
     }
 
 
-
-    private void acabarTurno() {
+    @Override
+    public void acabarTurno() {
         // aquí se podría añadir la comprobación de que hay jugadores en la partida
         
         Jugador actual = this.jugadores.get(this.turno);
@@ -1394,7 +1405,8 @@ public class Juego {
     }
 
     //imprime las estadisticas de la partida
-    private void estadisticas(){
+    @Override
+    public void estadisticas(){
         System.out.println("{");
         casillarentable();
         gruporentable();
@@ -1404,7 +1416,8 @@ public class Juego {
         System.out.println("}");
     }
 
-    private void estadisticasjugador(String nombrejugador){
+    @Override
+    public void estadisticasjugador(String nombrejugador){
 
         Jugador j = buscarJugadorPorNombre(nombrejugador);
         if(j == null){
@@ -1466,7 +1479,8 @@ public class Juego {
     }
 
     // Función para vender x cantidad de un edificio concreto en una casilla específica
-    private void gestionarVentaEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) {
+    @Override
+    public void gestionarVentaEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) {
         Casilla casilla = tablero.encontrar_casilla(nombreCasilla);
         if (casilla != null) {
             if (casilla.getTipo().equals("solar")) {
