@@ -6,12 +6,13 @@ public class Consolanormal implements Consola{
 
     private Scanner sc = new Scanner(System.in);
 
+    @Override
     public void imprimir(String mensaje){
         System.out.println(mensaje); //funcion para imprimir mensajes 
     }
 
-    public String leer(String peticion){
-        System.out.println(peticion); //imprimimos lo que queremos pedir al usuario
+    @Override
+    public String leer(){
         return sc.nextLine(); //recogemos lo que introduce el usuario en un string para poder utilizarlo donde corresponda
     }
 }

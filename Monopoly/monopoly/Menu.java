@@ -1,27 +1,46 @@
-//aqui tengo que crear una funcion que sea iniciar juego y llame a juego.iniciarPartida
-//tambien tiene que mostrarsele el menu de comandos al usuario desde aqui y no puede inicializarse nada desde este .java
 package monopoly;
-import java.util.Scanner;
 
-public class Menu{
+public class Menu {
 
     private Juego juego;
-    private Consola consola;
-    private Scanner input;
+
+    public Menu() {
+        this.juego = Juego.getInstancia();
+    }
+
+    public void iniciarJuego() {
+
+        juego.consola.imprimir("Bienvenido a Monopoly.\n");
+
+        juego.iniciarPartida();
+
+        juego.consola.imprimir("Introduce un comando (escribe 'salir' para terminar):");
+
+        while (true) {
+
+            juego.consola.imprimir("> ");
+            String comando = juego.consola.leer();
+
+            if (comando == null) continue;
+
+            comando = comando.trim();
+
+            if (comando.equalsIgnoreCase("salir")) {
+                juego.consola.imprimir("Saliendo del juego...");
+                break;
+            }
+
+            analizarComando(comando);
+        }
+    }
+
     private void analizarComando(String comando) {
 
-        consola.imprimir("\n> " + comando);
-
-        // Esto lo miro luego
-        /*if (juego.estaEnSubmenuBancarrota()) {
-            if (!comando.startsWith("hipotecar") && !comando.equalsIgnoreCase("bancarrota")) {
-                consola.imprimir("Debe hipotecar propiedades o declararse en bancarrota.");
-                consola.imprimir(" - hipotecar <casilla>");
-                consola.imprimir(" - bancarrota");
-                return;
-            }
-        }*/
-
+        if (!juego.comandoPermitido(comando)) {//comprobamos si el comando elegido puede ejecutarse según la situacion economica del jugador
+            juego.consola.imprimir("No puedes ejecutar este comando ahora.");
+            juego.mostrarComandos();  // muestra el submenú o menú normal
+            return;
+        }
 
         if (comando.equalsIgnoreCase("ver tablero")) {
             juego.imprimirTablero();
@@ -48,24 +67,23 @@ public class Menu{
 
         if (comando.equalsIgnoreCase("lanzar dados")) {
             juego.lanzarDados();
+            return;
         }
-        //tuve que cambiar esta función, al menos la forma de recoger los datos porque ahora la recgida se hace fuera de juego, y es mejor pasarle solo 2 enteros
+
         if (comando.startsWith("lanzar dados ")) {
-            String valores = comando.substring("lanzar dados ".length()).trim(); // "5+1"
+            String valores = comando.substring("lanzar dados ".length()).trim();
             String[] nums = valores.split("\\+");
 
             if (nums.length != 2) {
-                consola.imprimir("Formato inválido. Usa: lanzar dados X+Y");
+                juego.consola.imprimir("Formato inválido. Usa: lanzar dados X+Y");
                 return;
             }
 
             int d1 = Integer.parseInt(nums[0]);
             int d2 = Integer.parseInt(nums[1]);
-
             juego.lanzarDadosValor(d1, d2);
             return;
         }
-
 
         if (comando.startsWith("comprar")) {
             String casilla = comando.substring("comprar".length()).trim();
@@ -99,7 +117,7 @@ public class Menu{
         }
 
         if (comando.startsWith("listar edificios ")) {
-            String grupo = comando.substring("listar edificios".length()).trim();
+            String grupo = comando.substring("listar edificios ".length()).trim();
             juego.listarEdificiosGrupo(grupo);
             return;
         }
@@ -107,30 +125,20 @@ public class Menu{
         if (comando.startsWith("vender ")) {
 
             String args = comando.substring("vender".length()).trim();
-            // args = "casas Solar3 2"
-
             String[] partes = args.split("\\s+");
 
             if (partes.length != 3) {
-                consola.imprimir("Uso: vender <tipoEdificio> <nombreCasilla> <cantidad>");
+                juego.consola.imprimir("Uso: vender <tipoEdificio> <nombreCasilla> <cantidad>");
                 return;
             }
 
-            String tipo = partes[0];          // casas / hoteles / piscina / pista
-            String nombreCasilla = partes[1]; // Ej: Solar3
-            int cantidad;
-
-            try {
-                cantidad = Integer.parseInt(partes[2]);
-            } catch (NumberFormatException e) {
-                consola.imprimir("La cantidad debe ser un número entero.");
-                return;
-            }
+            String tipo = partes[0];
+            String nombreCasilla = partes[1];
+            int cantidad = Integer.parseInt(partes[2]);
 
             juego.gestionarVentaEdificios(tipo, nombreCasilla, cantidad);
             return;
         }
-
 
         if (comando.equalsIgnoreCase("acabar turno")) {
             juego.acabarTurno();
@@ -139,39 +147,35 @@ public class Menu{
 
         if (comando.startsWith("crear jugador ")) {
 
-            String datos = comando.substring("crear jugador".length()).trim();
+            String datos = comando.substring("crear jugador ".length()).trim();
             String[] partes = datos.split("\\s+");
 
             if (partes.length != 2) {
-                consola.imprimir("Uso: crear jugador <nombre> <tipoAvatar>");
+                juego.consola.imprimir("Uso: crear jugador <nombre> <tipoAvatar>");
                 return;
             }
 
-            String nombre = partes[0];
-            String tipo = partes[1];
-
-            juego.crearJugadorArchivo(nombre, tipo);
+            juego.crearJugadorArchivo(partes[0], partes[1]);
             return;
         }
 
-
-        if (comando.startsWith("hipotecar")) {
-            String casilla = comando.substring("hipotecar".length()).trim();
+        if (comando.startsWith("hipotecar ")) {
+            String casilla = comando.substring("hipotecar ".length()).trim();
             juego.hipotecar(casilla);
             return;
         }
 
-        if (comando.startsWith("deshipotecar")) {
-            String casilla = comando.substring("deshipotecar".length()).trim();
+        if (comando.startsWith("deshipotecar ")) {
+            String casilla = comando.substring("deshipotecar ".length()).trim();
             juego.deshipotecar(casilla);
             return;
         }
 
-        /*if (comando.startsWith("edificar")) {
-            String tipo = comando.substring("edificar".length()).trim();
-            juego.edificar(tipo); //lo dejo para la tarde
+        if (comando.startsWith("edificar ")) {
+            String tipo = comando.substring("edificar ".length()).trim();
+            juego.edificarJuego(tipo);
             return;
-        }*/
+        }
 
         if (comando.equalsIgnoreCase("estadisticas")) {
             juego.estadisticas();
@@ -179,17 +183,16 @@ public class Menu{
         }
 
         if (comando.startsWith("estadisticas ")) {
-            String nombre = comando.substring("estadisticas".length()).trim();
+            String nombre = comando.substring("estadisticas ".length()).trim();
             juego.estadisticasjugador(nombre);
             return;
         }
 
         if (comando.equalsIgnoreCase("bancarrota")) {
-            juego.declararBancarrota();
+            juego.bancarrota();
             return;
         }
 
-        consola.imprimir("Comando no reconocido.");
+        juego.consola.imprimir("Comando no reconocido.");
     }
 }
-

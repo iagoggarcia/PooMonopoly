@@ -21,9 +21,9 @@ public interface Comando {
     void crearJugadorArchivo(String nombre, String tipo);
     void hipotecar(String casilla);
     void deshipotecar(String casilla);
-    //void edificar(String tipoEdificio); //esto aun tengo que mirarlo
+    void edificarJuego(String tipoEdificio); //esto aun tengo que mirarlo
     void estadisticas();
     void estadisticasjugador(String nombreJugador);
-    //void declararBancarrota(Jugador deudor);
+    void bancarrota();
 
 }

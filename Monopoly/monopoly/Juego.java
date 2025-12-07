@@ -40,6 +40,8 @@ public class Juego implements Comando{
     private int indiceSuerte = 0;
     private int indiceComunidad = 0;
 
+    public static Consola consola = new Consolanormal();
+
     public Juego() {
         instancia = this;
         this.jugadores = new ArrayList<>();
@@ -157,7 +159,7 @@ public class Juego implements Comando{
         this.enCurso = true;
 
         System.out.println("\nPartida inicializada correctamente con " + numJugadores + " jugadores.\n");
-        bucleComandos();
+        mostrarComandos();
     }
 
     /*
@@ -165,55 +167,43 @@ public class Juego implements Comando{
     * tanto en esa función, como ahora en ejecutarArchivoComandos. Así al acabar de leer el archivo, en vez de terminar
     * permite seguir jugando como nos pedían.
     */
-    private void bucleComandos() { //esto tengo que mirar como hacer con el menu, ya que seguramente ira en interfazcomandos, pero en juego no puede ir
-        java.util.Scanner in = new java.util.Scanner(System.in);
+    //funcion correcta para imprimir comandos
+    public void mostrarComandos() {
 
-        while (this.enCurso) {
-
-            if (this.jugadores == null || this.jugadores.isEmpty()) {
-                System.out.println("No hay jugadores en la partida. Terminando...");
-                this.enCurso = false;
-                break;
-            }
-
-            Jugador actual = this.jugadores.get(this.turno);
-            String cmd;
-
-            do {
-                System.out.println("\n--- Turno de " + actual.getNombre() + " ---");
-                System.out.println("Comandos:");
-                System.out.println(" - crear jugador <nombreJugador> <tipoAvatar>");
-                System.out.println(" - ver tablero");
-                System.out.println(" - lanzar dados");
-                System.out.println(" - lanzar dados X+Y");
-                System.out.println(" - describir jugador <nombreJugador>");
-                System.out.println(" - describir <nombreCasilla>");
-                System.out.println(" - listar jugadores");
-                System.out.println(" - listar enventa");
-                System.out.println(" - listar edificios");
-                System.out.println(" - listar edificios <nombreGrupo>");
-                System.out.println(" - comprar <nombreCasilla>");
-                System.out.println(" - vender <tipoEdificio> <nombreCasilla> <numEdificios>");
-                System.out.println(" - edificar <tipoEdificio>");
-                System.out.println(" - estadisticas");
-                System.out.println(" - estadisticas <nombreJugador>");
-                System.out.println(" - salir cárcel");
-                System.out.println(" - acabar turno");
-                System.out.println(" - salir (para terminar)\n");
-
-                System.out.print("> "); // prompt
-                cmd = in.nextLine().trim();
-                analizarComando(cmd);
-
-            } while (!(cmd.equalsIgnoreCase("salir") || cmd.equalsIgnoreCase("acabar turno")));
-
-            if (cmd.equalsIgnoreCase("salir")) {
-                System.out.println("Fin de la partida");
-                this.enCurso = false;
-                return;
-            }
+        if (enSubmenuBancarrota) {
+            consola.imprimir("Estás en bancarrota. Solo puedes ejecutar:");
+            consola.imprimir(" - hipotecar <casilla>");
+            consola.imprimir(" - bancarrota");
+            return;
         }
+
+        consola.imprimir("Comandos disponibles:");
+        consola.imprimir(" - ver tablero");
+        consola.imprimir(" - describir <jugador|avatar|casilla>");
+        consola.imprimir(" - lanzar dados [X+Y]");
+        consola.imprimir(" - comprar <casilla>");
+        consola.imprimir(" - vender <tipo> <casilla> <num>");
+        consola.imprimir(" - hipotecar <casilla>");
+        consola.imprimir(" - deshipotecar <casilla>");
+        consola.imprimir(" - edificar <tipo>");
+        consola.imprimir(" - crear jugador <nombre> <tipoAvatar>");
+        consola.imprimir(" - listar jugadores|avatares|edificios|enventa");
+        consola.imprimir(" - estadisticas [jugador]");
+        consola.imprimir(" - acabar turno");
+        consola.imprimir(" - bancarrota");
     }
+
+    //funcion para bloquear el resto de comandos si el jugador esta endeudado
+    public boolean comandoPermitido(String comando) {
+        if (!enSubmenuBancarrota) return true;
+
+        if (comando.startsWith("hipotecar")) return true;
+        if (comando.equalsIgnoreCase("bancarrota")) return true;
+
+        return false;
+    }
+
+
 
     /*Método que interpreta el comando introducido y toma la accion correspondiente.
     * Parámetro: cadena de caracteres (el comando).
@@ -848,6 +838,16 @@ public class Juego implements Comando{
         }
     }
 
+    //funcion para acceder a bancarrota desde menu
+    public void bancarrota(){
+        if(this.enSubmenuBancarrota){
+            declararBancarrota(jugadorDeudor);
+        }
+        else{
+            consola.imprimir("el jugador está en una situación económica viable");
+        }
+    }
+
     public void declararBancarrota(Jugador deudor) {
         System.out.println(deudor.getNombre() + " no puede pagar y se declara en bancarrota.");
 
@@ -1478,8 +1478,19 @@ public class Juego implements Comando{
         }
     }
 
+    //tengo que hacer un metodo edificar aqui para poder acceder desde menu, ya que menu no puede acceder a solar
+    public void edificarJuego(String tipo){
+        Jugador actual = jugadores.get(this.turno);
+        Casilla lugar = actual.getAvatar().getLugar();
+
+        if(lugar.getTipo().equalsIgnoreCase("Solar")){
+            consola.imprimir("No se puede edificar aqui");
+            return;
+        }
+        Solar solar = (Solar) lugar; //hago un casteo de casilla a solar en el caso de que la casilla sea un solar
+        solar.edificar(tipo,actual);
+    }
     // Función para vender x cantidad de un edificio concreto en una casilla específica
-    @Override
     public void gestionarVentaEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) {
         Casilla casilla = tablero.encontrar_casilla(nombreCasilla);
         if (casilla != null) {
