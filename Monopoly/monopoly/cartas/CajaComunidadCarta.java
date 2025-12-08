@@ -15,7 +15,7 @@ public class CajaComunidadCarta extends Carta {
     @Override
     public void accion(Jugador jugador, Jugador banca, Accion casillaActual, Juego juego) {
 
-        System.out.println(jugador.getNombre() + " roba una carta de Caja de Comunidad. " + this.descripcion);
+        Juego.consola.imprimir(jugador.getNombre() + " roba una carta de Caja de Comunidad. " + this.descripcion);
 
         switch (this.id) {
 
@@ -40,7 +40,7 @@ public class CajaComunidadCarta extends Carta {
                 jugador.sumarFortuna(-cantidad);
                 jugador.sumarGastos(cantidad);
                 banca.sumarFortuna(cantidad);
-                System.out.println(jugador.getNombre() + " paga 500.000€.");
+                Juego.consola.imprimir(jugador.getNombre() + " paga 500.000€.");
                 break;
             }
 
@@ -58,7 +58,7 @@ public class CajaComunidadCarta extends Carta {
                 jugador.sumarFortuna(Valor.SUMA_VUELTA);
                 jugador.setVueltas(jugador.getVueltas() + 1);
 
-                System.out.println(jugador.getNombre() + " va a Salida y cobra 2.000.000€.");
+                Juego.consola.imprimir(jugador.getNombre() + " va a Salida y cobra 2.000.000€.");
                 salida.evaluarCasilla(jugador, banca, 0);
                 break;
             }
@@ -66,7 +66,7 @@ public class CajaComunidadCarta extends Carta {
             case 4: // cobrar 500.000
                 jugador.sumarFortuna(500_000);
                 jugador.setPremiosinversiones(jugador.getPremiosinversiones() + 500_000);
-                System.out.println(jugador.getNombre() + " cobra 500.000€.");
+                Juego.consola.imprimir(jugador.getNombre() + " cobra 500.000€.");
                 break;
 
             case 5: { // ir a Solar1
@@ -76,7 +76,7 @@ public class CajaComunidadCarta extends Carta {
                 destino.anhadirAvatar(jugador.getAvatar());
                 jugador.getAvatar().setLugar(destino);
 
-                System.out.println(jugador.getNombre() + " retrocede hasta " + destino.getNombre() + ".");
+                Juego.consola.imprimir(jugador.getNombre() + " retrocede hasta " + destino.getNombre() + ".");
                 destino.evaluarCasilla(jugador, banca, 0);
                 break;
             }
@@ -93,7 +93,7 @@ public class CajaComunidadCarta extends Carta {
                     jugador.setVueltas(jugador.getVueltas() + 1);
                 }
 
-                System.out.println(jugador.getNombre() + " avanza hasta " + destino.getNombre() + ".");
+                Juego.consola.imprimir(jugador.getNombre() + " avanza hasta " + destino.getNombre() + ".");
                 destino.evaluarCasilla(jugador, banca, 0);
                 break;
             }

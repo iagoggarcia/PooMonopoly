@@ -1,5 +1,6 @@
 package monopoly.casillas.especial;
 
+import monopoly.Juego;
 import partida.Jugador;
 
 public class Carcel extends Especial {
@@ -12,8 +13,8 @@ public class Carcel extends Especial {
     public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
         // de visita o preso lo gestiona el menu
         // caes por movimiento "normal", o ya estabas en la cárcel preso
-        System.out.println(actual.getNombre() + " está visitando la Cárcel. No está arrestado.");
-        System.out.println(actual.getNombre() + " está en la Cárcel (visita o preso).");
+        Juego.consola.imprimir(actual.getNombre() + " está visitando la Cárcel. No está arrestado.");
+        Juego.consola.imprimir(actual.getNombre() + " está en la Cárcel (visita o preso).");
         return true;
     }
 

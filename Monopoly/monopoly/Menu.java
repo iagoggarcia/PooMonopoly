@@ -16,7 +16,7 @@ public class Menu {
 
     public void iniciarJuego() {
 
-        juego.consola.imprimir("Bienvenido a Monopoly.\n");
+        Juego.consola.imprimir("Bienvenido a Monopoly.\n");
 
         juego.iniciarPartida();
         juego.mostrarComandos();   // Mostrar menú una sola vez
@@ -28,14 +28,14 @@ public class Menu {
 
         while (true) {
 
-            juego.consola.imprimir("> ");
-            String comando = juego.consola.leer();
+            Juego.consola.imprimir("> ");
+            String comando = Juego.consola.leer();
 
             if (comando == null) continue;
             comando = comando.trim();
 
             if (comando.equalsIgnoreCase("salir")) {
-                juego.consola.imprimir("Saliendo del juego...");
+                Juego.consola.imprimir("Saliendo del Juego...");
                 break;
             }
 
@@ -46,7 +46,7 @@ public class Menu {
     private void analizarComando(String comando) {
 
         if (!juego.comandoPermitido(comando)) {
-            juego.consola.imprimir("No puedes ejecutar este comando ahora.");
+            Juego.consola.imprimir("No puedes ejecutar este comando ahora.");
             juego.mostrarComandos();
             return;
         }
@@ -84,7 +84,7 @@ public class Menu {
             String[] nums = valores.split("\\+");
 
             if (nums.length != 2) {
-                juego.consola.imprimir("Formato inválido. Usa: lanzar dados X+Y");
+                Juego.consola.imprimir("Formato inválido. Usa: lanzar dados X+Y");
                 return;
             }
 
@@ -93,7 +93,7 @@ public class Menu {
                 int d2 = Integer.parseInt(nums[1]);
                 juego.lanzarDadosValor(d1, d2);
             } catch (NumberFormatException e) {
-                juego.consola.imprimir("Formato inválido. Usa: lanzar dados X+Y");
+                Juego.consola.imprimir("Formato inválido. Usa: lanzar dados X+Y");
             }
             return;
         }
@@ -141,7 +141,7 @@ public class Menu {
             String[] partes = args.split("\\s+");
 
             if (partes.length != 3) {
-                juego.consola.imprimir("Uso: vender <tipoEdificio> <nombreCasilla> <cantidad>");
+                Juego.consola.imprimir("Uso: vender <tipoEdificio> <nombreCasilla> <cantidad>");
                 return;
             }
 
@@ -151,7 +151,7 @@ public class Menu {
                 int cantidad = Integer.parseInt(partes[2]);
                 juego.gestionarVentaEdificios(tipo, nombreCasilla, cantidad);
             } catch (Exception e) {
-                juego.consola.imprimir("Error en la cantidad. Debe ser un número.");
+                Juego.consola.imprimir("Error en la cantidad. Debe ser un número.");
             }
             return;
         }
@@ -167,7 +167,7 @@ public class Menu {
             String[] partes = datos.split("\\s+");
 
             if (partes.length != 2) {
-                juego.consola.imprimir("Uso: crear jugador <nombre> <tipoAvatar>");
+                Juego.consola.imprimir("Uso: crear jugador <nombre> <tipoAvatar>");
                 return;
             }
 
@@ -209,7 +209,7 @@ public class Menu {
             return;
         }
 
-        juego.consola.imprimir("Comando no reconocido.");
+        Juego.consola.imprimir("Comando no reconocido.");
     }
 
     public void ejecutarArchivoComandos(String ruta) {
@@ -323,7 +323,7 @@ public class Menu {
             System.err.println("Error leyendo " + ruta + ": " + e.getMessage());
         }
         //para seguir jugando depsues
-        juego.consola.imprimir("\nArchivo finalizado. Puedes continuar jugando.\n");
+        Juego.consola.imprimir("\nArchivo finalizado. Puedes continuar jugando.\n");
         juego.mostrarComandos();
         bucleComandos();
     }

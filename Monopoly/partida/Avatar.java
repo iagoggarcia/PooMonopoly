@@ -31,7 +31,7 @@ public class Avatar {
         
         // colocamos el avatar en la casilla que se pasa como argumento
         if (lugar == null) {
-            System.err.println("Advertencia: avatar " + tipo + " creado sin casilla inicial.");
+            Juego.consola.imprimir("Advertencia: avatar " + tipo + " creado sin casilla inicial.");
         } else {
             this.lugar.anhadirAvatar(this); // coloca el avatar en la lista de avatares de la casilla
 }
@@ -138,7 +138,7 @@ public class Avatar {
         // actualizar referencia interna
         this.lugar = destino;
 
-        System.out.println("El avatar " + id + " avanza " + valorTirada + " posiciones, desde "
+        Juego.consola.imprimir("El avatar " + id + " avanza " + valorTirada + " posiciones, desde "
                 + nombreOrigen + " hasta " + destino.getNombre() + ".");
     }
 

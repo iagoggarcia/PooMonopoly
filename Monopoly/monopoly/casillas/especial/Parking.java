@@ -1,5 +1,6 @@
 package monopoly.casillas.especial;
 
+import monopoly.Juego;
 import partida.Jugador;
 
 public class Parking extends Especial {
@@ -18,10 +19,10 @@ public class Parking extends Especial {
         // cobre del bote (valor) y reseteo
         if (this.bote > 0) {
             actual.sumarFortuna(this.bote);
-            System.out.println(actual.getNombre() + " cobra el bote del Parking: " + this.bote + "€.");
+            Juego.consola.imprimir(actual.getNombre() + " cobra el bote del Parking: " + this.bote + "€.");
             this.bote = 0;
         } else {
-            System.out.println(actual.getNombre() + " descansa en el Parking. No hay bote acumulado.");
+            Juego.consola.imprimir(actual.getNombre() + " descansa en el Parking. No hay bote acumulado.");
         }
         return true;
     }

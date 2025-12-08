@@ -27,7 +27,7 @@ public abstract class Accion extends Casilla {
 
         // 4. Comprobar solvencia
         if (!juego.isSolvente()) {
-            System.out.println(actual.getNombre() + " ha quedado insolvente tras ejecutar la carta.");
+            Juego.consola.imprimir(actual.getNombre() + " ha quedado insolvente tras ejecutar la carta.");
             return false;
         }
 

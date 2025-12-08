@@ -204,16 +204,16 @@ public class Jugador {
     //Método para añadir una propiedad al jugador (cuando la compra). Como parámetro, la casilla a añadir.
     public void anhadirPropiedad(Casilla casilla) {
         if (casilla == null) {
-            System.out.println("No se puede añadir una propiedad nula.");
+            Juego.consola.imprimir("No se puede añadir una propiedad nula.");
             return;
         }
         if (!propiedades.contains(casilla)) { // comprobamos que la casilla no está ya en la lista de propiedades del jugador
             propiedades.add(casilla); // si no está, la añadimos
-            System.out.println(nombre + " ha adquirido la propiedad " + casilla.getNombre() + ".");
-            System.out.println("Ahora posee " + propiedades.size() + " propiedades.");
+            Juego.consola.imprimir(nombre + " ha adquirido la propiedad " + casilla.getNombre() + ".");
+            Juego.consola.imprimir("Ahora posee " + propiedades.size() + " propiedades.");
             // aqui creo que se añadiria casilla.setPropietario(this), pero en esta entrega creo que aun no se pide
         } else {
-            System.out.println(nombre + " ya posee la propiedad " + casilla.getNombre() + ".");            
+            Juego.consola.imprimir(nombre + " ya posee la propiedad " + casilla.getNombre() + ".");
         }
     }
 
@@ -225,11 +225,11 @@ public class Jugador {
         }
         if (propiedades.contains(casilla)) { // comprobamos que la  casilla está en la lista de propiedades del jugador
             propiedades.remove(casilla); // si está, la eliminamos
-            System.out.println(nombre + " ha perdido la propiedad " + casilla.getNombre() + ".");
-            System.out.println("Ahora posee " + propiedades.size() + " propiedades.");
+            Juego.consola.imprimir(nombre + " ha perdido la propiedad " + casilla.getNombre() + ".");
+            Juego.consola.imprimir("Ahora posee " + propiedades.size() + " propiedades.");
             // aqui creo que se añadiria casilla.setPropietario(banca), pero en esta entrega creo que aun no se pide
         } else {
-            System.out.println(nombre + " no posee la propiedad " + casilla.getNombre() + ".");
+            Juego.consola.imprimir(nombre + " no posee la propiedad " + casilla.getNombre() + ".");
         }
     }
 
@@ -238,7 +238,7 @@ public class Jugador {
     public void sumarFortuna(float valor) { 
         this.fortuna += valor;
         if (this.fortuna < 0) {
-            System.out.println(nombre + "ha caído en bancarrota. Fortuna actual: " + this.fortuna);
+            Juego.consola.imprimir(nombre + "ha caído en bancarrota. Fortuna actual: " + this.fortuna);
         }
     }
 
@@ -294,7 +294,7 @@ public class Jugador {
 
         this.enCarcel = true;
         this.tiradasCarcel = 0;
-        System.out.println(nombre + " ha sido encarcelado y trasladado a la casilla " + carcel.getNombre() + ".");
+        Juego.consola.imprimir(nombre + " ha sido encarcelado y trasladado a la casilla " + carcel.getNombre() + ".");
     }
 
     /* Función que simplemente coge un edificio
@@ -303,7 +303,7 @@ public class Jugador {
      */
     public void anhadirEdificioAJugador(Edificio edificio) {
         if (edificio == null) {
-            System.out.println("No se puede añadir un edificio nulo.");
+            Juego.consola.imprimir("No se puede añadir un edificio nulo.");
             return;
         }
         edificios.add(edificio);
@@ -316,13 +316,13 @@ public class Jugador {
      */
     public void eliminarEdificioDeJugador(Edificio edificio) {
         if (edificio == null) {
-            System.out.println("No se puede eliminar un edificio nulo.");
+            Juego.consola.imprimir("No se puede eliminar un edificio nulo.");
             return;
         }
         if (edificios.contains(edificio)) { // miro si está en los edificios que le pertenecen al jugador
             edificios.remove(edificio); // y si está lo elimino
         } else { // si no está, mensaje de error
-            System.err.println("El edificio " + edificio.getId() + " no pertenece a " + this.nombre);
+            Juego.consola.imprimir("El edificio " + edificio.getId() + " no pertenece a " + this.nombre);
         }
     }
 }

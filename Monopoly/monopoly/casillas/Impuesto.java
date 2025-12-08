@@ -18,7 +18,7 @@ public class Impuesto extends Casilla {
 
         // comprobamos solvencia, si no se puede pagar, declaramos bancarrota
         if (actual.getFortuna() < imp) {
-            System.out.println(actual.getNombre() + " no tiene suficiente dinero para pagar el impuesto de " + this.nombre + ".");
+            Juego.consola.imprimir(actual.getNombre() + " no tiene suficiente dinero para pagar el impuesto de " + this.nombre + ".");
             // comprobar si tiene algún solar sin hipotecar
             boolean puedeHipotecar = actual.getPropiedades() != null && !actual.getPropiedades().isEmpty() && actual.getHipotecas().size() < actual.getPropiedades().size();
 
@@ -38,7 +38,7 @@ public class Impuesto extends Casilla {
         banca.sumarFortuna(imp);
         actual.setImpuestos_tasas(actual.getImpuestos_tasas() + imp); //actualizamos los gastos del jugador
 
-        System.out.println(actual.getNombre() + " paga " + imp + "€ en impuestos.");
+        Juego.consola.imprimir(actual.getNombre() + " paga " + imp + "€ en impuestos.");
         return true;
     }
 

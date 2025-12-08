@@ -15,7 +15,7 @@ public class SuerteCarta extends Carta {
     @Override
     public void accion(Jugador jugador, Jugador banca, Accion casillaActual, Juego juego) {
 
-        System.out.println(jugador.getNombre() + " roba una carta de Suerte. " + this.descripcion);
+        Juego.consola.imprimir(jugador.getNombre() + " roba una carta de Suerte. " + this.descripcion);
         
         switch (this.id) {
 
@@ -29,7 +29,7 @@ public class SuerteCarta extends Carta {
                 if (destino.getPosicion() < casillaActual.getPosicion()) {
                     jugador.sumarFortuna(Valor.SUMA_VUELTA);
                     jugador.setVueltas(jugador.getVueltas() + 1);
-                    System.out.println(jugador.getNombre() + " cobra 2.000.000€ por pasar por Salida.");
+                    Juego.consola.imprimir(jugador.getNombre() + " cobra 2.000.000€ por pasar por Salida.");
                 }
 
                 destino.evaluarCasilla(jugador, banca, 0);
@@ -43,7 +43,7 @@ public class SuerteCarta extends Carta {
             case 3: // cobrar 1.000.000
                 jugador.sumarFortuna(1_000_000);
                 jugador.setPremiosinversiones(jugador.getPremiosinversiones() + 1_000_000);
-                System.out.println(jugador.getNombre() + " cobra 1.000.000€.");
+                Juego.consola.imprimir(jugador.getNombre() + " cobra 1.000.000€.");
                 break;
 
             case 4: {  // pagar a jugadores
@@ -73,7 +73,7 @@ public class SuerteCarta extends Carta {
                     }
                 }
 
-                System.out.println(jugador.getNombre() + " paga 250.000€ a cada jugador.");
+                Juego.consola.imprimir(jugador.getNombre() + " paga 250.000€ a cada jugador.");
                 break;
             }
 
@@ -87,7 +87,7 @@ public class SuerteCarta extends Carta {
                 destino.anhadirAvatar(jugador.getAvatar());
                 jugador.getAvatar().setLugar(destino);
 
-                System.out.println(jugador.getNombre() + " retrocede 3 casillas hasta " + destino.getNombre());
+                Juego.consola.imprimir(jugador.getNombre() + " retrocede 3 casillas hasta " + destino.getNombre());
                 destino.evaluarCasilla(jugador, banca, 0);
                 break;
             }
@@ -113,7 +113,7 @@ public class SuerteCarta extends Carta {
                 jugador.sumarFortuna(-multa);
                 jugador.sumarGastos(multa);
                 banca.sumarFortuna(multa);
-                System.out.println(jugador.getNombre() + " paga 150.000€ de multa.");
+                Juego.consola.imprimir(jugador.getNombre() + " paga 150.000€ de multa.");
                 break;
 
             case 7: // transporte más cercano

@@ -1,12 +1,7 @@
 package monopoly;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 import monopoly.cartas.*;
 import monopoly.casillas.*;
 import monopoly.casillas.especial.*;
@@ -102,9 +97,9 @@ public class Juego implements Comando{
     public void iniciarPartida() { //esta funcion se queda en juego, pero todos los system in y system out van en menu, y el menu de comandos tambien va en menu
 
         // 1. Crear banca y tablero, inicializar cartas
-        Jugador banca = new Jugador();
+        this.banca = new Jugador();
         banca.sumarFortuna(Valor.FORTUNA_BANCA);
-        Tablero tablero = new Tablero(banca);
+        this.tablero = new Tablero(banca);
         inicializarCartas();
 
         // 2. Obtener la casilla "Salida" donde se colocan los avatares
@@ -150,8 +145,6 @@ public class Juego implements Comando{
         }
 
         // 6. Guardar la información en los atributos de Menu
-        this.tablero = tablero;
-        this.banca = banca;
         this.jugadores = jugadores;
         this.avatares = avatares;
 
@@ -556,6 +549,7 @@ public class Juego implements Comando{
     }
 
     //funcion para acceder a bancarrota desde menu
+   @Override 
     public void bancarrota(){
         if(this.enSubmenuBancarrota){
             declararBancarrota(jugadorDeudor);

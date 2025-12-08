@@ -1,5 +1,6 @@
 package monopoly.casillas.especial;
 
+import monopoly.Juego;
 import partida.*;
 
 public class Salida extends Especial {
@@ -10,7 +11,7 @@ public class Salida extends Especial {
 
     @Override
     public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
-        System.out.println(actual.getNombre() + " está en la casilla de Salida. ¡Buen viaje!");
+        Juego.consola.imprimir(actual.getNombre() + " está en la casilla de Salida. ¡Buen viaje!");
         return true;
     }
 
