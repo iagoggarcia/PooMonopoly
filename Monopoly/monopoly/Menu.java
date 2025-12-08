@@ -45,6 +45,8 @@ public class Menu {
 
     private void analizarComando(String comando) {
 
+        Juego.consola.imprimir(comando + "\n");
+
         if (!juego.comandoPermitido(comando)) {
             Juego.consola.imprimir("No puedes ejecutar este comando ahora.");
             juego.mostrarComandos();
@@ -219,6 +221,8 @@ public class Menu {
             System.err.println("No existe el archivo: " + ruta);
             return;
         }
+
+        juego.inicializarCartas();
 
         try (Scanner sc = new Scanner(path, StandardCharsets.UTF_8)) {
 

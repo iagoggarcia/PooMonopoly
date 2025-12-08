@@ -45,6 +45,9 @@ public class Juego implements Comando{
     }
 
     public static Juego getInstancia(){
+        if (instancia == null) {
+            new Juego();
+        }
         return instancia;
     }
 
@@ -1195,12 +1198,13 @@ public class Juego implements Comando{
         Casilla lugar = actual.getAvatar().getLugar();
 
         if(!lugar.getTipo().equalsIgnoreCase("Solar")){
-            consola.imprimir("No se puede edificar aqui");
+            consola.imprimir("No se puede edificar en una casilla que no sea de tipo solar");
             return;
         }
         Solar solar = (Solar) lugar; //hago un casteo de casilla a solar en el caso de que la casilla sea un solar
         solar.edificar(tipo,actual);
     }
+
     // Función para vender x cantidad de un edificio concreto en una casilla específica
     public void gestionarVentaEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) {
         Casilla casilla = tablero.encontrar_casilla(nombreCasilla);
