@@ -15,14 +15,12 @@ public interface Comando {
 
     void imprimirTablero();
     void descJugador(String nombre) throws JugadorNoExisteException, UsoIncorrectoComandoException;
-    void descAvatar(String id) throws UsoIncorrectoComandoException;
     void descCasilla(String nombreCasilla) throws CasillaInexistenteException, UsoIncorrectoComandoException;
     void lanzarDados() throws JugadorEncarceladoException, JugadorBancarrotaException, CasillaInexistenteException, JugadorNoExisteException;
     void lanzarDadosValor(int d1, int d2) throws JugadorEncarceladoException, JugadorBancarrotaException, CasillaInexistenteException, JugadorNoExisteException;
     void comprar(String casilla) throws CasillaInexistenteException, NoEresPropietarioException, JugadorBancarrotaException, FondosInsuficientesException;
     void salirCarcel() throws JugadorNoExisteException, JugadorBancarrotaException, CasillaInexistenteException, UsoIncorrectoComandoException;
     void listarJugadores();
-    void listarAvatares();
     void listarVenta();
     void listarEdificios();
     void listarEdificiosGrupo(String grupo) throws UsoIncorrectoComandoException;

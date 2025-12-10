@@ -12,6 +12,11 @@ public class Consolanormal implements Consola{
     }
 
     @Override
+    public void imprimirSinSalto(String mensaje) {
+        System.out.print(mensaje);
+    }
+
+    @Override
     public String leer(){
         return sc.nextLine(); //recogemos lo que introduce el usuario en un string para poder utilizarlo donde corresponda
     }

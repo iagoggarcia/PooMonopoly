@@ -185,7 +185,7 @@ public class Juego implements Comando{
 
         consola.imprimir("Comandos disponibles:");
         consola.imprimir(" - ver tablero");
-        consola.imprimir(" - describir <jugador|avatar|casilla>");
+        consola.imprimir(" - describir <jugador|casilla>");
         consola.imprimir(" - lanzar dados [X+Y]");
         consola.imprimir(" - comprar <casilla>");
         consola.imprimir(" - vender <tipo> <casilla> <num>");
@@ -193,10 +193,12 @@ public class Juego implements Comando{
         consola.imprimir(" - deshipotecar <casilla>");
         consola.imprimir(" - edificar <tipo>");
         consola.imprimir(" - crear jugador <nombre> <tipoAvatar>");
-        consola.imprimir(" - listar jugadores|avatares|edificios|enventa");
+        consola.imprimir(" - listar <jugadores|edificios|enventa>");
         consola.imprimir(" - estadisticas [jugador]");
         consola.imprimir(" - acabar turno");
         consola.imprimir(" - bancarrota");
+        consola.imprimir("- salir");
+        consola.imprimir("\n");
     }
 
     //funcion para bloquear el resto de comandos si el jugador esta endeudado
@@ -295,28 +297,6 @@ public class Juego implements Comando{
             consola.imprimir("Edificios: " + j.getEdificios().toString());
         }
         consola.imprimir("===================================");
-    }
-
-    @Override
-    public void descAvatar(String id) throws UsoIncorrectoComandoException {
-        if (id == null || id.isBlank()) {
-            throw new UsoIncorrectoComandoException("Uso correcto: Describir avatar <ID>");
-        }
-        Avatar a = buscarAvatarPorId(id.trim());
-        if (a == null) {
-            consola.imprimir("No existe un avatar con ID '" + id + "'.");
-            return;
-        }
-
-        consola.imprimir("---- Avatar ----");
-        consola.imprimir("ID: " + a.getId());
-        consola.imprimir("Tipo: " + a.getTipo());
-        consola.imprimir("Jugador: " + (a.getJugador() != null ? a.getJugador().getNombre() : "(ninguno)"));
-        if (a.getLugar() != null) {
-            consola.imprimir("Ubicación: " + a.getLugar().getNombre());
-        } else {
-            consola.imprimir("Ubicación: (desconocida)");
-        }
     }
 
     @Override
@@ -771,16 +751,6 @@ public class Juego implements Comando{
             }
             consola.imprimir("}");
             consola.imprimir("\n");
-        }
-    }
-
-    @Override
-    public void listarAvatares() {
-        for(Avatar avatar : this.avatares){
-            consola.imprimir(avatar.getJugador().getNombre());
-            consola.imprimir(avatar.getTipo());
-            consola.imprimir(avatar.getLugar().getNombre());
-            consola.imprimir(avatar.getId());
         }
     }
 

@@ -3,5 +3,6 @@ package monopoly;
 
 public interface Consola {
     void imprimir(String mensaje);
+    void imprimirSinSalto(String mensaje);
     String leer();
 }

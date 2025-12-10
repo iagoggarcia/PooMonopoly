@@ -185,7 +185,7 @@ public class Solar extends Propiedad {
                 } catch (MaximoEdificiosException e) {
                     Juego.consola.imprimir(e.getMessage());
                 }
-
+                break;
             case "hotel":
                 try {
                     Hotel.puedeEdificarHotel(this);
@@ -195,7 +195,7 @@ public class Solar extends Propiedad {
                 } catch (MaximoEdificiosException e) {
                     Juego.consola.imprimir(e.getMessage());
                 }
-
+                break;
             case "piscina":
                 try {
                     Piscina.puedeEdificarPiscina(this);
@@ -204,7 +204,7 @@ public class Solar extends Propiedad {
                 } catch (MaximoEdificiosException e) {
                     Juego.consola.imprimir(e.getMessage());
                 }
-
+                break;
             case "pista":
                 try {
                     PistaDeporte.puedeEdificarPista(this);
@@ -213,9 +213,10 @@ public class Solar extends Propiedad {
                 } catch (MaximoEdificiosException e) {
                     Juego.consola.imprimir(e.getMessage());
                 }
-
+                break;
             default:
                 System.err.println("Tipo de edificio no válido.");
+                break;
         }
     }
 

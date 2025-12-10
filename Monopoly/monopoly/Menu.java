@@ -20,16 +20,18 @@ public class Menu {
         Juego.consola.imprimir("Bienvenido a Monopoly.\n");
 
         juego.iniciarPartida();
-        juego.mostrarComandos();   // Mostrar menú una sola vez
+        //juego.mostrarComandos();   // Mostrar menú una sola vez
 
         bucleComandos();
     }
 
     private void bucleComandos() throws MonopolyException {
+        // Imprimimos el menú 1 sola vez
+        Juego.getInstancia().mostrarComandos();
 
         while (true) {
 
-            Juego.consola.imprimir("> ");
+            Juego.consola.imprimirSinSalto("> ");
             String comando = Juego.consola.leer();
 
             if (comando == null) continue;
@@ -41,12 +43,14 @@ public class Menu {
             }
 
             analizarComando(comando);
+
+            Juego.getInstancia().mostrarComandos(); // lo volvemos a mostrar después de que se ejecute un comando
         }
     }
 
     private void analizarComando(String comando) throws MonopolyException {
 
-        Juego.consola.imprimir(comando + "\n");
+        Juego.consola.imprimir("\n> " + comando);
 
         try {
             if (!juego.comandoPermitido(comando)) {
@@ -61,12 +65,6 @@ public class Menu {
             if (comando.startsWith("describir jugador")) {
                 String nombre = comando.substring("describir jugador".length()).trim();
                 juego.descJugador(nombre);
-                return;
-            }
-
-            if (comando.startsWith("describir avatar")) {
-                String id = comando.substring("describir avatar".length()).trim();
-                juego.descAvatar(id);
                 return;
             }
 
@@ -117,11 +115,6 @@ public class Menu {
 
             if (comando.equalsIgnoreCase("listar enventa")) {
                 juego.listarVenta();
-                return;
-            }
-
-            if (comando.equalsIgnoreCase("listar avatares")) {
-                juego.listarAvatares();
                 return;
             }
 
@@ -248,7 +241,8 @@ public class Menu {
             Juego.consola.imprimir(e.getMessage());
             Juego.getInstancia().acabarTurno();
         }
-       
+
+
     }
 
     public void ejecutarArchivoComandos(String ruta) throws MonopolyException {
@@ -365,7 +359,6 @@ public class Menu {
         }
         //para seguir jugando depsues
         Juego.consola.imprimir("\nArchivo finalizado. Puedes continuar jugando.\n");
-        juego.mostrarComandos();
         bucleComandos();
     }
 }
