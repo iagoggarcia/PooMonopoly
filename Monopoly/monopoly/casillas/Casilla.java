@@ -1,11 +1,10 @@
 package monopoly.casillas;
 
 import java.util.ArrayList;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import monopoly.excepciones.JugadorNoExisteException;
 import partida.*;
-import monopoly.edificios.*;
-import monopoly.*;
-
-import javax.print.DocFlavor;
 
 public abstract class Casilla {
 
@@ -80,7 +79,7 @@ public abstract class Casilla {
      * - El valor de la tirada: para determinar impuesto a pagar en casillas de servicios.
      * Valor devuelto: true en caso de ser solvente (es decir, de cumplir las deudas), y false
      * en caso de no cumplirlas.*/
-    public abstract boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada);
+    public abstract boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) throws CasillaInexistenteException, JugadorBancarrotaException, JugadorNoExisteException;
 
     /*public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
         if (actual == null || banca == null)

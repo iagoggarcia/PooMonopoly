@@ -1,7 +1,7 @@
 package monopoly.edificios;
 import monopoly.casillas.propiedad.Solar;
+import monopoly.excepciones.MaximoEdificiosException;
 import partida.*;
-import monopoly.casillas.Casilla;
 
 public class Piscina extends Edificio {
     private static int contadorPiscinas = 0;
@@ -15,14 +15,13 @@ public class Piscina extends Edificio {
      * o porque ya hay una piscina (el dinero del jugador se comprueba en otra función), y cada uno de esos errores
      * tiene un código: el primero 1 y el segundo 2. La función retorna 0 cuando SÍ se puede construir.
      * */
-    public static int puedeEdificarPiscina(Solar lugar) {
+    public static void puedeEdificarPiscina(Solar lugar) throws MaximoEdificiosException {
         if (lugar.getNumHoteles() < 1) { // si no hay hotel
-            return 1;
+            throw new MaximoEdificiosException("No puedes constuir una piscina: necesitas un hotel en " + lugar);
         } // Comprobación de errores
         else if (lugar.getNumPiscinas() == 1) { // si ya hay piscina
-            return 2;
+            throw new MaximoEdificiosException("No puedes construir una piscina: ya existe una piscina en " + lugar);
         }
-        else return 0;
     }
 
     /*

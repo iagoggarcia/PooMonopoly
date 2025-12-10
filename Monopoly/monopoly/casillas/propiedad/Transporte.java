@@ -2,6 +2,9 @@ package monopoly.casillas.propiedad;
 
 import monopoly.*;
 import monopoly.casillas.*;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import monopoly.excepciones.JugadorNoExisteException;
 import partida.*;
 
 public class Transporte extends Propiedad {
@@ -20,7 +23,7 @@ public class Transporte extends Propiedad {
     }
 
     @Override
-    public boolean alquiler(Jugador actual) {
+    public boolean alquiler(Jugador actual) throws JugadorBancarrotaException {
         int cantidad = (int)impuesto;
 
         if (cantidad <= 0) return true; // si no hay nada que pagar devuelvo true
@@ -37,8 +40,8 @@ public class Transporte extends Propiedad {
     }
 
     @Override
-    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
-        if (actual == null || banca == null) throw new IllegalArgumentException("Los jugadores no pueden ser nulos.");
+    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) throws JugadorNoExisteException, CasillaInexistenteException, JugadorBancarrotaException {
+        if (actual == null || banca == null) throw new JugadorNoExisteException("Los jugadores no pueden ser nulos.");
 
         // si la casilla es de la banca (o sin dueño), está en venta
         if (this.duenho == null || this.duenho == banca) {

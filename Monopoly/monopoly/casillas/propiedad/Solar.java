@@ -1,11 +1,18 @@
 package monopoly.casillas.propiedad;
 
+import java.util.ArrayList;
 import monopoly.Juego;
 import monopoly.casillas.Casilla;
-import partida.Jugador;
 import monopoly.edificios.*;
-
-import java.util.ArrayList;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.FondosInsuficientesException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import monopoly.excepciones.JugadorNoExisteException;
+import monopoly.excepciones.MaximoEdificiosException;
+import monopoly.excepciones.NoEdificableException;
+import monopoly.excepciones.NoEresPropietarioException;
+import monopoly.excepciones.PropiedadHipotecadaException;
+import partida.Jugador;
 
 public class Solar extends Propiedad {
     // ATRIBUTOS:
@@ -45,7 +52,7 @@ public class Solar extends Propiedad {
     /* --------- MÉTODOS DEL ENUNCIADO Y OTROS ---------- */
 
     @Override
-    public boolean alquiler(Jugador actual) {
+    public boolean alquiler(Jugador actual) throws JugadorBancarrotaException {
         int cantidad = calcularAlquiler(actual);
 
         if (cantidad <= 0) return true; // si no hay nada que pagar devuelvo true
@@ -88,9 +95,9 @@ public class Solar extends Propiedad {
     }
 
     @Override
-    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
+    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) throws JugadorNoExisteException, JugadorBancarrotaException, CasillaInexistenteException {
         if (actual == null || banca == null)
-            throw new IllegalArgumentException("Los jugadores (actual o banca) no pueden ser nulos.");
+            throw new JugadorNoExisteException("Los jugadores (actual o banca) no pueden ser nulos.");
 
         // si la casilla es de la banca (o sin dueño), está en venta
         if (this.duenho == null || this.duenho == banca) {
@@ -155,15 +162,15 @@ public class Solar extends Propiedad {
 
     /* ---------- GESTIÓN DE EDIFICIOS ---------- */
 
-    public void edificar(String tipoEdificio, Jugador actual) {
+    public void edificar(String tipoEdificio, Jugador actual) throws JugadorNoExisteException, MaximoEdificiosException, FondosInsuficientesException, JugadorBancarrotaException, NoEdificableException, NoEresPropietarioException {
 
         if (actual == null) {
-            System.err.println("Jugador no válido.");
-            return;
+            throw new JugadorNoExisteException("Jugador no válido.");
         }
 
         // Necesitamos el Juego para reutilizar intentarConstruir(...)
         Juego juego = Juego.getInstancia();
+        
         if (juego == null) {
             System.err.println("No hay partida inicializada.");
             return;
@@ -171,75 +178,41 @@ public class Solar extends Propiedad {
 
         switch (tipoEdificio.toLowerCase()) {
             case "casa":
-                int edificableCasa = Casa.puedeEdificarCasa(this);
-                switch (edificableCasa) {
-                    case 0:
-                        Edificio casa = new Casa(actual, this);
-                        juego.intentarConstruir(actual, this, casa);
-                        break;
-                    case 1:
-                        System.err.println(actual.getNombre() + " ya ha construido el máximo de casas permitido en " + this.getNombre());
-                        break;
-                    case 2:
-                        System.err.println(actual.getNombre() + " no puede construir más casas en " + this.getNombre() + ", ya ha construido un hotel");
-                        break;
+                try {
+                    Casa.puedeEdificarCasa(this);
+                    Edificio casa = new Casa(actual, this);
+                    juego.intentarConstruir(actual, this, casa);
+                } catch (MaximoEdificiosException e) {
+                    Juego.consola.imprimir(e.getMessage());
                 }
-                break;
 
             case "hotel":
-                int edificableHotel = Hotel.puedeEdificarHotel(this);
-                switch (edificableHotel) {
-                    case 0:
-                        this.quitarCuatroCasas();
-                        Edificio hotel = new Hotel(actual, this);
-                        juego.intentarConstruir(actual, this, hotel);
-                        break;
-                    case 1:
-                        System.err.println(actual.getNombre() + " no ha construido todavía el número de casas necesarias en " + this.getNombre());
-                        break;
-                    case 2:
-                        System.err.println(actual.getNombre() + " ya ha construido un hotel en " + this.getNombre());
-                        break;
+                try {
+                    Hotel.puedeEdificarHotel(this);
+                    this.quitarCuatroCasas();
+                    Edificio hotel = new Hotel(actual, this);
+                    juego.intentarConstruir(actual, this, hotel);
+                } catch (MaximoEdificiosException e) {
+                    Juego.consola.imprimir(e.getMessage());
                 }
-                break;
 
             case "piscina":
-                int edificablePiscina = Piscina.puedeEdificarPiscina(this);
-                switch (edificablePiscina) {
-                    case 0:
-                        Edificio piscina = new Piscina(actual, this);
-                        juego.intentarConstruir(actual, this, piscina);
-                        break;
-                    case 1:
-                        System.err.println(actual.getNombre() + " no puede edificar una piscina en " + this.getNombre() + " porque todavía no hay hotel");
-                        break;
-                    case 2:
-                        System.err.println(actual.getNombre() + " no puede edificar una piscina en " +  this.getNombre() + " porque ya ha edificado una");
-                        break;
+                try {
+                    Piscina.puedeEdificarPiscina(this);
+                    Edificio piscina = new Piscina(actual, this);
+                    juego.intentarConstruir(actual, this, piscina);
+                } catch (MaximoEdificiosException e) {
+                    Juego.consola.imprimir(e.getMessage());
                 }
-                break;
 
             case "pista":
-                int edificablePista = PistaDeporte.puedeEdificarPista(this);
-                switch (edificablePista) {
-                    case 0:
-                        Edificio pista = new PistaDeporte(actual, this);
-                        juego.intentarConstruir(actual, this, pista);
-                        break;
-                    case 1:
-                        System.err.println(actual.getNombre() + " no puede edificar una pista en " +  this.getNombre() + " porque todavía no hay hotel ni piscina");
-                        break;
-                    case 2:
-                        System.err.println(actual.getNombre() + " no puede edificar una pista en " + this.getNombre() + " porque todavía no hay hotel");
-                        break;
-                    case 3:
-                        System.err.println(actual.getNombre() + " no puede edificar una pista en " + this.getNombre() + " porque todavía no hay piscina");
-                        break;
-                    case 4:
-                        System.err.println(actual.getNombre() + " no puede edificar una pista en " + this.getNombre() + " porque ya hay una");
-                        break;
+                try {
+                    PistaDeporte.puedeEdificarPista(this);
+                    Edificio pista = new PistaDeporte(actual, this);
+                    juego.intentarConstruir(actual, this, pista);
+                } catch (MaximoEdificiosException e) {
+                    Juego.consola.imprimir(e.getMessage());
                 }
-                break;
 
             default:
                 System.err.println("Tipo de edificio no válido.");
@@ -276,7 +249,7 @@ public class Solar extends Propiedad {
      * y va comprobando si el tipo de cada edificio es casa, si lo es,
      * se elimina del array
      */
-    public void quitarCuatroCasas() {
+    public void quitarCuatroCasas() throws NoEresPropietarioException {
         int retiradas = 0; // para controlar que solo se eliminen 4
         for (int i = 0; i < edificios.size() && retiradas < 4; i++) { // mientras no se hayan eliminado 4 casas y no se sobrepase el tamaño del array
             Edificio e = edificios.get(i); // cogemos el edificio número i del array
@@ -302,7 +275,7 @@ public class Solar extends Propiedad {
      * Los mensajes son personalizados para las casas, los otros tipos de edificio
      * también tienen su correspondiente función
      */
-    public void venderCasas(int nCasas, Jugador j) {
+    public void venderCasas(int nCasas, Jugador j) throws NoEresPropietarioException, JugadorBancarrotaException {
         int vendidas = 0;
         if (nCasas <= getNumCasas()) {
             // Recorremos la lista y paramos al vender nCasas
@@ -351,7 +324,7 @@ public class Solar extends Propiedad {
      * Los mensajes son personalizados para los hoteles, los otros tipos de edificio
      * también tienen su correspondiente función
      */
-    public void venderHoteles(int nHoteles, Jugador j) {
+    public void venderHoteles(int nHoteles, Jugador j) throws NoEresPropietarioException, JugadorBancarrotaException {
         int vendidas = 0;
         if (nHoteles <= getNumHoteles()) {
             // Recorremos la lista y paramos al vender nHoteles
@@ -395,7 +368,7 @@ public class Solar extends Propiedad {
      * Los mensajes son personalizados para las piscinas, los otros tipos de edificio
      * también tienen su correspondiente función
      */
-    public void venderPiscinas(int nPiscinas, Jugador j) {
+    public void venderPiscinas(int nPiscinas, Jugador j) throws NoEresPropietarioException, JugadorBancarrotaException {
         int vendidas = 0;
         if (nPiscinas <= getNumPiscinas()) {
             // Recorremos la lista y paramos al vender nHoteles
@@ -439,7 +412,7 @@ public class Solar extends Propiedad {
      * Los mensajes son personalizados para las pistas de deporte, los otros tipos de edificio
      * también tienen su correspondiente función
      */
-    public void venderPistas(int nPistas, Jugador j) {
+    public void venderPistas(int nPistas, Jugador j) throws NoEresPropietarioException, JugadorBancarrotaException {
         int vendidas = 0;
         if (nPistas <= getNumPistas()) {
             // Recorremos la lista y paramos al vender nHoteles
@@ -540,16 +513,14 @@ public class Solar extends Propiedad {
         return alquiler;
     }
 
-    public void hipotecar(Jugador actual) {
+    public void hipotecar(Jugador actual) throws NoEresPropietarioException, JugadorBancarrotaException, PropiedadHipotecadaException {
 
         if (this.getDuenho() == null || this.getDuenho() != actual) {
-            System.out.println("No puedes hipotecar " + this.getNombre() + " porque no eres su propietario.");
-            return;
+            throw new NoEresPropietarioException("No puedes hipotecar " + this.getNombre() + " porque no eres su propietario.");
         }
 
         if (estaHipotecada()) {
-            System.out.println("La casilla '" + this.getNombre() + "' ya está hipotecada.");
-            return;
+            throw new PropiedadHipotecadaException("La casilla '" + this.getNombre() + "' ya está hipotecada.");
         }
 
         // añadir después: si tiene edificios, pedir que los venda y demás
@@ -576,11 +547,10 @@ public class Solar extends Propiedad {
         System.out.println(actual.getNombre() + " recibe " + valorHipoteca + "€ por la hipoteca de " + this.getNombre() + ". No se puede recibir alquileres ni edificar en el grupo " + colorGrupo + ".");
     }
 
-    public void deshipotecar(Jugador actual) {
+    public void deshipotecar(Jugador actual) throws NoEresPropietarioException, FondosInsuficientesException, JugadorBancarrotaException {
 
         if (this.getDuenho() == null || this.getDuenho() != actual) {
-            System.out.println("No puedes deshipotecar " + this.getNombre() + " porque no eres su propietario.");
-            return;
+            throw new NoEresPropietarioException("No puedes deshipotecar " + this.getNombre() + " porque no eres su propietario.");
         }
 
         if (!this.isHipotecada()) {
@@ -591,8 +561,7 @@ public class Solar extends Propiedad {
         float valorHipoteca = this.getHipoteca();
 
         if (actual.getFortuna() < valorHipoteca) {
-            System.out.println("La fortuna de " + actual.getNombre() + " no es suficiente para deshipotecar " + this.getNombre() + ".");
-            return;
+            throw new FondosInsuficientesException("La fortuna de " + actual.getNombre() + " no es suficiente para deshipotecar " + this.getNombre() + ".");
         }
 
         this.setHipotecada(false);

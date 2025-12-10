@@ -1,6 +1,7 @@
 package monopoly.casillas.especial;
 
 import monopoly.Juego;
+import monopoly.excepciones.JugadorBancarrotaException;
 import partida.Jugador;
 
 public class Parking extends Especial {
@@ -13,7 +14,7 @@ public class Parking extends Especial {
 
     /* ---------- MÉTODOS HEREDADOS ---------- */
     @Override
-    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
+    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) throws JugadorBancarrotaException {
         if (actual == null) return true;
 
         // cobre del bote (valor) y reseteo

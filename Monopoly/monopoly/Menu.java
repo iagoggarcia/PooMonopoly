@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
+import monopoly.excepciones.*;
 
 public class Menu {
 
@@ -14,7 +15,7 @@ public class Menu {
         this.juego = Juego.getInstancia();
     }
 
-    public void iniciarJuego() {
+    public void iniciarJuego() throws MonopolyException {
 
         Juego.consola.imprimir("Bienvenido a Monopoly.\n");
 
@@ -24,7 +25,7 @@ public class Menu {
         bucleComandos();
     }
 
-    private void bucleComandos() {
+    private void bucleComandos() throws MonopolyException {
 
         while (true) {
 
@@ -43,178 +44,214 @@ public class Menu {
         }
     }
 
-    private void analizarComando(String comando) {
+    private void analizarComando(String comando) throws MonopolyException {
 
         Juego.consola.imprimir(comando + "\n");
 
-        if (!juego.comandoPermitido(comando)) {
-            Juego.consola.imprimir("No puedes ejecutar este comando ahora.");
-            juego.mostrarComandos();
-            return;
-        }
+        try {
+            if (!juego.comandoPermitido(comando)) {
+                throw new ComandoDesconocidoException("No puedes ejecutar este comando ahora.");
+            }
 
-        if (comando.equalsIgnoreCase("ver tablero")) {
-            juego.imprimirTablero();
-            return;
-        }
-
-        if (comando.startsWith("describir jugador")) {
-            String nombre = comando.substring("describir jugador".length()).trim();
-            juego.descJugador(nombre);
-            return;
-        }
-
-        if (comando.startsWith("describir avatar")) {
-            String id = comando.substring("describir avatar".length()).trim();
-            juego.descAvatar(id);
-            return;
-        }
-
-        if (comando.startsWith("describir")) {
-            String casilla = comando.substring("describir".length()).trim();
-            juego.descCasilla(casilla);
-            return;
-        }
-
-        if (comando.equalsIgnoreCase("lanzar dados")) {
-            juego.lanzarDados();
-            return;
-        }
-
-        if (comando.startsWith("lanzar dados ")) {
-            String valores = comando.substring("lanzar dados ".length()).trim();
-            String[] nums = valores.split("\\+");
-
-            if (nums.length != 2) {
-                Juego.consola.imprimir("Formato inválido. Usa: lanzar dados X+Y");
+            if (comando.equalsIgnoreCase("ver tablero")) {
+                juego.imprimirTablero();
                 return;
             }
 
-            try {
-                int d1 = Integer.parseInt(nums[0]);
-                int d2 = Integer.parseInt(nums[1]);
-                juego.lanzarDadosValor(d1, d2);
-            } catch (NumberFormatException e) {
-                Juego.consola.imprimir("Formato inválido. Usa: lanzar dados X+Y");
-            }
-            return;
-        }
-
-        if (comando.startsWith("comprar")) {
-            String casilla = comando.substring("comprar".length()).trim();
-            juego.comprar(casilla);
-            return;
-        }
-
-        if (comando.startsWith("salir cárcel")) {
-            juego.salirCarcel();
-            return;
-        }
-
-        if (comando.equalsIgnoreCase("listar jugadores")) {
-            juego.listarJugadores();
-            return;
-        }
-
-        if (comando.equalsIgnoreCase("listar enventa")) {
-            juego.listarVenta();
-            return;
-        }
-
-        if (comando.equalsIgnoreCase("listar avatares")) {
-            juego.listarAvatares();
-            return;
-        }
-
-        if (comando.equalsIgnoreCase("listar edificios")) {
-            juego.listarEdificios();
-            return;
-        }
-
-        if (comando.startsWith("listar edificios ")) {
-            String grupo = comando.substring("listar edificios ".length()).trim();
-            juego.listarEdificiosGrupo(grupo);
-            return;
-        }
-
-        if (comando.startsWith("vender ")) {
-
-            String args = comando.substring("vender".length()).trim();
-            String[] partes = args.split("\\s+");
-
-            if (partes.length != 3) {
-                Juego.consola.imprimir("Uso: vender <tipoEdificio> <nombreCasilla> <cantidad>");
+            if (comando.startsWith("describir jugador")) {
+                String nombre = comando.substring("describir jugador".length()).trim();
+                juego.descJugador(nombre);
                 return;
             }
 
-            try {
+            if (comando.startsWith("describir avatar")) {
+                String id = comando.substring("describir avatar".length()).trim();
+                juego.descAvatar(id);
+                return;
+            }
+
+            if (comando.startsWith("describir")) {
+                String casilla = comando.substring("describir".length()).trim();
+                juego.descCasilla(casilla);
+                return;
+            }
+
+            if (comando.equalsIgnoreCase("lanzar dados")) {
+                juego.lanzarDados();
+                return;
+            }
+
+            if (comando.startsWith("lanzar dados ")) {
+                String valores = comando.substring("lanzar dados ".length()).trim();
+                String[] nums = valores.split("\\+");
+
+                if (nums.length != 2) {
+                    throw new UsoIncorrectoComandoException("Formato inválido. Usa: lanzar dados X+Y");
+                }
+
+                try {
+                    int d1 = Integer.parseInt(nums[0]);
+                    int d2 = Integer.parseInt(nums[1]);
+                    juego.lanzarDadosValor(d1, d2);
+                } catch (NumberFormatException e) {
+                    throw new UsoIncorrectoComandoException("Formato inválido. Usa: lanzar dados X+Y");
+                }
+                return;
+            }
+
+            if (comando.startsWith("comprar")) {
+                String casilla = comando.substring("comprar".length()).trim();
+                juego.comprar(casilla);
+                return;
+            }
+
+            if (comando.startsWith("salir cárcel")) {
+                juego.salirCarcel();
+                return;
+            }
+
+            if (comando.equalsIgnoreCase("listar jugadores")) {
+                juego.listarJugadores();
+                return;
+            }
+
+            if (comando.equalsIgnoreCase("listar enventa")) {
+                juego.listarVenta();
+                return;
+            }
+
+            if (comando.equalsIgnoreCase("listar avatares")) {
+                juego.listarAvatares();
+                return;
+            }
+
+            if (comando.equalsIgnoreCase("listar edificios")) {
+                juego.listarEdificios();
+                return;
+            }
+
+            if (comando.startsWith("listar edificios ")) {
+                String grupo = comando.substring("listar edificios ".length()).trim();
+                juego.listarEdificiosGrupo(grupo);
+                return;
+            }
+
+            if (comando.startsWith("vender ")) {
+
+                String args = comando.substring("vender".length()).trim();
+                String[] partes = args.split("\\s+");
+
+                if (partes.length != 3) {
+                    throw new UsoIncorrectoComandoException("Uso: vender <tipoEdificio> <nombreCasilla> <cantidad>");
+                }
+
                 String tipo = partes[0];
                 String nombreCasilla = partes[1];
-                int cantidad = Integer.parseInt(partes[2]);
-                juego.gestionarVentaEdificios(tipo, nombreCasilla, cantidad);
-            } catch (Exception e) {
-                Juego.consola.imprimir("Error en la cantidad. Debe ser un número.");
-            }
-            return;
-        }
+                String cantidad = partes[2];
 
-        if (comando.equalsIgnoreCase("acabar turno")) {
-            juego.acabarTurno();
-            return;
-        }
+                boolean esNumero = true;
+                for (char c : cantidad.toCharArray()) {
+                    if (!Character.isDigit(c)) {
+                        esNumero = false;
+                        break;
+                    }
+                }
 
-        if (comando.startsWith("crear jugador ")) {
+                if (!esNumero) {
+                    throw new UsoIncorrectoComandoException("La cantidad debe ser un número entero positivo.");
+                }
 
-            String datos = comando.substring("crear jugador ".length()).trim();
-            String[] partes = datos.split("\\s+");
+                int cantidadNum = Integer.parseInt(cantidad);
 
-            if (partes.length != 2) {
-                Juego.consola.imprimir("Uso: crear jugador <nombre> <tipoAvatar>");
+                juego.gestionarVentaEdificios(tipo, nombreCasilla, cantidadNum);
                 return;
             }
 
-            juego.crearJugadorArchivo(partes[0], partes[1]);
-            return;
-        }
+            if (comando.equalsIgnoreCase("acabar turno")) {
+                juego.acabarTurno();
+                return;
+            }
 
-        if (comando.startsWith("hipotecar ")) {
-            String casilla = comando.substring("hipotecar ".length()).trim();
-            juego.hipotecar(casilla);
-            return;
-        }
+            if (comando.startsWith("crear jugador ")) {
 
-        if (comando.startsWith("deshipotecar ")) {
-            String casilla = comando.substring("deshipotecar ".length()).trim();
-            juego.deshipotecar(casilla);
-            return;
-        }
+                String datos = comando.substring("crear jugador ".length()).trim();
+                String[] partes = datos.split("\\s+");
 
-        if (comando.startsWith("edificar ")) {
-            String tipo = comando.substring("edificar ".length()).trim();
-            juego.edificarJuego(tipo);
-            return;
-        }
+                if (partes.length != 2) {
+                    throw new UsoIncorrectoComandoException("Uso: crear jugador <nombre> <tipoAvatar>");
+                }
 
-        if (comando.equalsIgnoreCase("estadisticas")) {
-            juego.estadisticas();
-            return;
-        }
+                juego.crearJugadorArchivo(partes[0], partes[1]);
+                return;
+            }
 
-        if (comando.startsWith("estadisticas ")) {
-            String nombre = comando.substring("estadisticas ".length()).trim();
-            juego.estadisticasjugador(nombre);
-            return;
-        }
+            if (comando.startsWith("hipotecar ")) {
+                String casilla = comando.substring("hipotecar ".length()).trim();
+                juego.hipotecar(casilla);
+                return;
+            }
 
-        if (comando.equalsIgnoreCase("bancarrota")) {
-            juego.bancarrota();
-            return;
-        }
+            if (comando.startsWith("deshipotecar ")) {
+                String casilla = comando.substring("deshipotecar ".length()).trim();
+                juego.deshipotecar(casilla);
+                return;
+            }
 
-        Juego.consola.imprimir("Comando no reconocido.");
+            if (comando.startsWith("edificar ")) {
+                String tipo = comando.substring("edificar ".length()).trim();
+                juego.edificarJuego(tipo);
+                return;
+            }
+
+            if (comando.equalsIgnoreCase("estadisticas")) {
+                juego.estadisticas();
+                return;
+            }
+
+            if (comando.startsWith("estadisticas ")) {
+                String nombre = comando.substring("estadisticas ".length()).trim();
+                juego.estadisticasjugador(nombre);
+                return;
+            }
+
+            if (comando.equalsIgnoreCase("bancarrota")) {
+                juego.bancarrota();
+                return;
+            }
+
+            else {
+                throw new ComandoDesconocidoException("Comando no reconocido");
+            }
+
+        } catch (ComandoDesconocidoException e) {
+            Juego.consola.imprimir(e.getMessage());
+            juego.mostrarComandos();
+        } catch (UsoIncorrectoComandoException e) {
+            Juego.consola.imprimir(e.getMessage());
+        } catch (JugadorNoExisteException e) {
+            Juego.consola.imprimir(e.getMessage());
+        } catch (CasillaInexistenteException e) {
+            Juego.consola.imprimir(e.getMessage());
+        } catch (NoEdificableException e) {
+            Juego.consola.imprimir(e.getMessage());
+        } catch (NoEresPropietarioException e) {
+            Juego.consola.imprimir(e.getMessage());
+        } catch (PropiedadHipotecadaException e) {
+            Juego.consola.imprimir(e.getMessage());
+        } catch (FondosInsuficientesException e) {
+            Juego.consola.imprimir(e.getMessage());
+        } catch (MaximoEdificiosException e) {
+            Juego.consola.imprimir(e.getMessage());
+        } catch (JugadorEncarceladoException e) { 
+            Juego.consola.imprimir(e.getMessage());
+        } catch (JugadorBancarrotaException e) {
+            Juego.consola.imprimir(e.getMessage());
+            Juego.getInstancia().acabarTurno();
+        }
+       
     }
 
-    public void ejecutarArchivoComandos(String ruta) {
+    public void ejecutarArchivoComandos(String ruta) throws MonopolyException {
 
         Path path = Path.of(ruta);
         if (!Files.exists(path)) {

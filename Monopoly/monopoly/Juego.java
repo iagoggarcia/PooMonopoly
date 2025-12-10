@@ -7,6 +7,16 @@ import monopoly.casillas.*;
 import monopoly.casillas.especial.*;
 import monopoly.casillas.propiedad.*;
 import monopoly.edificios.*;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.FondosInsuficientesException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import monopoly.excepciones.JugadorEncarceladoException;
+import monopoly.excepciones.JugadorNoExisteException;
+import monopoly.excepciones.MaximoEdificiosException;
+import monopoly.excepciones.NoEdificableException;
+import monopoly.excepciones.NoEresPropietarioException;
+import monopoly.excepciones.PropiedadHipotecadaException;
+import monopoly.excepciones.UsoIncorrectoComandoException;
 import partida.*;
 
 
@@ -97,7 +107,7 @@ public class Juego implements Comando{
     //AUN TENGO QUE COMPROBAR TODAS LAS PETICIONES DE DATOS DESDE ESTE ARCHIVO, PORQUE AUNQUE LO HAGA CON CONSOLA NO DEBERIA HACERLO DESDE AQUI, SI NO DESDE MENU
 
     // Método para inciar una partida: crea los jugadores y avatares.
-    public void iniciarPartida() { //esta funcion se queda en juego, pero todos los system in y system out van en menu, y el menu de comandos tambien va en menu
+    public void iniciarPartida() throws JugadorBancarrotaException, CasillaInexistenteException { //esta funcion se queda en juego, pero todos los system in y system out van en menu, y el menu de comandos tambien va en menu
 
         // 1. Crear banca y tablero, inicializar cartas
         this.banca = new Jugador();
@@ -202,7 +212,7 @@ public class Juego implements Comando{
 
     //función para crear jugador desde archivo
     @Override
-    public void crearJugadorArchivo(String nombre, String tipo) {
+    public void crearJugadorArchivo(String nombre, String tipo) throws CasillaInexistenteException {
 
         if (jugadores == null) {
             jugadores = new ArrayList<>();
@@ -243,13 +253,13 @@ public class Juego implements Comando{
     //EN LAS FUNCIONES DE DESCRIBIR Y LISTAR SOLAMENTE HAY QUE HACER PRINTS, LAS HAGO DE ÚLTIMO
 
 //helpers
-    private Jugador buscarJugadorPorNombre(String nombre) {
+    private Jugador buscarJugadorPorNombre(String nombre) throws JugadorNoExisteException {
         if (this.jugadores == null) return null;
         for (Jugador j : this.jugadores) {
             String n = j.getNombre();
             if (n != null && n.equalsIgnoreCase(nombre)) return j;
         }
-        return null;
+        throw new JugadorNoExisteException("El jugador " + nombre + " no existe en la partida");
     }
 
     private Avatar buscarAvatarPorId(String id) {
@@ -261,16 +271,12 @@ public class Juego implements Comando{
     }
 
     @Override
-    public void descJugador(String nombreJugador) {
+    public void descJugador(String nombreJugador) throws JugadorNoExisteException, UsoIncorrectoComandoException {
         if (nombreJugador == null || nombreJugador.isBlank()) {
-            consola.imprimir("Uso correcto: Describir <Nombre>");
-            return;
+            throw new UsoIncorrectoComandoException ("Uso correcto: Describir <Nombre>");
         }
+
         Jugador j = buscarJugadorPorNombre(nombreJugador.trim());
-        if (j == null) {
-            consola.imprimir("No existe un jugador con el nombre '" + nombreJugador + "'.");
-            return;
-        }
 
         consola.imprimir("===== Información del jugador =====");
         consola.imprimir("Nombre: " + j.getNombre());
@@ -292,10 +298,9 @@ public class Juego implements Comando{
     }
 
     @Override
-    public void descAvatar(String id) {
+    public void descAvatar(String id) throws UsoIncorrectoComandoException {
         if (id == null || id.isBlank()) {
-            consola.imprimir("Uso correcto: Describir avatar <ID>");
-            return;
+            throw new UsoIncorrectoComandoException("Uso correcto: Describir avatar <ID>");
         }
         Avatar a = buscarAvatarPorId(id.trim());
         if (a == null) {
@@ -315,10 +320,9 @@ public class Juego implements Comando{
     }
 
     @Override
-    public void descCasilla(String nombreCasilla) {
+    public void descCasilla(String nombreCasilla) throws CasillaInexistenteException, UsoIncorrectoComandoException {
         if (nombreCasilla == null || nombreCasilla.isBlank()) {
-            consola.imprimir("Uso correcto: describir <Nombre>");
-            return;
+            throw new UsoIncorrectoComandoException("Uso correcto: describir <Nombre>");
         }
         if (this.tablero == null) {
             consola.imprimir("No hay tablero inicializado.");
@@ -327,8 +331,7 @@ public class Juego implements Comando{
 
         Casilla c = this.tablero.encontrar_casilla(nombreCasilla.trim());
         if (c == null) {
-            consola.imprimir("No existe una casilla llamada '" + nombreCasilla + "'.");
-            return;
+            throw new CasillaInexistenteException("No existe una casilla llamada '" + nombreCasilla + "'.");
         }
 
         consola.imprimir("---- Casilla ----");
@@ -340,11 +343,11 @@ public class Juego implements Comando{
     //Método que ejecuta todas las acciones relacionadas con el comando 'lanzar dados'.
 
     @Override
-    public void lanzarDados() { //funcion para valores random de dados
+    public void lanzarDados() throws JugadorEncarceladoException, JugadorBancarrotaException, CasillaInexistenteException, JugadorNoExisteException  { //funcion para valores random de dados
         //comprobacion para no dejarle tirar normalmente si está en la cárcel
         Jugador actual = this.jugadores.get(this.turno);
         if(actual.isEnCarcel()){
-            consola.imprimir("Actualmente el jugador solo puede lanzar dados para salir de la cárcel desde el comando salir cárcel");
+            throw new JugadorEncarceladoException("Actualmente el jugador solo puede lanzar dados para salir de la cárcel desde el comando salir cárcel");
             //hay que hacerlo así porque puede ser que caiga en la casilla cárcel sin ser encarcelado
         }
         else if((!tirado)||tirado && lanzamientos!=0) {//si aún no hemos tirado, o hemos tirado pero hemos sacado dobles, podemos tirar
@@ -372,10 +375,9 @@ public class Juego implements Comando{
     }
 
     @Override
-    public void lanzarDadosValor(int d1, int d2) {
+    public void lanzarDadosValor(int d1, int d2) throws JugadorEncarceladoException, JugadorBancarrotaException, CasillaInexistenteException, JugadorNoExisteException {
         if (jugadores.get(turno).isEnCarcel()) {
-            consola.imprimir("Actualmente el jugador solo puede lanzar dados para salir de la cárcel desde el comando salir cárcel");
-            return;
+            throw new JugadorEncarceladoException("Actualmente el jugador solo puede lanzar dados para salir de la cárcel desde el comando salir cárcel");
         }
 
         if ((!tirado) || (tirado && lanzamientos != 0)) {
@@ -403,7 +405,7 @@ public class Juego implements Comando{
 
 
     //  Método auxiliar con toda la lógica compartida
-    private void realizarTirada(int valor1, int valor2) {//hice el proceso de la tirada fuera para no tener que copiarlo en ambas funciones de lanzar
+    private void realizarTirada(int valor1, int valor2) throws CasillaInexistenteException, JugadorBancarrotaException, JugadorNoExisteException {//hice el proceso de la tirada fuera para no tener que copiarlo en ambas funciones de lanzar
         int suma = valor1 + valor2;
         Jugador actual = this.jugadores.get(this.turno);
         Avatar av = actual.getAvatar();
@@ -423,9 +425,7 @@ public class Juego implements Comando{
         this.solvente = destino.evaluarCasilla(actual, this.banca, suma);//evaluamos casilla
 
         if (!this.solvente) {
-            consola.imprimir(actual.getNombre() + " ha quedado en bancarrota y queda fuera del juego.");
-            acabarTurno();
-            return;
+            throw new JugadorBancarrotaException(actual.getNombre() + " ha quedado en bancarrota y queda fuera del juego.");
         }
 
         // si el jugador cayó en 'Ir a la Cárcel', se aplica el encarcelamiento
@@ -485,12 +485,11 @@ public class Juego implements Comando{
     * Parámetro: cadena de caracteres con el nombre de la casilla.
     */
     @Override
-    public void comprar(String nombre) {
+    public void comprar(String nombre) throws CasillaInexistenteException, NoEresPropietarioException, JugadorBancarrotaException, FondosInsuficientesException {
         Casilla casilla = this.tablero.encontrar_casilla(nombre);
         
         if (casilla == null) {
-            consola.imprimir("No existe una casilla con el nombre '" + nombre + "'.");
-            return;
+            throw new CasillaInexistenteException("No existe una casilla con el nombre '" + nombre + "'.");
         }
 
         Jugador comprador = this.jugadores.get(this.turno); // jugador del turno
@@ -508,12 +507,11 @@ public class Juego implements Comando{
     }
 
     @Override
-    public void hipotecar(String nombre) {
+    public void hipotecar(String nombre) throws CasillaInexistenteException, JugadorBancarrotaException, NoEresPropietarioException, PropiedadHipotecadaException {
         Casilla casilla = this.tablero.encontrar_casilla(nombre);
 
         if (casilla == null) {
-            consola.imprimir("No existe una casilla con el nombre '" + nombre + "'.");
-            return;
+            throw new CasillaInexistenteException("No existe una casilla con el nombre '" + nombre + "'.");
         }
 
         if (!(casilla instanceof Solar solar)) { // solo se puede hipotecar si es un solar
@@ -529,12 +527,11 @@ public class Juego implements Comando{
 
 
     @Override
-    public void deshipotecar(String nombre) {
+    public void deshipotecar(String nombre) throws CasillaInexistenteException, JugadorBancarrotaException, NoEresPropietarioException, FondosInsuficientesException {
         Casilla casilla = this.tablero.encontrar_casilla(nombre);
 
         if (casilla == null) {
-            consola.imprimir("No existe una casilla con el nombre '" + nombre + "'.");
-            return;
+            throw new CasillaInexistenteException("No existe una casilla con el nombre '" + nombre + "'.");
         }
 
         Jugador actual = this.jugadores.get(this.turno);
@@ -553,7 +550,7 @@ public class Juego implements Comando{
 
     //funcion para acceder a bancarrota desde menu
    @Override 
-    public void bancarrota(){
+    public void bancarrota() throws CasillaInexistenteException {
         if(this.enSubmenuBancarrota){
             declararBancarrota(jugadorDeudor);
         }
@@ -562,7 +559,7 @@ public class Juego implements Comando{
         }
     }
 
-    public void declararBancarrota(Jugador deudor) {
+    public void declararBancarrota(Jugador deudor) throws CasillaInexistenteException {
         consola.imprimir(deudor.getNombre() + " no puede pagar y se declara en bancarrota.");
 
         // si no hay acreedor, el acreedor es la banca
@@ -615,7 +612,7 @@ public class Juego implements Comando{
     }
 
     // La puse aquí para no repetir código en las funciones del submenú de la cárcel
-    private void intentarSalirTirandoDados(Jugador actual) {
+    private void intentarSalirTirandoDados(Jugador actual) throws CasillaInexistenteException, JugadorBancarrotaException, JugadorNoExisteException {
         consola.imprimir(actual.getNombre() + " está en la cárcel e intenta salir tirando los dados...");
 
         if (this.dado1 == null) this.dado1 = new Dado();
@@ -669,7 +666,7 @@ public class Juego implements Comando{
     * Función que se usa en salirCarcel para saber si el jugador quiere salir pagando (1), utilizar una carta de suerte (2)
     * o tirar los dados (3).
      */
-    private void submenuCarcel(Jugador actual) {
+    private void submenuCarcel(Jugador actual) throws CasillaInexistenteException, JugadorBancarrotaException, UsoIncorrectoComandoException, JugadorNoExisteException {
         consola.imprimir(actual.getNombre() + ", ¿quieres salir pagando (1), utilizar una carta de suerte (2) o tirar los dados (3)?");
         int opcion = Integer.parseInt(consola.leer().trim());
         switch (opcion) {
@@ -704,18 +701,16 @@ public class Juego implements Comando{
                 intentarSalirTirandoDados(actual);
                 break;
             default:
-                consola.imprimir("Opción no válida. Debes elegir 1, 2 o 3.");
-                break;
+                throw new UsoIncorrectoComandoException("Opción no válida. Debes elegir 1, 2 o 3.");
         }
     }
 
     //Método que ejecuta todas las acciones relacionadas con el comando 'salir carcel'.
     // Solo puede ejecutarlo el jugador cuyo índice coincide con 'turno' (o si en el comando se especificó ese jugador).
     @Override
-    public void salirCarcel() {
+    public void salirCarcel() throws JugadorNoExisteException, JugadorBancarrotaException, CasillaInexistenteException, UsoIncorrectoComandoException {
         if (this.jugadores == null || this.jugadores.isEmpty()) {
-            consola.imprimir("No hay jugadores en la partida.");
-            return;
+            throw new JugadorNoExisteException("No hay jugadores en la partida.");
         }
 
         Jugador actual = this.jugadores.get(this.turno); 
@@ -725,9 +720,7 @@ public class Juego implements Comando{
         }
         // Si está en el submenú de bancarrota, NO puede usar este comando
         if (this.enSubmenuBancarrota && this.jugadorDeudor == actual) {
-            consola.imprimir("No puedes intentar salir de la cárcel mientras tienes deudas pendientes.");
-            consola.imprimir("Debes hipotecar propiedades o declararte en bancarrota.");
-            return;
+            consola.imprimir("No puedes intentar salir de la cárcel mientras tienes deudas pendientes. Debes hipotecar propiedades o declararte en bancarrota.");
         }
 
         submenuCarcel(actual);
@@ -812,14 +805,13 @@ public class Juego implements Comando{
     }
 
     @Override
-    public void listarEdificiosGrupo(String grupo) {
+    public void listarEdificiosGrupo(String grupo) throws UsoIncorrectoComandoException {
         if (this.tablero == null || this.tablero.getPosiciones() == null) {
             consola.imprimir("No hay tablero inicializado.");
             return;
         }
         if (grupo == null || grupo.isBlank()) {
-            consola.imprimir("Uso: listar edificios <nombreGrupo>");
-            return;
+            throw new UsoIncorrectoComandoException("Uso: listar edificios <nombreGrupo>");
         }
 
         boolean hayAlgo = false;
@@ -928,15 +920,14 @@ public class Juego implements Comando{
     }
 
     //imprime las casillas mas frecuentadas (en caso de que una sobresalga sobre el resto solo imprime esa)
-    private void casillasfrecuentadas(){
+    private void casillasfrecuentadas() throws CasillaInexistenteException{
 
         if(this.tablero == null){
             consola.imprimir("El tablero no está inicializado.");
             return;
         }
         if(this.tablero.getPosiciones() == null){
-            consola.imprimir("No hay casillas inicializadas en el tablero.");
-            return;
+            throw new CasillaInexistenteException("No hay casillas inicializadas en el tablero.");
         }
         int maximo = 0;
         ArrayList<Casilla> provisional = new ArrayList<>();
@@ -960,10 +951,9 @@ public class Juego implements Comando{
         }
     }
 
-    private void masvueltas(){
+    private void masvueltas() throws JugadorNoExisteException{
         if(this.jugadores == null || this.jugadores.isEmpty()){
-            consola.imprimir("No hay jugadores registrados en la partida");
-            return;
+            throw new JugadorNoExisteException("No hay jugadores registrados en la partida");
         }
         else{
             int maximo = 0;
@@ -985,10 +975,9 @@ public class Juego implements Comando{
     }
 
     //funcion que imprime el jugador con mas valor de toda la partida (dinero, edificios, casillas)
-    private void encabeza(){
+    private void encabeza() throws JugadorNoExisteException {
         if(this.jugadores == null ||  this.jugadores.isEmpty()){
-            consola.imprimir("No hay jugadores registrados en la partida");
-            return;
+            throw new JugadorNoExisteException("No hay jugadores registrados en la partida");
         }
         else{
             float maximo = 0;
@@ -1006,10 +995,9 @@ public class Juego implements Comando{
 
 
     //funcion que imprime los datos de la casilla mas rentable
-    private void casillarentable() {
+    private void casillarentable() throws JugadorNoExisteException {
         if (this.jugadores == null || this.jugadores.isEmpty()) {
-            consola.imprimir("No hay jugadores registrados en la partida");
-            return;
+            throw new JugadorNoExisteException("No hay jugadores registrados en la partida");
         } else {
             ArrayList<Casilla> rentables = new ArrayList<>();
             float maximo = Float.NEGATIVE_INFINITY;
@@ -1120,7 +1108,7 @@ public class Juego implements Comando{
 
     //imprime las estadisticas de la partida
     @Override
-    public void estadisticas(){
+    public void estadisticas() throws JugadorNoExisteException, CasillaInexistenteException {
         consola.imprimir("{");
         casillarentable();
         gruporentable();
@@ -1131,13 +1119,10 @@ public class Juego implements Comando{
     }
 
     @Override
-    public void estadisticasjugador(String nombrejugador){
+    public void estadisticasjugador(String nombrejugador) throws JugadorNoExisteException {
 
         Jugador j = buscarJugadorPorNombre(nombrejugador);
-        if(j == null){
-            consola.imprimir("Jugador no encontrado.\n");
-            return;
-        }
+    
         consola.imprimir("{");
         consola.imprimir("dineroInvertido: " + j.getInversiones() + ","); //aqui hice setter y getter, un atributo, e inclui esta variable en comprar casilla e intentar construir
         consola.imprimir("pagoTasasEImpuestos: " + j.getImpuestos_tasas() + ",");
@@ -1154,10 +1139,10 @@ public class Juego implements Comando{
     * Se le llama en cada case del switch, por eso hice una función específica, para no repetir
     * este fragmento tantas veces
      */
-    public void intentarConstruir(Jugador actual, Solar solar, Edificio e) {
+    public void intentarConstruir(Jugador actual, Solar solar, Edificio e) throws FondosInsuficientesException, JugadorBancarrotaException, NoEdificableException {
         int precio = e.getPrecio();
         if (actual.getFortuna() < precio ) { // de primeras compruebo si el jugador tiene el dinero suficiente
-            System.err.println("La fortuna de " + actual.getNombre() + " no es suficiente para edificar un/a " + e.getTipo() + " en la casilla " + solar.getNombre());
+            throw new FondosInsuficientesException("La fortuna de " + actual.getNombre() + " no es suficiente para edificar un/a " + e.getTipo() + " en la casilla " + solar.getNombre());
         }
         else { // si lo tiene
             if (solar.getDuenho() == actual && solar.getGrupo().esDuenhoGrupo(actual)) { // miro si es dueño de la casilla en la que está y del grupo completo
@@ -1174,10 +1159,10 @@ public class Juego implements Comando{
             }
             else { // si no es dueño de la casilla o del grupo
                 if (solar.getDuenho() != actual) {
-                    System.err.println(actual.getNombre() + " no puede edificar en " + solar.getNombre() + " porque no le pertenece");
+                    throw new NoEdificableException(actual.getNombre() + " no puede edificar en " + solar.getNombre() + " porque no le pertenece");
                 }
                 else if (!solar.getGrupo().esDuenhoGrupo(actual)) {
-                    System.err.println(actual.getNombre() + " no puede edificar en " + solar.getNombre() + " porque no es propietario del grupo " + solar.getGrupo().getNombreColorGrupo());
+                    throw new NoEdificableException(actual.getNombre() + " no puede edificar en " + solar.getNombre() + " porque no es propietario del grupo " + solar.getGrupo().getNombreColorGrupo());
                 }
             }
         }
@@ -1193,39 +1178,40 @@ public class Juego implements Comando{
     }
 
     //tengo que hacer un metodo edificar aqui para poder acceder desde menu, ya que menu no puede acceder a solar
-    public void edificarJuego(String tipo){
+    @Override
+    public void edificarJuego(String tipo) throws NoEdificableException, JugadorNoExisteException, MaximoEdificiosException, FondosInsuficientesException, JugadorBancarrotaException, NoEresPropietarioException {
         Jugador actual = jugadores.get(this.turno);
         Casilla lugar = actual.getAvatar().getLugar();
 
         if(!lugar.getTipo().equalsIgnoreCase("Solar")){
-            consola.imprimir("No se puede edificar en una casilla que no sea de tipo solar");
-            return;
+            throw new NoEdificableException("No se puede edificar en una casilla que no sea de tipo solar");
         }
         Solar solar = (Solar) lugar; //hago un casteo de casilla a solar en el caso de que la casilla sea un solar
         solar.edificar(tipo,actual);
     }
 
     // Función para vender x cantidad de un edificio concreto en una casilla específica
-    public void gestionarVentaEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) {
+    @Override
+    public void gestionarVentaEdificios(String tipoEdificio, String nombreCasilla, int numEdificios) throws CasillaInexistenteException, NoEdificableException, NoEresPropietarioException, JugadorBancarrotaException {
         Casilla casilla = tablero.encontrar_casilla(nombreCasilla);
         if (casilla != null) {
             if (casilla.getTipo().equals("solar")) {
                 requisitosVenta(tipoEdificio, casilla, numEdificios);
             }
             else {
-                System.err.println("No se pueden vender edificios en casillas de tipo " + casilla.getTipo() + " , porque no se puede edificar en ellas");
+                throw new NoEdificableException("No se pueden vender edificios en casillas de tipo " + casilla.getTipo() + " , porque no se puede edificar en ellas");
             }
         }
         else {
-            consola.imprimir("No existe la casilla " +  nombreCasilla);
+            throw new CasillaInexistenteException("No existe la casilla " +  nombreCasilla);
         }
     }
 
-    private void requisitosVenta(String tipoEdificio, Casilla casilla, int numEdificios) {
+    private void requisitosVenta(String tipoEdificio, Casilla casilla, int numEdificios) throws NoEresPropietarioException, JugadorBancarrotaException {
         Jugador actual = this.jugadores.get(this.turno); // guardo el jugador que ejecuta el comando
 
         if (!(casilla instanceof Solar solar)) { // compruebo que el tipo sea solar
-            consola.imprimir("No puedes hipotecar una casilla de tipo '" + casilla.getTipo() + "'.");
+            consola.imprimir("No puedes vender una casilla de tipo '" + casilla.getTipo() + "'.");
             return;
         }
 
@@ -1234,34 +1220,34 @@ public class Juego implements Comando{
                 if (solar.getDuenho() != null && solar.getDuenho().equals(actual)) {
                     solar.venderCasas(numEdificios, actual); // y esta función ya comprueba si es el dueño
                 } else {
-                    System.err.println("No se pueden vender casas en " + solar.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
+                    throw new NoEresPropietarioException("No se pueden vender casas en " + solar.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
                 }
                 break;
             case "hoteles":
                 if (solar.getDuenho() != null && solar.getDuenho().equals(actual)) {
                     solar.venderHoteles(numEdificios, actual); // y esta función ya comprueba si es el dueño
                 } else {
-                    System.err.println("No se pueden vender hoteles en " + solar.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
+                    throw new NoEresPropietarioException("No se pueden vender hoteles en " + solar.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
                 }
                 break;
             case "piscina":
                 if (solar.getDuenho() != null && solar.getDuenho().equals(actual)) {
                     solar.venderPiscinas(numEdificios, actual); // y esta función ya comprueba si es el dueño
                 } else {
-                    System.err.println("No se pueden vender piscinas en " + solar.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
+                    throw new NoEresPropietarioException("No se pueden vender piscinas en " + solar.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
                 }
                 break;
             case "pista":
                 if (solar.getDuenho() != null && solar.getDuenho().equals(actual)) {
                     solar.venderPistas(numEdificios, actual); // y esta función ya comprueba si es el dueño
                 } else {
-                    System.err.println("No se pueden vender pistas de deporte en " + solar.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
+                    throw new NoEresPropietarioException("No se pueden vender pistas de deporte en " + solar.getNombre() + ". Esta propiedad no pertenece a " + actual.getNombre() + ".");
                 }
                 break;
         }
     }
 
-    public void moverTransporteMasCercano(Jugador jugador, Jugador banca) {
+    public void moverTransporteMasCercano(Jugador jugador, Jugador banca) throws CasillaInexistenteException, JugadorBancarrotaException {
         if (jugador == null || this.tablero == null)  return;
 
         // casilla actual del jugador
@@ -1287,8 +1273,7 @@ public class Juego implements Comando{
         }
 
         if (destino == null) {
-            consola.imprimir("No se encontró ninguna casilla de transporte en el tablero.");
-            return;
+            throw new CasillaInexistenteException("No se encontró ninguna casilla de transporte en el tablero.");
         }
 
         // mover el avatar hasta la casilla de transporte

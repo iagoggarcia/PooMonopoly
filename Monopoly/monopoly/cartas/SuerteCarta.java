@@ -4,6 +4,9 @@ import monopoly.Juego;
 import monopoly.Valor;
 import monopoly.casillas.Casilla;
 import monopoly.casillas.accion.Accion;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import monopoly.excepciones.JugadorNoExisteException;
 import partida.Jugador;
 
 public class SuerteCarta extends Carta {
@@ -13,7 +16,7 @@ public class SuerteCarta extends Carta {
     }
 
     @Override
-    public void accion(Jugador jugador, Jugador banca, Accion casillaActual, Juego juego) {
+    public void accion(Jugador jugador, Jugador banca, Accion casillaActual, Juego juego) throws JugadorBancarrotaException, CasillaInexistenteException, JugadorNoExisteException {
 
         Juego.consola.imprimir(jugador.getNombre() + " roba una carta de Suerte. " + this.descripcion);
         

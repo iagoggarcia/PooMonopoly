@@ -1,9 +1,10 @@
 package monopoly.casillas.propiedad;
 
-import monopoly.casillas.*;
-import partida.Jugador;
-import monopoly.casillas.*;
 import monopoly.*;
+import monopoly.casillas.*;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import partida.Jugador;
 
 public class Servicio extends Propiedad {
 
@@ -12,7 +13,7 @@ public class Servicio extends Propiedad {
     }
 
     @Override
-    public boolean alquiler(Jugador actual) {
+    public boolean alquiler(Jugador actual) throws JugadorBancarrotaException {
         int cantidad = (int)impuesto;
 
         if (cantidad <= 0) return true; // si no hay nada que pagar devuelvo true
@@ -34,7 +35,7 @@ public class Servicio extends Propiedad {
     }
 
     @Override
-    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
+    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) throws JugadorBancarrotaException, CasillaInexistenteException {
         // si la casilla es de la banca (o sin dueño), está en venta
         if (this.duenho == null || this.duenho == banca) {
             System.out.println("[" + this.nombre + "] Propiedad libre por " + this.valor + "€. Usa el comando 'comprar' para adquirirla.");

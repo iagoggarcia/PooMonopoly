@@ -1,7 +1,9 @@
 package monopoly.casillas;
 
-import partida.Jugador;
 import monopoly.Juego;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import partida.Jugador;
 
 public class Impuesto extends Casilla {
     // ATRIBUTOS:
@@ -13,7 +15,7 @@ public class Impuesto extends Casilla {
     }
 
     @Override
-    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
+    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) throws CasillaInexistenteException, JugadorBancarrotaException {
         int imp = this.impuesto;
 
         // comprobamos solvencia, si no se puede pagar, declaramos bancarrota

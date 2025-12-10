@@ -1,8 +1,10 @@
 package monopoly;
 
+import monopoly.excepciones.MonopolyException;
+
 public class MonopolyETSE {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MonopolyException {
 
         Menu menu = new Menu();
 

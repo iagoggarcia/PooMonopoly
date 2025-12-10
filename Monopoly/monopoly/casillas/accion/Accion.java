@@ -3,6 +3,9 @@ package monopoly.casillas.accion;
 import monopoly.*;
 import monopoly.cartas.*;
 import monopoly.casillas.*;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import monopoly.excepciones.JugadorNoExisteException;
 import partida.Jugador;
 
 public abstract class Accion extends Casilla {
@@ -12,7 +15,7 @@ public abstract class Accion extends Casilla {
     }
 
     @Override
-    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) {
+    public boolean evaluarCasilla(Jugador actual, Jugador banca, int tirada) throws JugadorBancarrotaException, CasillaInexistenteException, JugadorNoExisteException {
 
         Juego juego = Juego.getInstancia();
 

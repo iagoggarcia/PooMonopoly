@@ -1,7 +1,7 @@
 package monopoly.edificios;
 import monopoly.casillas.propiedad.Solar;
+import monopoly.excepciones.MaximoEdificiosException;
 import partida.*;
-import monopoly.casillas.Casilla;
 
 public class PistaDeporte extends Edificio {
     private static int contadorPistasDeporte = 0;
@@ -16,20 +16,19 @@ public class PistaDeporte extends Edificio {
      * y cada uno de esos errores tiene un código: el primero 1, el segundo 2, el tercero 3 y el último 4. La función retorna 0
      * cuando SÍ se puede construir.
      * */
-    public static int puedeEdificarPista(Solar lugar) {
+    public static void  puedeEdificarPista(Solar lugar) throws MaximoEdificiosException{
         if (lugar.getNumHoteles() < 1 && lugar.getNumPiscinas() < 1) { // si no hay hotel ni piscina
-            return 1;
+            throw new MaximoEdificiosException("No puedes construir una pista de deporte: necesitas un hotel y una piscina en " + lugar);
         } // Comprobación de errores
         else if (lugar.getNumHoteles() < 1) { // si no hay hotel
-            return 2;
+            throw new MaximoEdificiosException("No puedes construir una pista de deporte: necesitas un hotel en " + lugar);
         }
         else if (lugar.getNumPiscinas() < 1) { // si no hay piscina
-            return 3;
+            throw new MaximoEdificiosException("No puedes construir una pista de deporte: necesitas una piscina en " + lugar);
         }
         else if (lugar.getNumPistas() == 1) { // si ya hay pista
-            return 4;
+            throw new MaximoEdificiosException("No puedes construir una pista de deporte: ya existe una pista de deporte en " + lugar);
         }
-        else return 0;
     }
 
     /*

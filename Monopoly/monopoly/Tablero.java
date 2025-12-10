@@ -7,6 +7,7 @@ import monopoly.casillas.accion.Caja;
 import monopoly.casillas.accion.Suerte;
 import monopoly.casillas.especial.*;
 import monopoly.casillas.propiedad.*;
+import monopoly.excepciones.CasillaInexistenteException;
 import partida.*;
 
 public class Tablero {
@@ -259,7 +260,7 @@ public class Tablero {
     }
 
     //Método usado para buscar la casilla con el nombre pasado como argumento:
-    public Casilla encontrar_casilla(String nombre){
+    public Casilla encontrar_casilla(String nombre) throws CasillaInexistenteException {
         // Busco la casilla en cada lado del tablero:
         for (ArrayList<Casilla> lado : posiciones) {   // posiciones: norte, sur, oeste, este
             for (Casilla c : lado) {
@@ -269,18 +270,20 @@ public class Tablero {
                 }
             }
         }
-        return null; // si no existe una casilla con ese nombre devuelve null
+
+        throw new CasillaInexistenteException("No existe la casilla con nombre: " + nombre);
     }
 
-    public Casilla casillaPorPosicion(int pos) {
-    for (ArrayList<Casilla> lado : this.posiciones) {
-        for (Casilla c : lado) {
-            if (c.getPosicion() == pos) {
-                return c;
+    public Casilla casillaPorPosicion(int pos) throws CasillaInexistenteException {
+        for (ArrayList<Casilla> lado : this.posiciones) {
+            for (Casilla c : lado) {
+                if (c.getPosicion() == pos) {
+                    return c;
+                }
             }
         }
+
+        throw new CasillaInexistenteException("No existe la casilla con posición: " + pos);
     }
-    return null; // por si no existe (no debería pasar)
-}
 
 }

@@ -1,7 +1,9 @@
 package monopoly.casillas.propiedad;
-import monopoly.*;
 import monopoly.casillas.*;
-import monopoly.casillas.Casilla;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.FondosInsuficientesException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import monopoly.excepciones.NoEresPropietarioException;
 import partida.*;
 
 // Atributos que tienen las propiedades (solares, servicios y transportes):
@@ -47,7 +49,7 @@ public abstract class Propiedad extends Casilla {
     }
 
     // Es abstract porque se declara en cada subclase que la use
-    public abstract boolean alquiler(Jugador actual);
+    public abstract boolean alquiler(Jugador actual) throws JugadorBancarrotaException;
 
     // También se crea en cada subclase que la use
     public abstract float valor();
@@ -55,19 +57,17 @@ public abstract class Propiedad extends Casilla {
     /*Método usado para comprar una casilla determinada. Parámetros:
      * - Jugador que solicita la compra de la casilla.
      * - Banca del monopoly (es el dueño de las casillas no compradas aún).*/
-    public void comprar(Jugador solicitante, Jugador banca) {
+    public void comprar(Jugador solicitante, Jugador banca) throws JugadorBancarrotaException, CasillaInexistenteException, FondosInsuficientesException, NoEresPropietarioException {
         //comprobaciones
         if (this.duenho == solicitante) {
             System.out.println("Ya posees la casilla " + this.nombre + ".");
             return;
         }
         if (this.duenho != banca && this.duenho != null) {
-            System.out.println("No puedes comprar " + this.nombre + ": pertenece a " + this.duenho.getNombre() + ".");
-            return;
+            throw new NoEresPropietarioException("No puedes comprar " + this.nombre + ": pertenece a " + this.duenho.getNombre() + ".");
         }
         if (solicitante.getFortuna() < this.valor) {
-            System.out.println("No tienes suficiente dinero para comprar " + this.nombre + ".");
-            return;
+            throw new FondosInsuficientesException("No tienes suficiente dinero para comprar " + this.nombre + ".");
         }
 
         solicitante.sumarFortuna(-this.valor);
