@@ -198,6 +198,7 @@ public class Juego implements Comando{
         consola.imprimir(" - acabar turno");
         consola.imprimir(" - bancarrota");
         consola.imprimir(" - trato <jugador>: cambiar (...)");
+        consola.imprimir(" - aceptar <trato>");
         consola.imprimir(" - salir");
         consola.imprimir("\n");
     }
@@ -856,6 +857,21 @@ public class Juego implements Comando{
 
         consola.imprimir("Le toca al jugador " + siguiente.getNombre() + ".");
 
+        // listamos los tratos del jugador al que le toca
+        ArrayList<Trato> tratosPendientes = siguiente.getTratosPendientes();
+
+        if (tratosPendientes == null || tratosPendientes.isEmpty()) {
+            consola.imprimir("No hay tratos pendientes. \n");
+        } else {
+            consola.imprimir("Tienes los siguientes tratos pendientes: \n");
+
+            for (Trato t : tratosPendientes) {
+                consola.imprimir(" - " + t.getIdTrato() + " propuesto por " + t.getEmisor().getNombre() + ": " + t.getDescripcionTrato());
+            }
+
+            consola.imprimir("\n");
+        }
+
         comprobarSolaresNoComprados(); // cada vez que un turno acaba
     }
 
@@ -1380,12 +1396,7 @@ public class Juego implements Comando{
 
         // procesamos primer elemento
         if (Character.isDigit(parte1.charAt(0))) {
-            if (dineroEmisor > 0 && emisor.getFortuna() < dineroEmisor) {
-                throw new FondosInsuficientesException(emisor.getNombre() + " no tiene " + dineroEmisor + "€ para pagar el trato.");
-            }
-
             dineroEmisor = Integer.parseInt(parte1);
-
         } else {
             Casilla c = tablero.encontrar_casilla(parte1);
             if (!(c instanceof Propiedad)) {
@@ -1393,18 +1404,10 @@ public class Juego implements Comando{
             }
 
             propEmisor = (Propiedad) c;
-
-            if (propEmisor.getDuenho() != emisor) {
-                throw new NoEresPropietarioException("No puedes ofrecer " + parte1 + ": no te pertenece.");
-            }
         }
 
         // procesamos segundo elemento
         if (Character.isDigit(parte2.charAt(0))) {
-            if (dineroReceptor > 0 && receptor.getFortuna() < dineroReceptor) {
-                throw new FondosInsuficientesException(receptor.getNombre() + " no tiene " + dineroReceptor + "€ para pagar el trato.");
-            }
-
             dineroReceptor = Integer.parseInt(parte2);
         } else {
             Casilla c = tablero.encontrar_casilla(parte2);
@@ -1413,10 +1416,6 @@ public class Juego implements Comando{
             }
 
             propReceptor = (Propiedad) c;
-
-            if (propReceptor.getDuenho() != receptor) {
-                throw new NoEresPropietarioException("No puedes ofrecer " + parte2 + ": no te pertenece.");
-            }
         }
 
         // procesamos el tercer elemento (el opcional)
@@ -1426,15 +1425,11 @@ public class Juego implements Comando{
                     throw new UsoIncorrectoComandoException("Solo puede haber una cantidad de dinero solicitada.");
                 }
 
-                if (dineroReceptor > 0 && receptor.getFortuna() < dineroReceptor) {
-                    throw new FondosInsuficientesException(receptor.getNombre() + " no tiene " + dineroReceptor + "€ para pagar el trato.");
-                }
-
                 dineroReceptor = Integer.parseInt(parte3);
 
             } else {
                 if (propReceptor != null) {
-                    throw new UsoIncorrectoComandoException("Solo puede haber una propiedad para el receptor.");
+                    throw new UsoIncorrectoComandoException("Solo puedes solicitar una propiedad de " + receptor.getNombre() + ".");
                 }
 
                 Casilla c = tablero.encontrar_casilla(parte2);
@@ -1443,10 +1438,6 @@ public class Juego implements Comando{
                 }
 
                 propReceptor = (Propiedad) c;
-
-                if (propEmisor.getDuenho() != receptor) {
-                    throw new NoEresPropietarioException("No puedes ofrecer " + parte2 + ": no te pertenece.");
-                }
             }
         }
 
@@ -1455,6 +1446,85 @@ public class Juego implements Comando{
         receptor.getTratosPendientes().add(trato);
         Juego.consola.imprimir(receptor.getNombre() + ", ¿te doy " + parte1 + " y tú me das " + parte2 + (parte3 != null ? " y " + parte3 : "") + "?");
 
+    }
+
+    @Override
+    public void aceptarTrato(String idTrato) throws UsoIncorrectoComandoException, NoEresPropietarioException, FondosInsuficientesException, CasillaInexistenteException, JugadorBancarrotaException {
+        Jugador actual = jugadores.get(turno);
+        ArrayList<Trato> tratosPendientes = actual.getTratosPendientes();
+
+        Trato seleccionado = null;
+
+        // buscar el trato por el id
+        for (Trato t : tratosPendientes) {
+            if(t.getIdTrato().equalsIgnoreCase(idTrato)) {
+                seleccionado = t;
+                break;
+            }
+        }
+
+        if (seleccionado == null) {
+            throw new UsoIncorrectoComandoException("No existe el trato " + idTrato + ".");
+        }
+
+        Jugador emisor = seleccionado.getEmisor();
+        Jugador receptor = seleccionado.getReceptor();
+
+        // comprobación por seguridad
+        if (receptor != actual) {
+            throw new UsoIncorrectoComandoException("No puedes aceptar un trato que no es tuyo.");
+        }
+
+        if (seleccionado.getPropiedadEmisor() != null) {
+            if (seleccionado.getPropiedadEmisor().getDuenho() != emisor) {
+                throw new NoEresPropietarioException("El trato no puede ser aceptado: " + seleccionado.getPropiedadEmisor().getNombre() + " no pertenecce a " + emisor.getNombre() + ".");
+            }
+        }
+
+        if (seleccionado.getPropiedadReceptor() != null) {
+            if (seleccionado.getPropiedadReceptor().getDuenho() != receptor) {
+                throw new NoEresPropietarioException("El trato no puede ser aceptado: " + seleccionado.getPropiedadReceptor().getNombre() + " no pertenecce a " + receptor.getNombre() + ".");
+            }
+        }
+
+        if (seleccionado.getDineroEmisor() > 0) {
+            if (emisor.getFortuna() < seleccionado.getDineroEmisor()) {
+                throw new FondosInsuficientesException("El trato no puede ser aceptado: " + emisor.getNombre() + " no dispone de " + seleccionado.getDineroEmisor() + "€.");
+            }
+        }
+
+        if (seleccionado.getDineroReceptor() > 0) {
+            if (receptor.getFortuna() < seleccionado.getDineroReceptor()) {
+                throw new FondosInsuficientesException("El trato no puede ser aceptado: " + receptor.getNombre() + " no dispone de " + seleccionado.getDineroReceptor() + "€.");
+            }
+        }
+
+        if (seleccionado.getPropiedadEmisor() != null) {
+            Propiedad p = seleccionado.getPropiedadEmisor();
+            emisor.eliminarPropiedad(p);
+            receptor.anhadirPropiedad(p);
+        }
+
+        if (seleccionado.getPropiedadReceptor() != null) {
+            Propiedad p = seleccionado.getPropiedadReceptor();
+            receptor.eliminarPropiedad(p);
+            emisor.anhadirPropiedad(p);
+        }
+
+        if (seleccionado.getDineroEmisor() > 0) {
+            emisor.sumarFortuna(-seleccionado.getDineroEmisor());
+            receptor.sumarFortuna(seleccionado.getDineroEmisor());
+        }
+
+        if (seleccionado.getDineroReceptor() > 0) {
+            receptor.sumarFortuna(-seleccionado.getDineroReceptor());
+            emisor.sumarFortuna(seleccionado.getDineroReceptor());
+        }
+
+        // quitamos el trato de la lista de tratos pendientes
+        tratosPendientes.remove(seleccionado);
+
+        consola.imprimir("Se ha aceptado el siguiente trato con " + emisor.getNombre() + ": le doy " + seleccionado.descripcionAceptacion());
     }
 
 }

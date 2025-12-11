@@ -34,5 +34,6 @@ public interface Comando {
     void estadisticasjugador(String nombreJugador) throws JugadorNoExisteException;
     void bancarrota() throws CasillaInexistenteException;
     void proponerTrato(String comando) throws JugadorNoExisteException, NoEresPropietarioException, FondosInsuficientesException, CasillaInexistenteException, UsoIncorrectoComandoException;
+    void aceptarTrato(String idTrato) throws UsoIncorrectoComandoException, NoEresPropietarioException, FondosInsuficientesException, CasillaInexistenteException, JugadorBancarrotaException;
 
 }

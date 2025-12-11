@@ -1,11 +1,14 @@
 package monopoly;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import monopoly.casillas.propiedad.Propiedad;
 import partida.Jugador;
 
 public class Trato {
 
-    private static int contadorTratos = 0;
+    private static int contadorTratos = 1;
     private String idTrato; 
     private  Jugador emisor; // quien propone el trato 
     private Jugador receptor; // a quien se le propone el trato
@@ -59,32 +62,24 @@ public class Trato {
     public String getDescripcionTrato() {
         return descripcionTrato;
     }
-    
-    public boolean comprobacionEmisor() {
-        boolean comprobacion = true;
 
-        if (propiedadEmisor != null && propiedadEmisor.getDuenho() != emisor) {
-            comprobacion = false;
-        }
+    public String descripcionAceptacion() {
 
-        if (dineroEmisor > 0 && emisor.getFortuna() < dineroEmisor) {
-            comprobacion = false;
-        }
+        ArrayList<String> partes = new ArrayList<>();
 
-        return comprobacion;
+        if (propiedadEmisor != null)
+            partes.add(propiedadEmisor.getNombre());
+
+        if (dineroEmisor > 0)
+            partes.add(dineroEmisor + "€");
+
+        if (propiedadReceptor != null)
+            partes.add(propiedadReceptor.getNombre());
+
+        if (dineroReceptor > 0)
+            partes.add(dineroReceptor + "€");
+
+        return String.join(" y ", partes);
     }
 
-    public boolean comprobacionReceptor() {
-        boolean comprobacion = true;
-
-        if (propiedadReceptor != null && propiedadReceptor.getDuenho() != receptor) {
-            comprobacion = false;
-        }
-
-        if (dineroReceptor > 0 && receptor.getFortuna() < dineroReceptor) {
-            comprobacion = false;
-        }
-
-        return comprobacion;
-    }
 }

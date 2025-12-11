@@ -217,6 +217,17 @@ public class Menu {
                 return;
             }
 
+            if (comando.startsWith("aceptar ")) {
+                String idTrato = comando.substring("aceptar ".length()).trim();
+
+                if (idTrato == null) {
+                    throw new UsoIncorrectoComandoException("Formato inválido. Uso: aceptar <trato>");
+                }
+
+                juego.aceptarTrato(idTrato);
+                return;
+            }
+
             else {
                 throw new ComandoDesconocidoException("Comando no reconocido");
             }
@@ -355,7 +366,12 @@ public class Menu {
                     analizarComando("estadisticas " + resto);
                 }
                 else if (l.startsWith("trato ")) {
-                    analizarComando(linea);
+                    String resto = linea.substring("trato".length()).trim();
+                    analizarComando("trato " + resto);
+                }
+                else if (l.startsWith("aceptar ")) {
+                    String resto = linea.substring("aceptar".length()).trim();
+                    analizarComando("aceptar " + resto);
                 }
                 else {
                     throw new ComandoDesconocidoException("comando no reconocido en el archivo: " + lineaOriginal);
