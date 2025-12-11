@@ -228,6 +228,22 @@ public class Menu {
                 return;
             }
 
+            if (comando.startsWith("listar tratos")) {
+                juego.listarTratos();
+                return;
+            }
+
+            if (comando.startsWith("eliminar ")) {
+                String idTrato = comando.substring("eliminar ".length()).trim();
+
+                if (idTrato == null) {
+                    throw new UsoIncorrectoComandoException("Formato inválido. Uso: eliminar <trato>");
+                }
+
+                juego.eliminarTrato(idTrato);
+                return;
+            }
+
             else {
                 throw new ComandoDesconocidoException("Comando no reconocido");
             }
@@ -372,6 +388,13 @@ public class Menu {
                 else if (l.startsWith("aceptar ")) {
                     String resto = linea.substring("aceptar".length()).trim();
                     analizarComando("aceptar " + resto);
+                }
+                else if (l.equals("listar tratos")) {
+                    analizarComando("listar tratos");
+                }
+                else if (l.startsWith("eliminar ")) {
+                    String resto = linea.substring("eliminar".length()).trim();
+                    analizarComando("eliminar " + resto);
                 }
                 else {
                     throw new ComandoDesconocidoException("comando no reconocido en el archivo: " + lineaOriginal);

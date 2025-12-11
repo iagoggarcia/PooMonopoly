@@ -193,12 +193,13 @@ public class Juego implements Comando{
         consola.imprimir(" - deshipotecar <casilla>");
         consola.imprimir(" - edificar <tipo>");
         consola.imprimir(" - crear jugador <nombre> <tipoAvatar>");
-        consola.imprimir(" - listar <jugadores|edificios|enventa>");
+        consola.imprimir(" - listar <jugadores|edificios|enventa|tratos>");
         consola.imprimir(" - estadisticas [jugador]");
         consola.imprimir(" - acabar turno");
         consola.imprimir(" - bancarrota");
         consola.imprimir(" - trato <jugador>: cambiar (...)");
         consola.imprimir(" - aceptar <trato>");
+        consola.imprimir(" - eliminar <trato>");
         consola.imprimir(" - salir");
         consola.imprimir("\n");
     }
@@ -858,19 +859,7 @@ public class Juego implements Comando{
         consola.imprimir("Le toca al jugador " + siguiente.getNombre() + ".");
 
         // listamos los tratos del jugador al que le toca
-        ArrayList<Trato> tratosPendientes = siguiente.getTratosPendientes();
-
-        if (tratosPendientes == null || tratosPendientes.isEmpty()) {
-            consola.imprimir("No hay tratos pendientes. \n");
-        } else {
-            consola.imprimir("Tienes los siguientes tratos pendientes: \n");
-
-            for (Trato t : tratosPendientes) {
-                consola.imprimir(" - " + t.getIdTrato() + " propuesto por " + t.getEmisor().getNombre() + ": " + t.getDescripcionTrato());
-            }
-
-            consola.imprimir("\n");
-        }
+        listarTratos();
 
         comprobarSolaresNoComprados(); // cada vez que un turno acaba
     }
@@ -1357,8 +1346,8 @@ public class Juego implements Comando{
             throw new UsoIncorrectoComandoException("Formato inválido. Faltan paréntesis con el contenido del trato.");
         }
 
-        // Incluye los paréntesis como tú pediste
         String contenido = comando.substring(indiceParte1, indiceParte2 + 1).trim();
+        contenido = contenido.replace(" y ", ",");
         
         Jugador emisor = jugadores.get(turno);
         Jugador receptor = buscarJugadorPorNombre(nombreReceptor);
@@ -1464,7 +1453,7 @@ public class Juego implements Comando{
         }
 
         if (seleccionado == null) {
-            throw new UsoIncorrectoComandoException("No existe el trato " + idTrato + ".");
+            throw new UsoIncorrectoComandoException("No existe en tus tratos el " + idTrato + ".");
         }
 
         Jugador emisor = seleccionado.getEmisor();
@@ -1525,6 +1514,51 @@ public class Juego implements Comando{
         tratosPendientes.remove(seleccionado);
 
         consola.imprimir("Se ha aceptado el siguiente trato con " + emisor.getNombre() + ": le doy " + seleccionado.descripcionAceptacion());
+    }
+
+    @Override
+    public void listarTratos() {
+        Jugador actual = jugadores.get(turno);
+
+        ArrayList<Trato> listaTratos = actual.getTratosPendientes();
+
+        if (listaTratos == null || listaTratos.isEmpty()) {
+            consola.imprimir("No hay tratos pendientes.");
+            return;
+        }
+
+        for (Trato t : listaTratos) {
+            consola.imprimir("{");
+            consola.imprimir("id: " + t.getIdTrato());
+            consola.imprimir("  jugadorPropone: " + t.getEmisor().getNombre());
+            consola.imprimir("  trato: cambiar " + t.getDescripcionTrato());
+            consola.imprimir("}");
+        }
+    }
+
+    @Override
+    public void eliminarTrato(String idTrato) throws UsoIncorrectoComandoException {
+        Jugador actual = jugadores.get(turno);
+
+        for (Jugador j : jugadores) {
+            ArrayList<Trato> listaTratos = j.getTratosPendientes();
+            if (listaTratos == null) continue;
+
+            for (Trato t : listaTratos) {
+                if(t.getIdTrato().equalsIgnoreCase(idTrato)) {
+                    // solo puede eliminarlo si es el que propuso el trato
+                    if (t.getEmisor() != actual) {
+                        throw new UsoIncorrectoComandoException("No puedes eliminar el trato " + idTrato + " porque tú no lo propusiste.");
+                    }
+
+                    listaTratos.remove(t);
+                    consola.imprimir("Se ha eliminado el " + idTrato + ".");
+                    return;
+                }
+            }
+        }
+
+        throw new UsoIncorrectoComandoException("No existe ningún trato con id " + idTrato + ".");
     }
 
 }

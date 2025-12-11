@@ -121,15 +121,17 @@ public class Jugador {
 
     public ArrayList<Casilla> getHipotecas() {
         ArrayList<Casilla> solaresHipotecados = new ArrayList<>();
+
         if (this.propiedades != null) {
             for (Casilla c : this.propiedades) {
-                if (c instanceof Solar s) {
+                if (c instanceof Solar s && s.estaHipotecada()) {
                     solaresHipotecados.add(c);
                 }
             }
         }
         return solaresHipotecados;
     }
+
     public float getPatrimonio() {
         float valorPropiedades = 0;
         if (this.propiedades != null) {
