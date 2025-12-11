@@ -29,6 +29,7 @@ public class Jugador {
     private float alquilerpagadojugador;
     private float premiosinversiones; //todo lo recibido por cartas, casillas de suerte, bote del parking...
     private int vecescarcel; //contador para la carcel
+    private ArrayList<Trato> tratosPendientes = new ArrayList<>();
 
     //Constructor vacío. Se usará para crear la banca.
     // estaba mal, como pone en el esqueleto es VACÍO, no hay que completar nada
@@ -201,6 +202,17 @@ public class Jugador {
         return this.vecescarcel;
     }
 
+    public void agregarTratoPendiente(Trato t) {
+        tratosPendientes.add(t);
+    }
+
+    public ArrayList<Trato> getTratosPendientes() {
+        return tratosPendientes;
+    }
+
+    public void eliminarTratoPendiente(Trato t) {
+        tratosPendientes.remove(t);
+    }
 
 
     //Otros métodos:

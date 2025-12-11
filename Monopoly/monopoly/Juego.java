@@ -197,7 +197,8 @@ public class Juego implements Comando{
         consola.imprimir(" - estadisticas [jugador]");
         consola.imprimir(" - acabar turno");
         consola.imprimir(" - bancarrota");
-        consola.imprimir("- salir");
+        consola.imprimir(" - trato <jugador>: cambiar (...)");
+        consola.imprimir(" - salir");
         consola.imprimir("\n");
     }
 
@@ -1317,6 +1318,143 @@ public class Juego implements Comando{
 
     public ArrayList<Jugador> getJugadores() {
         return this.jugadores;
+    }
+
+    @Override
+    public void proponerTrato(String comando) throws JugadorNoExisteException, NoEresPropietarioException, FondosInsuficientesException, CasillaInexistenteException, UsoIncorrectoComandoException {
+        // primero borramos la palabra trato del principio
+        String resto = comando.substring("trato ".length()).trim();
+
+        // buscamos el nombre del receptor antes de los dos puntos
+        int indiceDosPuntos = resto.indexOf(':');
+        if (indiceDosPuntos == -1) {
+            throw new UsoIncorrectoComandoException("Formato inválido. Uso: trato <jugador>: cambiar ( ... )");
+        }
+
+        String nombreReceptor = resto.substring(0, indiceDosPuntos).trim();
+
+        // buscamos los paréntesis
+        int indiceParte1 = comando.indexOf('(');
+        int indiceParte2 = comando.lastIndexOf(')');
+
+        if (indiceParte1 == -1 || indiceParte2 == -1 || indiceParte2 < indiceParte1) {
+            throw new UsoIncorrectoComandoException("Formato inválido. Faltan paréntesis con el contenido del trato.");
+        }
+
+        // Incluye los paréntesis como tú pediste
+        String contenido = comando.substring(indiceParte1, indiceParte2 + 1).trim();
+        
+        Jugador emisor = jugadores.get(turno);
+        Jugador receptor = buscarJugadorPorNombre(nombreReceptor);
+
+        if (receptor == null) {
+            throw new JugadorNoExisteException("No existe el jugador '" + nombreReceptor + "'.");
+        }
+
+        if (receptor == emisor) {
+            Juego.consola.imprimir("No puedes proponerte un trato a ti mismo.");
+            return;
+        }
+
+        // quitamos los paréntesis
+        contenido = contenido.trim();
+        if (contenido.startsWith("(") && contenido.endsWith(")")) {
+            contenido = contenido.substring(1, contenido.length() - 1);
+        }
+
+        // dividimos por comas
+        String[] partes = contenido.split(",");
+
+        if (partes.length < 2 || partes.length > 3) {
+            throw new UsoIncorrectoComandoException("Formato inválido de trato.");
+        }
+
+        String parte1 = partes[0].trim();
+        String parte2 = partes[1].trim();
+        String parte3 = partes.length == 3 ? partes[2].trim() : null;
+
+        Propiedad propEmisor = null;
+        Propiedad propReceptor = null;
+        int dineroEmisor = 0;
+        int dineroReceptor = 0;
+
+        // procesamos primer elemento
+        if (Character.isDigit(parte1.charAt(0))) {
+            if (dineroEmisor > 0 && emisor.getFortuna() < dineroEmisor) {
+                throw new FondosInsuficientesException(emisor.getNombre() + " no tiene " + dineroEmisor + "€ para pagar el trato.");
+            }
+
+            dineroEmisor = Integer.parseInt(parte1);
+
+        } else {
+            Casilla c = tablero.encontrar_casilla(parte1);
+            if (!(c instanceof Propiedad)) {
+                throw new UsoIncorrectoComandoException(parte1 + " no es una propiedad válida.");
+            }
+
+            propEmisor = (Propiedad) c;
+
+            if (propEmisor.getDuenho() != emisor) {
+                throw new NoEresPropietarioException("No puedes ofrecer " + parte1 + ": no te pertenece.");
+            }
+        }
+
+        // procesamos segundo elemento
+        if (Character.isDigit(parte2.charAt(0))) {
+            if (dineroReceptor > 0 && receptor.getFortuna() < dineroReceptor) {
+                throw new FondosInsuficientesException(receptor.getNombre() + " no tiene " + dineroReceptor + "€ para pagar el trato.");
+            }
+
+            dineroReceptor = Integer.parseInt(parte2);
+        } else {
+            Casilla c = tablero.encontrar_casilla(parte2);
+            if (!(c instanceof Propiedad)) {
+                throw new UsoIncorrectoComandoException(parte2 + " no es una propiedad válida.");
+            }
+
+            propReceptor = (Propiedad) c;
+
+            if (propReceptor.getDuenho() != receptor) {
+                throw new NoEresPropietarioException("No puedes ofrecer " + parte2 + ": no te pertenece.");
+            }
+        }
+
+        // procesamos el tercer elemento (el opcional)
+        if (parte3 != null){
+            if (Character.isDigit(parte3.charAt(0))) {
+                if (dineroReceptor > 0) {
+                    throw new UsoIncorrectoComandoException("Solo puede haber una cantidad de dinero solicitada.");
+                }
+
+                if (dineroReceptor > 0 && receptor.getFortuna() < dineroReceptor) {
+                    throw new FondosInsuficientesException(receptor.getNombre() + " no tiene " + dineroReceptor + "€ para pagar el trato.");
+                }
+
+                dineroReceptor = Integer.parseInt(parte3);
+
+            } else {
+                if (propReceptor != null) {
+                    throw new UsoIncorrectoComandoException("Solo puede haber una propiedad para el receptor.");
+                }
+
+                Casilla c = tablero.encontrar_casilla(parte2);
+                if (!(c instanceof Propiedad)) {
+                    throw new UsoIncorrectoComandoException(parte2 + " no es una propiedad válida.");
+                }
+
+                propReceptor = (Propiedad) c;
+
+                if (propEmisor.getDuenho() != receptor) {
+                    throw new NoEresPropietarioException("No puedes ofrecer " + parte2 + ": no te pertenece.");
+                }
+            }
+        }
+
+        String descripcion = "(" + parte1 + ", " + parte2 + (parte3 != null ? ", " + parte3 : "") + ")";
+        Trato trato = new Trato (emisor, receptor, propEmisor, dineroEmisor, propReceptor, dineroReceptor, descripcion);
+        receptor.getTratosPendientes().add(trato);
+        Juego.consola.imprimir(receptor.getNombre() + ", ¿te doy " + parte1 + " y tú me das " + parte2 + (parte3 != null ? " y " + parte3 : "") + "?");
+
     }
 
 }

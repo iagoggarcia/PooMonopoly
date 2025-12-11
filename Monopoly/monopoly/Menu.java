@@ -212,6 +212,11 @@ public class Menu {
                 return;
             }
 
+            if (comando.startsWith("trato ")) {
+                juego.proponerTrato(comando);
+                return;
+            }
+
             else {
                 throw new ComandoDesconocidoException("Comando no reconocido");
             }
@@ -275,7 +280,7 @@ public class Menu {
                         String tipo = p[3];
                         analizarComando("crear jugador " + nombre + " " + tipo);
                     } else {
-                        System.err.println("Formato inválido para 'crear jugador': " + lineaOriginal);
+                        throw new UsoIncorrectoComandoException("Formato inválido para 'crear jugador': " + lineaOriginal);
                     }
                 }
                 else if (l.equals("ver tablero")) {
@@ -349,8 +354,11 @@ public class Menu {
                     String resto = linea.substring("estadisticas".length()).trim();
                     analizarComando("estadisticas " + resto);
                 }
+                else if (l.startsWith("trato ")) {
+                    analizarComando(linea);
+                }
                 else {
-                    System.err.println("comando no reconocido en el archivo: " + lineaOriginal);
+                    throw new ComandoDesconocidoException("comando no reconocido en el archivo: " + lineaOriginal);
                 }
             }
         }
@@ -361,4 +369,5 @@ public class Menu {
         Juego.consola.imprimir("\nArchivo finalizado. Puedes continuar jugando.\n");
         bucleComandos();
     }
+
 }

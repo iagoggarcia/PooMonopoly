@@ -5,6 +5,7 @@ import partida.Jugador;
 
 public class Trato {
 
+    private static int contadorTratos = 0;
     private String idTrato; 
     private  Jugador emisor; // quien propone el trato 
     private Jugador receptor; // a quien se le propone el trato
@@ -14,9 +15,9 @@ public class Trato {
     private int dineroReceptor; // el dinero que se pide a cambio
     private String descripcionTrato;
 
-    public Trato (String idTrato, Jugador emisor, Jugador receptor, Propiedad propiedadEmisor, int dineroEmisor, Propiedad propiedadReceptor, int dineroReceptor, String descripcionTrato) {
+    public Trato (Jugador emisor, Jugador receptor, Propiedad propiedadEmisor, int dineroEmisor, Propiedad propiedadReceptor, int dineroReceptor, String descripcionTrato) {
         
-        this.idTrato = idTrato;
+        this.idTrato = "trato" + (contadorTratos++);
         this.emisor = emisor;
         this.receptor = receptor;
         this.propiedadEmisor = propiedadEmisor;
