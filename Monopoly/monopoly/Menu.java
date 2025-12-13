@@ -289,124 +289,137 @@ public class Menu {
 
         try (Scanner sc = new Scanner(path, StandardCharsets.UTF_8)) {
 
+            int numLinea = 0;
+
             while (sc.hasNextLine()) {
+                numLinea++;
 
                 String lineaOriginal = sc.nextLine();
                 if (lineaOriginal == null) continue;
 
-                String linea = lineaOriginal.strip();
-                if (linea.isEmpty()) continue;
-                if (linea.startsWith("#") || linea.startsWith("//")) continue;
+                try {
+                    String linea = lineaOriginal.strip();
+                    if (linea.isEmpty()) continue;
+                    if (linea.startsWith("#") || linea.startsWith("//")) continue;
 
-                String l = linea.toLowerCase();
+                    String l = linea.toLowerCase();
 
-                if (l.startsWith("crear jugador")) {
-                    String[] p = linea.split("\\s+");
-                    if (p.length >= 4) {
-                        String nombre = p[2];
-                        String tipo = p[3];
-                        analizarComando("crear jugador " + nombre + " " + tipo);
-                    } else {
-                        throw new UsoIncorrectoComandoException("Formato inválido para 'crear jugador': " + lineaOriginal);
+                    if (l.startsWith("crear jugador")) {
+                        String[] p = linea.split("\\s+");
+                        if (p.length >= 4) {
+                            String nombre = p[2];
+                            String tipo = p[3];
+                            analizarComando("crear jugador " + nombre + " " + tipo);
+                        } else {
+                            throw new UsoIncorrectoComandoException(
+                                    "Formato inválido para 'crear jugador': " + lineaOriginal
+                            );
+                        }
                     }
-                }
-                else if (l.equals("ver tablero")) {
-                    analizarComando("ver tablero");
-                }
-                else if (l.equals("lanzar dados")) {
-                    analizarComando("lanzar dados");
-                }
-                else if (l.startsWith("lanzar dados ")) {
-                    String resto = linea.substring(linea.toLowerCase().indexOf("lanzar dados") + "lanzar dados".length()).trim();
-                    analizarComando("lanzar dados " + resto);
-                }
-                else if (l.startsWith("describir jugador")) {
-                    String resto = linea.substring("describir jugador".length()).trim();
-                    analizarComando("describir jugador " + resto);
-                }
-                else if (l.startsWith("describir avatar")) {
-                    String resto = linea.substring("describir avatar".length()).trim();
-                    analizarComando("describir avatar " + resto);
-                }
-                else if (l.startsWith("describir")) {
-                    String resto = linea.substring("describir".length()).trim();
-                    analizarComando("describir " + resto);
-                }
-                else if (l.equals("listar jugadores")) {
-                    analizarComando("listar jugadores");
-                }
-                else if (l.equals("listar enventa")) {
-                    analizarComando("listar enventa");
-                }
-                else if (l.equals("listar edificios")) {
-                    analizarComando("listar edificios");
-                }
-                else if (l.startsWith("listar edificios ")) {
-                    String resto = linea.substring("listar edificios".length()).trim();
-                    analizarComando("listar edificios " + resto);
-                }
-                else if (l.equals("acabar turno")) {
-                    analizarComando("acabar turno");
-                }
-                else if (l.startsWith("salir cárcel")) {
-                    analizarComando("salir cárcel");
-                }
-                else if (l.startsWith("comprar ")) {
-                    String prop = linea.substring("comprar".length()).trim();
-                    analizarComando("comprar " + prop);
-                }
-                else if (l.startsWith("vender ")) {
-                    String datos = linea.substring("vender".length()).trim();
-                    analizarComando("vender " + datos);
-                }
-                else if (l.equals("listar avatares")) {
-                    analizarComando("listar avatares");
-                }
-                else if (l.startsWith("hipotecar ")) {
-                    String resto = linea.substring("hipotecar".length()).trim();
-                    analizarComando("hipotecar " + resto);
-                }
-                else if (l.startsWith("deshipotecar ")) {
-                    String resto = linea.substring("deshipotecar".length()).trim();
-                    analizarComando("deshipotecar " + resto);
-                }
-                else if (l.startsWith("edificar ")) {
-                    String resto = linea.substring("edificar".length()).trim();
-                    analizarComando("edificar " + resto);
-                }
-                else if (l.equals("estadisticas")) {
-                    analizarComando("estadisticas");
-                }
-                else if (l.startsWith("estadisticas ")) {
-                    String resto = linea.substring("estadisticas".length()).trim();
-                    analizarComando("estadisticas " + resto);
-                }
-                else if (l.startsWith("trato ")) {
-                    String resto = linea.substring("trato".length()).trim();
-                    analizarComando("trato " + resto);
-                }
-                else if (l.startsWith("aceptar ")) {
-                    String resto = linea.substring("aceptar".length()).trim();
-                    analizarComando("aceptar " + resto);
-                }
-                else if (l.equals("listar tratos")) {
-                    analizarComando("listar tratos");
-                }
-                else if (l.startsWith("eliminar ")) {
-                    String resto = linea.substring("eliminar".length()).trim();
-                    analizarComando("eliminar " + resto);
-                }
-                else {
-                    throw new ComandoDesconocidoException("comando no reconocido en el archivo: " + lineaOriginal);
+                    else if (l.equals("ver tablero")) {
+                        analizarComando("ver tablero");
+                    }
+                    else if (l.equals("lanzar dados")) {
+                        analizarComando("lanzar dados");
+                    }
+                    else if (l.startsWith("lanzar dados ")) {
+                        String resto = linea.substring(linea.toLowerCase().indexOf("lanzar dados") + "lanzar dados".length()).trim();
+                        analizarComando("lanzar dados " + resto);
+                    }
+                    else if (l.startsWith("describir jugador")) {
+                        String resto = linea.substring("describir jugador".length()).trim();
+                        analizarComando("describir jugador " + resto);
+                    }
+                    else if (l.startsWith("describir avatar")) {
+                        String resto = linea.substring("describir avatar".length()).trim();
+                        analizarComando("describir avatar " + resto);
+                    }
+                    else if (l.startsWith("describir")) {
+                        String resto = linea.substring("describir".length()).trim();
+                        analizarComando("describir " + resto);
+                    }
+                    else if (l.equals("listar jugadores")) {
+                        analizarComando("listar jugadores");
+                    }
+                    else if (l.equals("listar enventa")) {
+                        analizarComando("listar enventa");
+                    }
+                    else if (l.equals("listar edificios")) {
+                        analizarComando("listar edificios");
+                    }
+                    else if (l.startsWith("listar edificios ")) {
+                        String resto = linea.substring("listar edificios".length()).trim();
+                        analizarComando("listar edificios " + resto);
+                    }
+                    else if (l.equals("acabar turno")) {
+                        analizarComando("acabar turno");
+                    }
+                    else if (l.startsWith("salir cárcel")) {
+                        analizarComando("salir cárcel");
+                    }
+                    else if (l.startsWith("comprar ")) {
+                        String prop = linea.substring("comprar".length()).trim();
+                        analizarComando("comprar " + prop);
+                    }
+                    else if (l.startsWith("vender ")) {
+                        String datos = linea.substring("vender".length()).trim();
+                        analizarComando("vender " + datos);
+                    }
+                    else if (l.equals("listar avatares")) {
+                        analizarComando("listar avatares");
+                    }
+                    else if (l.startsWith("hipotecar ")) {
+                        String resto = linea.substring("hipotecar".length()).trim();
+                        analizarComando("hipotecar " + resto);
+                    }
+                    else if (l.startsWith("deshipotecar ")) {
+                        String resto = linea.substring("deshipotecar".length()).trim();
+                        analizarComando("deshipotecar " + resto);
+                    }
+                    else if (l.startsWith("edificar ")) {
+                        String resto = linea.substring("edificar".length()).trim();
+                        analizarComando("edificar " + resto);
+                    }
+                    else if (l.equals("estadisticas")) {
+                        analizarComando("estadisticas");
+                    }
+                    else if (l.startsWith("estadisticas ")) {
+                        String resto = linea.substring("estadisticas".length()).trim();
+                        analizarComando("estadisticas " + resto);
+                    }
+                    else if (l.startsWith("trato ")) {
+                        String resto = linea.substring("trato".length()).trim();
+                        analizarComando("trato " + resto);
+                    }
+                    else if (l.startsWith("aceptar ")) {
+                        String resto = linea.substring("aceptar".length()).trim();
+                        analizarComando("aceptar " + resto);
+                    }
+                    else if (l.equals("listar tratos")) {
+                        analizarComando("listar tratos");
+                    }
+                    else if (l.startsWith("eliminar ")) {
+                        String resto = linea.substring("eliminar".length()).trim();
+                        analizarComando("eliminar " + resto);
+                    }
+                    else {
+                        throw new ComandoDesconocidoException("comando no reconocido en el archivo: " + lineaOriginal);
+                    }
+
+                } catch (MonopolyException e) {
+                    Juego.consola.imprimir("[Línea " + numLinea + "] " + e.getMessage());
+                    continue;
                 }
             }
-        }
-        catch (IOException e) {
+
+        } catch (IOException e) {
             System.err.println("Error leyendo " + ruta + ": " + e.getMessage());
         }
+
         //para seguir jugando depsues
         Juego.consola.imprimir("\nArchivo finalizado. Puedes continuar jugando.\n");
         bucleComandos();
     }
+
 
 }
