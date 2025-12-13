@@ -1395,32 +1395,11 @@ public class Juego implements Comando{
             propEmisor = (Propiedad) c;
         }
 
-        // procesamos segundo elemento
-        if (Character.isDigit(parte2.charAt(0))) {
-            dineroReceptor = Integer.parseInt(parte2);
-        } else {
-            Casilla c = tablero.encontrar_casilla(parte2);
-            if (!(c instanceof Propiedad)) {
-                throw new UsoIncorrectoComandoException(parte2 + " no es una propiedad válida.");
-            }
-
-            propReceptor = (Propiedad) c;
-        }
-
-        // procesamos el tercer elemento (el opcional)
-        if (parte3 != null){
-            if (Character.isDigit(parte3.charAt(0))) {
-                if (dineroReceptor > 0) {
-                    throw new UsoIncorrectoComandoException("Solo puede haber una cantidad de dinero solicitada.");
-                }
-
-                dineroReceptor = Integer.parseInt(parte3);
-
+        // procesamos segundo y tercer elemento
+        if (parte3 == null) {   
+            if (Character.isDigit(parte2.charAt(0))) {
+                dineroReceptor = Integer.parseInt(parte2);
             } else {
-                if (propReceptor != null) {
-                    throw new UsoIncorrectoComandoException("Solo puedes solicitar una propiedad de " + receptor.getNombre() + ".");
-                }
-
                 Casilla c = tablero.encontrar_casilla(parte2);
                 if (!(c instanceof Propiedad)) {
                     throw new UsoIncorrectoComandoException(parte2 + " no es una propiedad válida.");
@@ -1428,13 +1407,56 @@ public class Juego implements Comando{
 
                 propReceptor = (Propiedad) c;
             }
+        } else {
+            if (Character.isDigit(parte2.charAt(0))) {
+                dineroEmisor = Integer.parseInt(parte2);
+            } else {
+                Casilla c = tablero.encontrar_casilla(parte2);
+                if (!(c instanceof Propiedad)) {
+                    throw new UsoIncorrectoComandoException(parte2 + " no es una propiedad válida.");
+                }
+
+                propReceptor = (Propiedad) c;
+            }
+
+            if (Character.isDigit(parte3.charAt(0))) {
+                dineroReceptor = Integer.parseInt(parte3);
+            } else {
+                Casilla c = tablero.encontrar_casilla(parte3);
+                if (!(c instanceof Propiedad)) {
+                    throw new UsoIncorrectoComandoException(parte3 + " no es una propiedad válida.");
+                }
+
+                propReceptor = (Propiedad) c;
+            }
         }
 
-        String descripcion = "(" + parte1 + ", " + parte2 + (parte3 != null ? ", " + parte3 : "") + ")";
-        Trato trato = new Trato (emisor, receptor, propEmisor, dineroEmisor, propReceptor, dineroReceptor, descripcion);
-        receptor.getTratosPendientes().add(trato);
-        Juego.consola.imprimir(receptor.getNombre() + ", ¿te doy " + parte1 + " y tú me das " + parte2 + (parte3 != null ? " y " + parte3 : "") + "?");
+        String descripcion;
 
+        if (parte3 == null) {
+            descripcion = "(" + parte1 + ", " + parte2 + ")";
+        } else {
+            if (Character.isDigit(parte2.charAt(0))) {
+                // propiedad y dinero, propiedad
+                descripcion = "(" + parte1 + " y " + parte2 + ", " + parte3 + ")";
+            } else {
+                // propiedad, propiedad y dinero
+                descripcion = "(" + parte1 + ", " + parte2 + " y " + parte3 + ")";
+            }
+        }
+        
+        Trato trato = new Trato (emisor, receptor, propEmisor, dineroEmisor, propReceptor, dineroReceptor, descripcion);
+        receptor.getTratosPendientes().add(trato); 
+
+        if (parte3 == null) {
+            consola.imprimir(receptor.getNombre() + ", ¿te doy " + parte1 + " y tú me das " + parte2 + "?");
+        } else {
+            if (Character.isDigit(parte2.charAt(0))) {
+                consola.imprimir(receptor.getNombre() + ", ¿te doy " + parte1 + " y " + parte2 + " y tú me das " + parte3 + "?");
+            } else {
+                consola.imprimir(receptor.getNombre() + ", ¿te doy " + parte1 + " y tú me das " + parte2 + " y " + parte3 + "?");
+            }
+        }
     }
 
     @Override
@@ -1459,6 +1481,9 @@ public class Juego implements Comando{
         Jugador emisor = seleccionado.getEmisor();
         Jugador receptor = seleccionado.getReceptor();
 
+        String jugadorDa = "";
+        String jugadorRecibe = "";
+
         // comprobación por seguridad
         if (receptor != actual) {
             throw new UsoIncorrectoComandoException("No puedes aceptar un trato que no es tuyo.");
@@ -1468,24 +1493,30 @@ public class Juego implements Comando{
             if (seleccionado.getPropiedadEmisor().getDuenho() != emisor) {
                 throw new NoEresPropietarioException("El trato no puede ser aceptado: " + seleccionado.getPropiedadEmisor().getNombre() + " no pertenecce a " + emisor.getNombre() + ".");
             }
+            jugadorRecibe += seleccionado.getPropiedadEmisor().getNombre();
         }
 
         if (seleccionado.getPropiedadReceptor() != null) {
             if (seleccionado.getPropiedadReceptor().getDuenho() != receptor) {
                 throw new NoEresPropietarioException("El trato no puede ser aceptado: " + seleccionado.getPropiedadReceptor().getNombre() + " no pertenecce a " + receptor.getNombre() + ".");
             }
+            jugadorDa += seleccionado.getPropiedadReceptor().getNombre();
         }
 
         if (seleccionado.getDineroEmisor() > 0) {
             if (emisor.getFortuna() < seleccionado.getDineroEmisor()) {
                 throw new FondosInsuficientesException("El trato no puede ser aceptado: " + emisor.getNombre() + " no dispone de " + seleccionado.getDineroEmisor() + "€.");
             }
+            if (!jugadorRecibe.isEmpty()) jugadorRecibe += " y ";
+            jugadorRecibe += seleccionado.getDineroEmisor();
         }
 
         if (seleccionado.getDineroReceptor() > 0) {
             if (receptor.getFortuna() < seleccionado.getDineroReceptor()) {
                 throw new FondosInsuficientesException("El trato no puede ser aceptado: " + receptor.getNombre() + " no dispone de " + seleccionado.getDineroReceptor() + "€.");
             }
+            if (!jugadorDa.isEmpty()) jugadorDa += " y ";
+            jugadorDa += seleccionado.getDineroReceptor();
         }
 
         if (seleccionado.getPropiedadEmisor() != null) {
@@ -1503,17 +1534,20 @@ public class Juego implements Comando{
         if (seleccionado.getDineroEmisor() > 0) {
             emisor.sumarFortuna(-seleccionado.getDineroEmisor());
             receptor.sumarFortuna(seleccionado.getDineroEmisor());
+            consola.imprimir(receptor.getNombre() + " ha recibido " + seleccionado.getDineroEmisor() + " de " + emisor.getNombre() + ".");
         }
 
         if (seleccionado.getDineroReceptor() > 0) {
             receptor.sumarFortuna(-seleccionado.getDineroReceptor());
             emisor.sumarFortuna(seleccionado.getDineroReceptor());
+            consola.imprimir(emisor.getNombre() + " ha recibido " + seleccionado.getDineroReceptor() + " de " + receptor.getNombre() + ".");
         }
 
         // quitamos el trato de la lista de tratos pendientes
         tratosPendientes.remove(seleccionado);
 
-        consola.imprimir("Se ha aceptado el siguiente trato con " + emisor.getNombre() + ": le doy " + seleccionado.descripcionAceptacion());
+        // imprimimos
+        consola.imprimir("Se ha aceptado el siguiente trato con " + emisor.getNombre() + ": le doy " + jugadorDa + " y él me da " + jugadorRecibe + ".");
     }
 
     @Override
