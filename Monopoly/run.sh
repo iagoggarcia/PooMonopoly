@@ -1,13 +1,15 @@
 #!/bin/bash
-# Limpiar clases antiguas
-rm -f monopoly/*.class
 
-# Compilar todos los .java del paquete monopoly
-javac monopoly/*.java partida/*.java
+# Limpiar TODAS las clases antiguas del proyecto
+find . -name "*.class" -delete
 
-# Si la compilación fue exitosa, ejecutar el programa principal
+# Compilar TODO el proyecto
+javac $(find . -name "*.java")
+
+# Si la compilación fue exitosa, ejecutar
 if [ $? -eq 0 ]; then
-    java monopoly.MonopolyETSE comandos_P2_1.txt
+    java monopoly.MonopolyETSE comandosP3.txt
 else
     echo "Error de compilación. No se ejecutará el programa."
 fi
+

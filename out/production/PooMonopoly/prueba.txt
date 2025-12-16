@@ -1,0 +1,30 @@
+crear jugador Pedro pelota
+crear jugador Maria coche
+lanzar dados 1+0
+comprar Solar1
+edificar casa
+acabar turno
+acabar turno
+lanzar dados 1+1
+comprar Solar2
+edificar casa
+vender casas Solar2 2
+edificar casa
+edificar casa
+vender casas Solar2 2
+edificar casa
+edificar casa
+edificar casa
+edificar casa
+listar edificios negro
+edificar hotel
+listar edificios negro
+vender piscinas Solar2 1
+vender pista Solar3 2
+edificar piscina
+edificar pista
+vender pista Solar2 1
+estadisticas
+listar edificios negro
+describir Solar8
+estadisticas Pedro

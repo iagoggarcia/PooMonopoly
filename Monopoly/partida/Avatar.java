@@ -2,6 +2,8 @@ package partida;
 
 import java.util.ArrayList;
 import monopoly.*;
+import monopoly.casillas.*;
+import monopoly.excepciones.CasillaInexistenteException;
 
 
 public class Avatar {
@@ -21,7 +23,7 @@ public class Avatar {
     * Tipo del avatar, jugador al que pertenece, lugar en el que estará ubicado, y un arraylist con los
     * avatares creados (usado para crear un ID distinto del de los demás avatares).
      */
-    public Avatar(String tipo, Jugador jugador, Casilla lugar, ArrayList<Avatar> avCreados) {
+    public Avatar(String tipo, Jugador jugador, Casilla lugar, ArrayList<Avatar> avCreados) throws CasillaInexistenteException {
         this.tipo = tipo; // cadena con el tipo de avatar
         this.jugador = jugador; // el dueño del avatar (quien lo va a mover)
         this.lugar = lugar; // la casilla  inicial donde aparecerá el avatar (salida normalmente)
@@ -30,7 +32,7 @@ public class Avatar {
         
         // colocamos el avatar en la casilla que se pasa como argumento
         if (lugar == null) {
-            System.err.println("Advertencia: avatar " + tipo + " creado sin casilla inicial.");
+            throw new CasillaInexistenteException("Advertencia: avatar " + tipo + " creado sin casilla inicial.");
         } else {
             this.lugar.anhadirAvatar(this); // coloca el avatar en la lista de avatares de la casilla
 }
@@ -104,19 +106,19 @@ public class Avatar {
     }
 
     // mover avatar SIN REGLAS
-    public void moverAvatar(ArrayList<ArrayList<Casilla>> casillas, int valorTirada) {
+    public void moverAvatar(ArrayList<ArrayList<Casilla>> casillas, int valorTirada) throws CasillaInexistenteException {
 
         if (casillas == null || casillas.isEmpty())
             throw new IllegalArgumentException("El tablero no puede ser nulo ni vacío");
         if (this.lugar == null)
-            throw new IllegalStateException("El avatar no tiene casilla actual (lugar == null)");
+            throw new CasillaInexistenteException("El avatar no tiene casilla actual (lugar == null)");
         if (valorTirada < 0)
             throw new IllegalArgumentException("valorTirada debe ser >= 0");
 
         // indice actual del avatar
         int indiceActual = indiceDeCasilla(casillas, this.lugar);
         if (indiceActual == -1)
-            throw new IllegalStateException("No se encuentra la casilla actual del avatar en el tablero");
+            throw new CasillaInexistenteException("No se encuentra la casilla actual del avatar en el tablero");
 
         // indice destino (modulo fijo es el num de casillas = 40)
         int indiceNuevo = (indiceActual + valorTirada) % NUM_CASILLAS;
@@ -124,7 +126,7 @@ public class Avatar {
         // obtener casilla destino
         Casilla destino = casillaPorIndice(casillas, indiceNuevo);
         if (destino == null)
-            throw new IllegalStateException("No se pudo localizar la casilla destino (índice " + indiceNuevo + ")");
+            throw new CasillaInexistenteException("No se pudo localizar la casilla destino (índice " + indiceNuevo + ")");
 
         // --- guardar nombre de origen antes de mover (cambio mínimo) ---
         String nombreOrigen = (this.lugar != null && this.lugar.getNombre() != null)
@@ -137,7 +139,7 @@ public class Avatar {
         // actualizar referencia interna
         this.lugar = destino;
 
-        System.out.println("El avatar " + id + " avanza " + valorTirada + " posiciones, desde "
+        Juego.consola.imprimir("El avatar " + id + " avanza " + valorTirada + " posiciones, desde "
                 + nombreOrigen + " hasta " + destino.getNombre() + ".");
     }
 

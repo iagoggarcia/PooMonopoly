@@ -2,6 +2,12 @@ package partida;
 
 import java.util.ArrayList;
 import monopoly.*;
+import monopoly.casillas.*;
+import monopoly.casillas.propiedad.*;
+import monopoly.edificios.*;
+import monopoly.excepciones.CasillaInexistenteException;
+import monopoly.excepciones.JugadorBancarrotaException;
+import monopoly.excepciones.NoEresPropietarioException;
 
 
 public class Jugador {
@@ -23,6 +29,7 @@ public class Jugador {
     private float alquilerpagadojugador;
     private float premiosinversiones; //todo lo recibido por cartas, casillas de suerte, bote del parking...
     private int vecescarcel; //contador para la carcel
+    private ArrayList<Trato> tratosPendientes = new ArrayList<>();
 
     //Constructor vacío. Se usará para crear la banca.
     // estaba mal, como pone en el esqueleto es VACÍO, no hay que completar nada
@@ -35,7 +42,7 @@ public class Jugador {
     * avatares creados (usado para dos propósitos: evitar que dos jugadores tengan el mismo nombre y
     * que dos avatares tengan mismo ID). Desde este constructor también se crea el avatar.
      */
-    public Jugador(String nombre, String tipoAvatar, Casilla inicio, ArrayList<Avatar> avCreados) {
+    public Jugador(String nombre, String tipoAvatar, Casilla inicio, ArrayList<Avatar> avCreados) throws CasillaInexistenteException {
         this.nombre = nombre;
         this.avatar = new Avatar(tipoAvatar, this, inicio, avCreados); // para el avatar hay que crearlo y por defecto le puse que lo cree en la casilla inicial
         this.fortuna = Valor.FORTUNA_INICIAL; // puse la fortuna inicial
@@ -114,20 +121,24 @@ public class Jugador {
 
     public ArrayList<Casilla> getHipotecas() {
         ArrayList<Casilla> solaresHipotecados = new ArrayList<>();
+
         if (this.propiedades != null) {
             for (Casilla c : this.propiedades) {
-                if (c.getTipo().equalsIgnoreCase("solar") && c.isHipotecada()) {
+                if (c instanceof Solar s && s.estaHipotecada()) {
                     solaresHipotecados.add(c);
                 }
             }
         }
         return solaresHipotecados;
     }
+
     public float getPatrimonio() {
         float valorPropiedades = 0;
         if (this.propiedades != null) {
             for (Casilla c : this.propiedades) {
-                if (c != null) valorPropiedades += c.getValor();
+                if (c instanceof Propiedad p) {
+                    if (c != null) valorPropiedades += p.getValor();
+                }
             }
         }
 
@@ -193,47 +204,56 @@ public class Jugador {
         return this.vecescarcel;
     }
 
+    public void agregarTratoPendiente(Trato t) {
+        tratosPendientes.add(t);
+    }
+
+    public ArrayList<Trato> getTratosPendientes() {
+        return tratosPendientes;
+    }
+
+    public void eliminarTratoPendiente(Trato t) {
+        tratosPendientes.remove(t);
+    }
 
 
     //Otros métodos:
     //Método para añadir una propiedad al jugador (cuando la compra). Como parámetro, la casilla a añadir.
-    public void anhadirPropiedad(Casilla casilla) {
+    public void anhadirPropiedad(Casilla casilla) throws CasillaInexistenteException {
         if (casilla == null) {
-            System.out.println("No se puede añadir una propiedad nula.");
-            return;
+            throw new CasillaInexistenteException("No se puede añadir una propiedad nula.");
         }
         if (!propiedades.contains(casilla)) { // comprobamos que la casilla no está ya en la lista de propiedades del jugador
             propiedades.add(casilla); // si no está, la añadimos
-            System.out.println(nombre + " ha adquirido la propiedad " + casilla.getNombre() + ".");
-            System.out.println("Ahora posee " + propiedades.size() + " propiedades.");
+            Juego.consola.imprimir(nombre + " ha adquirido la propiedad " + casilla.getNombre() + ".");
+            Juego.consola.imprimir("Ahora posee " + propiedades.size() + " propiedades.");
             // aqui creo que se añadiria casilla.setPropietario(this), pero en esta entrega creo que aun no se pide
         } else {
-            System.out.println(nombre + " ya posee la propiedad " + casilla.getNombre() + ".");            
+            Juego.consola.imprimir(nombre + " ya posee la propiedad " + casilla.getNombre() + ".");
         }
     }
 
     //Método para eliminar una propiedad del arraylist de propiedades de jugador (venta, hipoteca o eliminación).
-    public void eliminarPropiedad(Casilla casilla) {
+    public void eliminarPropiedad(Casilla casilla) throws NoEresPropietarioException, CasillaInexistenteException{
         if (casilla == null) {
-            System.out.println("No se puede eliminar una propiedad nula.");
-            return;
+            throw new CasillaInexistenteException("No se puede añadir una propiedad nula.");
         }
         if (propiedades.contains(casilla)) { // comprobamos que la  casilla está en la lista de propiedades del jugador
             propiedades.remove(casilla); // si está, la eliminamos
-            System.out.println(nombre + " ha perdido la propiedad " + casilla.getNombre() + ".");
-            System.out.println("Ahora posee " + propiedades.size() + " propiedades.");
+            Juego.consola.imprimir(nombre + " ha perdido la propiedad " + casilla.getNombre() + ".");
+            Juego.consola.imprimir("Ahora posee " + propiedades.size() + " propiedades.");
             // aqui creo que se añadiria casilla.setPropietario(banca), pero en esta entrega creo que aun no se pide
         } else {
-            System.out.println(nombre + " no posee la propiedad " + casilla.getNombre() + ".");
+            throw new NoEresPropietarioException(nombre + " no posee la propiedad " + casilla.getNombre() + ".");
         }
     }
 
     //Método para añadir fortuna a un jugador
     //Como parámetro se pide el valor a añadir. Si hay que restar fortuna, se pasaría un valor negativo.
-    public void sumarFortuna(float valor) { 
+    public void sumarFortuna(float valor) throws JugadorBancarrotaException{ 
         this.fortuna += valor;
         if (this.fortuna < 0) {
-            System.out.println(nombre + "ha caído en bancarrota. Fortuna actual: " + this.fortuna);
+            throw new JugadorBancarrotaException(nombre + "ha caído en bancarrota. Fortuna actual: " + this.fortuna);
         }
     }
 
@@ -252,7 +272,7 @@ public class Jugador {
     private static final int IDX_CARCEL   = 10; // posición fija de "Cárcel"
 
     // ddevuelve  la casilla con indice lineal en el orden el que fue construido
-    private Casilla casillaPorIndice(ArrayList<ArrayList<Casilla>> pos, int indice) {
+    private Casilla casillaPorIndice(ArrayList<ArrayList<Casilla>> pos, int indice) throws CasillaInexistenteException {
         if (pos == null || indice < 0 || indice >= NUM_CASILLAS) return null;
 
         int k = 0; // k ira contando para cada casilla visitada
@@ -262,12 +282,12 @@ public class Jugador {
                 k++; // avanzamosa a la siguiente
             }
         }
-        return null; 
+        throw new CasillaInexistenteException("No existe la casilla con posición: " + pos);
     }
     
     // por ahora solo mueve fisicamente el avatar a la carcel y marca el estado en enCarcel y modifica tiradasCarcel
     // las otras "reglas" (cobrar o pagar dinero, comprobar si se puede salir, etc) se gestionan desde otro sitio, por ejemplo evaluarcasilla
-    public void encarcelar(ArrayList<ArrayList<Casilla>> pos) {
+    public void encarcelar(ArrayList<ArrayList<Casilla>> pos) throws CasillaInexistenteException {
         if (pos == null || pos.isEmpty()) {
             throw new IllegalArgumentException("El tablero (pos) no puede ser nulo ni vacío");
         }
@@ -278,7 +298,7 @@ public class Jugador {
         // localizamos la casilla cárcel por índice fijo
         Casilla carcel = casillaPorIndice(pos, IDX_CARCEL);
         if (carcel == null) {
-            throw new IllegalStateException("No se encontró la casilla de Cárcel (índice 10)");
+            throw new CasillaInexistenteException("No se encontró la casilla de Cárcel (índice 10)");
         }
         // quitamos al avatar de su casilla actual y lo colocamos en carcel
         Casilla actual = this.avatar.getLugar();
@@ -289,7 +309,7 @@ public class Jugador {
 
         this.enCarcel = true;
         this.tiradasCarcel = 0;
-        System.out.println(nombre + " ha sido encarcelado y trasladado a la casilla " + carcel.getNombre() + ".");
+        Juego.consola.imprimir(nombre + " ha sido encarcelado y trasladado a la casilla " + carcel.getNombre() + ".");
     }
 
     /* Función que simplemente coge un edificio
@@ -298,7 +318,7 @@ public class Jugador {
      */
     public void anhadirEdificioAJugador(Edificio edificio) {
         if (edificio == null) {
-            System.out.println("No se puede añadir un edificio nulo.");
+            Juego.consola.imprimir("No se puede añadir un edificio nulo.");
             return;
         }
         edificios.add(edificio);
@@ -309,15 +329,15 @@ public class Jugador {
     * Se usa al construir un hotel porque hay que quitar 4 casas
     * y más adelante también lo uso en venderEdificio
      */
-    public void eliminarEdificioDeJugador(Edificio edificio) {
+    public void eliminarEdificioDeJugador(Edificio edificio) throws NoEresPropietarioException {
         if (edificio == null) {
-            System.out.println("No se puede eliminar un edificio nulo.");
+            Juego.consola.imprimir("No se puede eliminar un edificio nulo.");
             return;
         }
         if (edificios.contains(edificio)) { // miro si está en los edificios que le pertenecen al jugador
             edificios.remove(edificio); // y si está lo elimino
         } else { // si no está, mensaje de error
-            System.err.println("El edificio " + edificio.getId() + " no pertenece a " + this.nombre);
+            throw new NoEresPropietarioException("El edificio " + edificio.getId() + " no pertenece a " + this.nombre);
         }
     }
 }
